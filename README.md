@@ -88,7 +88,7 @@ Signature: "34k8j3w1rxL5wtLCi5AsP93CtjwUWoV5wnyiRucRtSDs9CgAUU8bsYNbgtAAuCmHdG37
 
 ### ACP Formats and Templates
 
-ACPs should be written in [markdown](https://daringfireball.net/projects/markdown/syntax) format. Please see the [ACP template](./proposals/TEMPLATE.md) for an example of the correct layout.
+ACPs should be written in [markdown](https://daringfireball.net/projects/markdown/syntax) format. Please see the [ACP template](./ACPs/TEMPLATE.md) for an example of the correct layout.
 
 ### Auxiliary Files
 
@@ -97,7 +97,6 @@ ACPs may include auxiliary files such as diagrams. Image files should be include
 ### Waived Copyright
 
 ACP authors must waive any copyright claims before an ACP will be merged into the repository. This can be done by including the following text in an ACP:
-
 
 ```text
 ## Copyright
