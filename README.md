@@ -13,7 +13,7 @@ ACPs are an open framework for proposing improvements and gathering consensus ar
 There are three kinds of ACP:
 
 * A `Standards Track` ACP describes a change to the design or function of the Avalanche Network, such as a change to the P2P networking protocol, P-Chain design, Subnet architecture, or any change/addition that affects the interoperability of Avalanche Network Clients (ANCs).
-* A 'Best Practices Track` ACP describes a design pattern or common interface that should be used across the Avalanche Network to make it easier to integrate with Avalanche or for Subnets to interoperate with each other. This would include things like proposing a smart contract interface, not proposing a change to how smart contracts are executed.
+* A `Best Practices Track` ACP describes a design pattern or common interface that should be used across the Avalanche Network to make it easier to integrate with Avalanche or for Subnets to interoperate with each other. This would include things like proposing a smart contract interface, not proposing a change to how smart contracts are executed.
 * A `Meta Track` ACP describes a change to the ACP process or suggests a new way for the Avalanche Community to collaborate.
 
 ## ACP Statuses
