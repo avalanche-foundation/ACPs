@@ -108,3 +108,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 | Number | Title |  Author(s) | Type | Status |
 |:-------|:------|:-------|:-----|:-------|
+
+## Contributing
+
+Before contributing to ACPs, please read the [ACP Terms of Contribution](./CONTRIBUTING.md).
