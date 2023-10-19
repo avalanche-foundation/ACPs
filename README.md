@@ -131,4 +131,4 @@ For mutual protection and enjoyment, the following terms are binding on and deem
 
 These terms are incorporated by reference into the repo; each ACP; all comments, oppositions and other posts and communications about an ACP, the ACP process and all repos associated with any ACP.
 
-**The administrators of this repository reserve the right to terminate access at any time, especially if you do not follow these terms.**
+**The maintainers of this repository reserve the right to terminate access at any time, especially if you do not follow these terms.**
