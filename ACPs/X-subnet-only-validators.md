@@ -1,12 +1,10 @@
 ```text
-ACP: <PR Number>
-Title: <ACP title>
-Author(s): <a list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com>>
-Discussions-To: <GitHub Discussion URL>
-Status: <Proposed, Implementable, Recommended, Stale>
-Track: <Standards, Best Practices, Meta>
-Replaces (*optional): <ACP number>
-Superseded-By (*optional): <ACP number>
+ACP: <TODO>
+Title: Subnet-Only Validators
+Author(s): Patrick O'Grady <patrickogrady.xyz>
+Discussions-To: <TODO>
+Status: Proposed
+Track: Standards
 ```
 
 This is the suggested template for new ACPs.
@@ -52,3 +50,4 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
