@@ -187,12 +187,12 @@ _This native approach is comparable to the idea of using $ETH to secure DA on [E
 
 ## Backwards Compatibility
 
-* All existing Subnet Validators can continue validating both the Primary Network and whatever Subnets they are validating. This change would just provide a new option for Subnet Validators that allows them to sacrifice their staking rewards for a smaller upfront $AVAX commitment and lower infrastructure costs.
-* TODO: Support for this ACP would require adding a new transaction type to the P-Chain. This new transaction would not be compatible with Avalanche Cortina and require a mandatory Avalanche Network upgrade.
+* Existing Subnet Validation semantics for Primary Network Validators are not modified by this ACP. This means that All existing Subnet Validators can continue validating both the Primary Network and whatever Subnets they are validating. This change would just provide a new option for Subnet Validators that allows them to sacrifice their staking rewards for a smaller upfront $AVAX commitment and lower infrastructure costs.
+* Support for this ACP would require adding a new transaction type to the P-Chain (i.e. `AddSubnetOnlyValidatorTx`). This new transaction is an execution-breaking change that would require a mandatory Avalanche Network upgrade to activate.
 
 ## Reference Implementation
 
-`TODO` (once considered "Implementable")
+`TODO` (will start once "Implementable")
 
 ## Security Considerations
 
