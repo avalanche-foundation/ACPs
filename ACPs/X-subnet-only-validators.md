@@ -9,6 +9,8 @@ Track: Standards
 
 ## Abstract
 
+Introduce Subnet-Only Validators (SOVs), a new type of staker that can validate any Avalanche Subnet but is not required to validate the Primary Network. SOVs retain the ability to participate in Avalanche Warp Messaging (AWM) but do not need to sync the X/C-Chains must post an $AVAX-denominated bond...
+
 Introduce a new type of Validator that is not required to validate the Primary Network...
 
 Remove the requirement that Subnet Validators must validate the Primary Network without revoking support for Subnet Validators to send/verify Avalanche Warp Messages (AWM). Allow Subnet Validators to stake on a Subnet by posting an $AVAX-deonimated bond.
@@ -29,20 +31,29 @@ Regulated entities that are prohibited from validating permissionless, smart con
 TODO: fault isolation
 A popular Subnet ("popular" meaning validated by many nodes) could destabilitze the Primary Network if usage spikes unexpectedly (cause an OOM, disk IO, CPU exhaustion on a large number of Primary Network validators) or the inverse on the Primary Network (where some undefined behavior could bring a Subnet offline). Allowing optional separation IMO is a step in the right direction to making Primary Network/Subnets more resilient to regressions in the other.
 
+TODO: don't give up ability to use AWM
+Don't give up ability
+
 
 ## Specification
+
+### Overview
 
 * Remove the requirement for a Subnet Validator to also be a Primary Network Validator but do not prevent it (current behavior not deprecated)
 * Introduce a new transaction type on the P-Chain for Subnet Validators that only want to validate a Subnet (`AddSubnetOnlyValidatorTx`)
 * Require Subnet-Only Validators to bond X $AVAX per validation per Subnet (to account for P-Chain Load)
 * Track IPs for Subnet-Only Validators in AvalancheGo to allow ....
-* Provide a guaranteed byte allotment for subnet validators
+* Provide a guaranteed RL allotment for subnet validators
+  * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L181-L188
+  * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L198-L203
 
 Without the requirement to validate the Primary Network, the need for Subnet Validators to instantiate and sync the C-Chain and X-Chain can be relaxed. Subnet Validators will only be required to sync the P-chain to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation.
 
 _The value of the required "bond" (X) is open for debate. To avoid impacting network stability, I think it should be at least 250-750 \$AVAX. To set this "bond" lower, I think the PlatformVM should be futher optimized (assumes that lower fees lead to a corresponding increase in Subnets)._
 
-### `AddSubnetOnlyValidatorTx`
+### TODO
+
+#### `AddSubnetOnlyValidatorTx`
 
 _This is the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58). The exception being that the minimum staked tokens are ...._
 
@@ -152,7 +163,7 @@ message PeerListAck {
 }
 ```
 
-### Future Directions
+### Future Work
 
 The following ideas require their own ACPs...
 
@@ -186,7 +197,7 @@ _This approach is comparable to the idea of using \$ETH to secure DA on [EigenLa
 ## Backwards Compatibility
 
 * All existing Subnet Validators can continue validating both the Primary Network and whatever Subnets they are validating. This change would just provide a new option for Subnet Validators that allows them to sacrifice their staking rewards for a smaller upfront $AVAX commitment and lower infrastructure costs.
-* Support for Phase 1 would require adding a new transaction type to the P-Chain. This new transaction would not be compatible with Avalanche Cortina and require a mandatory Avalanche Network upgrade.
+* TODO: Support for this ACP would require adding a new transaction type to the P-Chain. This new transaction would not be compatible with Avalanche Cortina and require a mandatory Avalanche Network upgrade.
 
 ## Reference Implementation
 
