@@ -107,88 +107,19 @@ type AddSubnetOnlyValidatorTx struct {
 
 _`AddSubnetOnlyValidatorTx` is almost the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58), the only exception being that `StakeOuts` are now `LockOuts`._
 
-### P2P
+### `GetSubnetPeers`
 
-To support tracking 
-
-#### Version
-
-https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L93C1-L117C2
-
-Trscked Subnets?
+To support tracking SOV IPs, a new message should be added to the P2P specification that allows Subnet Validators to request the IP of all peers a node knows about on a Subnet (these Signed IPs won't be gossiped like they are for Primary Network Validators because they don't need to be known by the entire Avalanche Network):
 
 ```text
-// Version is the first outbound message sent to a peer when a connection is
-// established to start the p2p handshake.
-//
-// Peers must respond to a Version message with a PeerList message to allow the
-// peer to connect to other peers in the network.
-//
-// Peers should drop connections to peers with incompatible versions.
-message Version {
-  // Network the peer is running on (e.g local, testnet, mainnet)
-  uint32 network_id = 1;
-  // Unix timestamp when this Version message was created
-  uint64 my_time = 2;
-  // IP address of the peer
-  bytes ip_addr = 3;
-  // IP port of the peer
-  uint32 ip_port = 4;
-  // Avalanche client version
-  string my_version = 5;
-  // Timestamp of the IP
-  uint64 my_version_time = 6;
-  // Signature of the peer IP port pair at a provided timestamp
-  bytes sig = 7;
-  // Subnets the peer is tracking
-  repeated bytes tracked_subnets = 8;
-}
-```
-
-#### GetPeers
-https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L165
-
-```text
-// Return SubnetOnlyValidators?
-message GetPeers {
+message GetSubnetPeers {
     bytes subnet_id = 1;
 }
 ```
 
-#### -> PeerList
-https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L148
+_It would be a nice addition if a bloom filter could also be provided here so that an ANC only sends IPs of peers that the original sender does not know._ 
 
-```text
-// PeerList contains network-level metadata for a set of validators.
-//
-// PeerList must be sent in response to an inbound Version message from a
-// remote peer a peer wants to connect to. Once a PeerList is received after
-// a version message, the p2p handshake is complete and the connection is
-// established.
-
-// Peers should periodically send PeerList messages to allow peers to
-// discover each other.
-//
-// PeerListAck should be sent in response to a PeerList.
-message PeerList {
-  repeated ClaimedIpPort claimed_ip_ports = 1;
-}
-```
-
-#### -> PeerListAck
-https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L160-L165
-
-```text
-// PeerListAck is sent in response to PeerList to acknowledge the subset of
-// peers that the peer will attempt to connect to.
-message PeerListAck {
-  reserved 1; // deprecated; used to be tx_ids
-  repeated PeerAck peer_acks = 2;
-}
-```
-
-
-`TODO` (will start once "Implementable")
+ANCs should respond to this incoming message with a [`PeerList` message](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L148). 
 
 ## Security Considerations
 
