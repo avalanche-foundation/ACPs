@@ -15,21 +15,17 @@ _This ACP does not modify/deprecate the existing Subnet Validation semantics for
 
 ## Motivation
 
-Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating. 
-
-TODO: work in 2000 $AVAX here? 
-Although the fee paid to the Primary Network to operate a Subnet does not go up with the amount of activity on the Subnet, the fixed, upfront cost of setting up a Subnet Validator on the Primary Network deters new projects that prefer smaller, even variable, costs until demand is observed. _Unlike L2s that pay some increasing fee (usually denominated in units per transaction byte) to an external chain for data availability and security as activity scales, Subnets provide their own security/data availability and the only cost operators must pay from processing more activity is the hardware cost of supporting additional load._
+Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. Most Subnets aim to launch with at least 8 Subnet Validators, which requires staking 16000 $AVAX (~$160k at time of writing). All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating.
 
 Regulated entities that are prohibited from validating permissionless, smart contract-enabled blockchains (like the C-Chain) can’t launch a Subnet because they can’t opt-out of Primary Network Validation. This deployment blocker prevents a large cohort of Real World Asset (RWA) issuers from bringing unique, valuable tokens to the Avalanche Ecosystem (that could move between C-Chain <> Subnets using AWM/Teleporter).
 
-TODO: fault isolation
-A popular Subnet ("popular" meaning validated by many nodes) could destabilitze the Primary Network if usage spikes unexpectedly (cause an OOM, disk IO, CPU exhaustion on a large number of Primary Network validators) or the inverse on the Primary Network (where some undefined behavior could bring a Subnet offline). Allowing optional separation IMO is a step in the right direction to making Primary Network/Subnets more resilient to regressions in the other.
+Avalanche Warp Messaging (AWM), the native interoperability mechanism for the Avalanche Network, provides a way for Subnets to communicate with each other/C-Chain without a trusted intermediary. Any Subnet Validator must be able to register a BLS key and participate in AWM, otherwise a Subnet may not be able to generate a BLS Multi-Signature with sufficient participating stake.
 
-TODO: don't give up ability to use AWM
-Don't give up ability
+A widely validated Subnet could destabilitze the Primary Network if usage spikes unexpectedly. Underprovisioned Primary Network Validators running such a Subnet may exit with an OOM exception, see degraded disk performance, or be unable to allocate CPU time to P/X/C-Chain validation. The inverse also holds for Subnets with the Primary Network (where some undefined behavior could bring a Subnet offline).
+
+Although the fee paid to the Primary Network to operate a Subnet does not go up with the amount of activity on the Subnet, the fixed, upfront cost of setting up a Subnet Validator on the Primary Network deters new projects that prefer smaller, even variable, costs until demand is observed. _Unlike L2s that pay some increasing fee (usually denominated in units per transaction byte) to an external chain for data availability and security as activity scales, Subnets provide their own security/data availability and the only cost operators must pay from processing more activity is the hardware cost of supporting additional load._
 
 Elastic Subnets allow any community to weight Subnet Validation based on some staking token and reward Subnet Validators with high uptime with said staking token. However, there is no way for $AVAX holders on the Primary Network to augment the security of such Subnets.
-
 
 ## Specification
 
