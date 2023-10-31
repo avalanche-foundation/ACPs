@@ -161,16 +161,9 @@ message PeerListAck {
 
 ### Future Work
 
-The previously described specification is a minimal, additive change to Subnet Validation semantics. It alone, however, fails to communicate what is possible if Subnet Validation is decoupled from Primary Network validation or provide an alternative use of $AVAX that would've otherwise been staked to create Subnet Validators.
+The previously described specification is a minimal, additive change to Subnet Validation semantics that prepares the Avalanche Network for a more flexible Subnet model. It alone, however, fails to communicate this flexibility nor provides an alternative use of $AVAX that would have otherwise been used to create Subnet Validators.
 
-
-
-
-The following ideas require their own ACPs...
-
-Shared to (TODO: if not blocked by this, should share?)
-
-...once relationship is decoupled, can consider 
+Below are two high-level ideas (Pay-As-You-Go Subnet Validation Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
 
 #### Pay-As-You-Go Subnet Validation Fees
 _To lower validation fees, should rely on BLS Multi-Singature Voting: https://hackmd.io/@patrickogrady/100k-subnets#How-will-BLS-Multi-Signature-uptime-voting-work_
