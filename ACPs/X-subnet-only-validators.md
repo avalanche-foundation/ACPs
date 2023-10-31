@@ -216,7 +216,7 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 
 ## Appendix
 
-A draft of this ACP was posted on in the ["Ideas" Discussion Board](https://github.com/avalanche-foundation/ACPs/discussions/10#discussioncomment-7373486), as suggested by the [ACP README](https://github.com/avalanche-foundation/ACPs#step-1-post-your-idea-to-github-discussions). Feedback on this draft was collected and responed to on both the "Ideas" Discussion Board and on [HackMD](https://hackmd.io/@patrickogrady/100k-subnets#Feedback-to-Draft-Proposal).
+A draft of this ACP was posted on in the ["Ideas" Discussion Board](https://github.com/avalanche-foundation/ACPs/discussions/10#discussioncomment-7373486), as suggested by the [ACP README](https://github.com/avalanche-foundation/ACPs#step-1-post-your-idea-to-github-discussions). Feedback on this draft was collected and addressed on both the "Ideas" Discussion Board and on [HackMD](https://hackmd.io/@patrickogrady/100k-subnets#Feedback-to-Draft-Proposal).
 
 ## Acknowledgements
 
