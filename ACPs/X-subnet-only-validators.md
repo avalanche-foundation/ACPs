@@ -166,13 +166,14 @@ The previously described specification is a minimal, additive change to Subnet V
 Below are two high-level ideas (Pay-As-You-Go Subnet Validation Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
 
 #### Pay-As-You-Go Subnet Validation Fees
-_To lower validation fees, should rely on BLS Multi-Singature Voting: https://hackmd.io/@patrickogrady/100k-subnets#How-will-BLS-Multi-Signature-uptime-voting-work_
 
-Transition Subnet Validation fees to a dynamically priced, continuously charged mechanism that doesn't require locking/staking large amounts of $AVAX upfront _(this could be broken out as a separate step but makes sense to include in the voting code refactor, so kept here)_
+**Idea:** Transition Subnet Validator registration to a dynamically priced, continuously charged fee (that doesn't require locking large amounts of $AVAX upfront)
 
-It would be possible to just transition to a lower required "bond" amount, but many (myself included) think that it would be more competitve to transition to a dynamically priced, continuous payment mechanism. This new mechanism would target some $Y nAVAX fee that would be paid by each Subnet Validator per Subnet per second (pulling from a "Subnet Validator's Account") instead of requiring a large upfront lockup of \$AVAX.
+While it would be possible to just transition to a lower required "lock" amount, many think that it would be more competitve to transition to a dynamically priced, continuous payment mechanism to register as a Subnet Validator. This new mechanism would target some $Y nAVAX fee that would be paid by each Subnet Validator per Subnet per second (pulling from a "Subnet Validator's Account") instead of requiring a large upfront lockup of $AVAX.
 
-_The rate of nAVAX/second should be set by the demand for validating Subnets on Avalanche compared to some usage target per Subnet and across all Subnets. This rate should be locked for each Subnet Validation period to ensure operators are not subject to suprise costs if demand rose significantly over time. All fees would still be paid to the network and burned, like all other P-Chain, X-Chain, and C-Chain transactions. The optimization work outlined here should allow the min rate to be set as low as ~512-4096 nAVAX/second (or 1.3-10.6 \$AVAX/month)._
+The rate of nAVAX/second should be set by the demand for validating Subnets on Avalanche compared to some usage target per Subnet and across all Subnets. This rate should be locked for each Subnet Validation period to ensure operators are not subject to suprise costs if demand rises significantly over time. The optimization work outlined in [BLS Multi-Signature Voting](https://hackmd.io/@patrickogrady/100k-subnets#How-will-BLS-Multi-Signature-uptime-voting-work) should allow the min rate to be set as low as ~512-4096 nAVAX/second (or 1.3-10.6 $AVAX/month).
+
+Fees paid to the Avalanche Network for PAYG could be burned, like all other P-Chain, X-Chain, and C-Chain transactions, or they could be partially rewarded to Primary Network Validators as a "boost" over the existing staking rewards. The nice byproduct of the latter approach is that it better aligns Primary Network Validators with the growth of Subnets.
 
 #### $AVAX-Augmented Subnet Security
 Some believe the relaxing of the validator relationship would be bad for $AVAX...
