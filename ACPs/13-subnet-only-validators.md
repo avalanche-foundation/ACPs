@@ -2,7 +2,7 @@
 ACP: 13
 Title: Subnet-Only Validators (SOVs)
 Author(s): Patrick O'Grady <contact@patrickogrady.xyz>
-Discussions-To: <TODO>
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/14
 Status: Proposed
 Track: Standards
 ```
