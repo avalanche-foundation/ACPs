@@ -1,6 +1,6 @@
 ```text
 ACP: <TODO>
-Title: Subnet-Only Validators
+Title: Subnet-Only Validators (SOVs)
 Author(s): Patrick O'Grady <patrickogrady.xyz>
 Discussions-To: <TODO>
 Status: Proposed
@@ -9,13 +9,17 @@ Track: Standards
 
 ## Abstract
 
-Remove the requirement that Subnet Validators must validate the Primary Network and instead require bond...
+Introduce a new type of Subnet Validator that does not validate the Primary Network...
+
+Remove the requirement that Subnet Validators must validate the Primary Network without revoking support for Subnet Validators to send/verify Avalanche Warp Messages (AWM). Allow Subnet Validators to stake on a Subnet by posting an $AVAX-deonimated bond.
+
+and instead require bond...
 
 Validators without restricting their ability to send or verify Avalanche Warp Messages (AWM). Preview a future transition to Pay-As-You-Go Subnet Validation and $AVAX-Augmented Subnet Security.
 
 ## Motivation
 
-Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. All Subnet Validators, to satisfy their role as Primary Network Validators, must also allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating.
+Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating.
 
 Although the fee paid to the Primary Network to operate a Subnet does not go up with the amount of activity on the Subnet, the fixed, upfront cost of setting up a Subnet Validator on the Primary Network deters new projects that prefer smaller, even variable, costs until demand is observed. _Unlike L2s that pay some increasing fee (usually denominated in units per transaction byte) to an external chain for data availability and security as activity scales, Subnets provide their own security/data availability and the only cost operators must pay from processing more activity is the hardware cost of supporting additional load._
 
@@ -27,14 +31,76 @@ TODO: fault isolation
 
 * Remove the requirement for a Subnet Validator to also be a Primary Network Validator but do not prevent it (current behavior not deprecated)
 * Introduce a new transaction type on the P-Chain for Subnet Validators that only want to validate a Subnet (`AddSubnetOnlyValidatorTx`)
-* Require Subnet-Only Validators to bond X \$AVAX per validation per Subnet (to account for P-Chain Load)
+* Require Subnet-Only Validators to bond X $AVAX per validation per Subnet (to account for P-Chain Load)
+* Track IPs for Subnet-Only Validators in AvalancheGo to allow ....
+* Provide a guaranteed byte allotment for subnet validators
 
 Without the requirement to validate the Primary Network, the need for Subnet Validators to instantiate and sync the C-Chain and X-Chain can be relaxed. Subnet Validators will only be required to sync the P-chain to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation.
 
 _The value of the required "bond" (X) is open for debate. To avoid impacting network stability, I think it should be at least 250-750 \$AVAX. To set this "bond" lower, I think the PlatformVM should be futher optimized (assumes that lower fees lead to a corresponding increase in Subnets)._
 
+### `AddSubnetOnlyValidatorTx`
+
+_This is the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58). The exception being that the minimum staked tokens are ...._
+
+```text
+type AddSubnetOnlyValidatorTx struct {
+	// Metadata, inputs and outputs
+	BaseTx `serialize:"true"`
+	// Describes the validator
+	// The NodeID included in [Validator] must be the Ed25519 public key.
+	Validator `serialize:"true" json:"validator"`
+	// ID of the subnet this validator is validating
+	Subnet ids.ID `serialize:"true" json:"subnetID"`
+	// [Signer] is the BLS key for this validator.
+	// Note: We do not enforce that the BLS key is unique across all validators.
+	//       This means that validators can share a key if they so choose.
+	//       However, a NodeID does uniquely map to a BLS key
+	Signer signer.Signer `serialize:"true" json:"signer"`
+	// Where to send staked tokens when done validating
+	StakeOuts []*avax.TransferableOutput `serialize:"true" json:"stake"`
+	// Where to send validation rewards when done validating
+	ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
+	// Where to send delegation rewards when done validating
+	DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
+	// Fee this validator charges delegators as a percentage, times 10,000
+	// For example, if this validator has DelegationShares=300,000 then they
+	// take 30% of rewards from delegators
+	DelegationShares uint32 `serialize:"true" json:"shares"`
+}
+```
+
+### P2P
+TODO
+
+#### Version
+
+Tracked Subnets?
+
+#### GetPeers
+https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L165
+
+```text
+// Return SubnetOnlyValidators?
+message GetPeers {
+    bytes subnet_id = 1;
+}
+```
+
+#### -> PeerList
+
+#### -> PeerListAck
+
+
 ### Future Directions
-#### Improve PlatformVM Efficiency + Pay-As-You-Go Subnet Validation Fees
+
+The following ideas require their own ACPs...
+
+Shared to (TODO: if not blocked by this, should share?)
+
+...once relationship is decoupled, can consider 
+
+#### Pay-As-You-Go Subnet Validation Fees
 
 * Replace Proposal Block-based Subnet reward voting with BLS Multi-Signature votes from Subnet Validators
 * Transition Subnet Validation fees to a dynamically priced, continuously charged mechanism that doesn't require locking/staking large amounts of \$AVAX upfront _(this could be broken out as a separate step but makes sense to include in the voting code refactor, so kept here)_
@@ -70,10 +136,12 @@ _This approach is comparable to the idea of using \$ETH to secure DA on [EigenLa
 
 * Any Subnet Validator running in "Partial Sync Mode" will not be able to verify Atomic Imports on the P-Chain and will rely entirely on Primary Network consensus to only accept valid P-Chain blocks.
 * High-throughput Subnets will be better isolated from the Primary Network and should improve its resilience (i.e. surges of traffic on some Subnet cannot destabilize a Primary Network Validator).
+* AvalancheGo must support tracking IPs for non-validators
 
 ## Open Questions
 
 * Bond amount?
+* Use bloom filters for synchronizing peer lists
 
 ## Straw Poll
 
@@ -84,6 +152,16 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 
 ### Objectors
 * `<message>/<signature>`
+
+## Appendix
+
+This ACP was previously posted as part of another discussion here: https://github.com/avalanche-foundation/ACPs/discussions/10#discussioncomment-7373486
+
+All feedback is here: https://hackmd.io/@patrickogrady/100k-subnets#Feedback-to-Draft-Proposal
+
+## Acknowledgements
+
+Thanks to @luigidemeo1, @stephenbuttolph, @aaronbuchwald, @dhrubabasu, and @abi87 for their feedback on these ideas.
 
 ## Copyright
 
