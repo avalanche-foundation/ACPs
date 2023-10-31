@@ -9,7 +9,7 @@ Track: Standards
 
 ## Abstract
 
-Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnet and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network. Require SOVs to lock (not rewarded like existing staking) 500 $AVAX on the P-Chain for the duration of their staking period instead of staking at least 2000 $AVAX, the minimum requirement to become a Primary Network Validator. Preview a future transation to Pay-As-You-Go Subnet Validation and $AVAX-Augmented Subnet Security.
+Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnet and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network. Require SOVs to pay a refundable fee of 500 $AVAX on the P-Chain to register as a Subnet Validator instead of staking at least 2000 $AVAX, the minimum requirement to become a Primary Network Validator. Preview a future transation to Pay-As-You-Go Subnet Validation and $AVAX-Augmented Subnet Security.
 
 _This ACP does not modify/deprecate the existing Subnet Validation semantics for Primary Network Validators._
 
@@ -29,21 +29,17 @@ Elastic Subnets allow any community to weight Subnet Validation based on some st
 
 ## Specification
 
-### Overview
+### Required Changes
 
-* Remove the requirement for a Subnet Validator to also be a Primary Network Validator but do not prevent it (current behavior not deprecated)
-* Introduce a new transaction type on the P-Chain for Subnet Validators that only want to validate a Subnet (`AddSubnetOnlyValidatorTx`)
-* Require Subnet-Only Validators to bond X $AVAX per validation per Subnet (to account for P-Chain Load)
-* Track IPs for Subnet-Only Validators in AvalancheGo to allow ....
-* Provide a guaranteed RL allotment for subnet validators
-  * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L181-L188
-  * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L198-L203
+1) Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnets and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network
+2) Introduce a refundable fee (called a "lock") of 500 $AVAX that nodes must pay to become an SOV
+3) Introduce a non-refundable fee of 0.1 $AVAX that SOVs must pay to become an SOV
+4) Introduce a new transaction type on the P-Chain to register as an SOV (i.e. `AddSubnetOnlyValidatorTx`)
+5) Add a mode to ANCs that allows SOVs to optionally disable full Primary Network verification (only need to verify P-Chain)
+6) ANCs track IPs for SOVs to ensure Subnet Validators can find peers whether or not they are Primary Network Validators
+7) Provide a guaranteed rate limiting allowance for SOVs like Primary Network Validators
 
-No rewards
-
-Without the requirement to validate the Primary Network, the need for Subnet Validators to instantiate and sync the C-Chain and X-Chain can be relaxed. Subnet Validators will only be required to sync the P-chain to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation.
-
-_The value of the required "bond" (X) is open for debate. To avoid impacting network stability, I think it should be at least 250-750 \$AVAX. To set this "bond" lower, I think the PlatformVM should be futher optimized (assumes that lower fees lead to a corresponding increase in Subnets)._
+Because SOVs do not validate the Primary Network, they will not be rewarded with $AVAX for "locking" the 500 $AVAX required to become an SOV. This enables people interested in validating Subnets to opt for a lower upfront $AVAX commitment and lower infrastructure costs instead of $AVAX rewards. Additionally, SOVs will only be required to sync the P-chain (not X/C-Chain) to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation. If an SOV wishes to sync the entire Primary Network, they still can.
 
 ### TODO
 
