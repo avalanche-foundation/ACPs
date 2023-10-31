@@ -1,5 +1,5 @@
 ```text
-ACP: <TODO>
+ACP: 13
 Title: Subnet-Only Validators (SOVs)
 Author(s): Patrick O'Grady <contact@patrickogrady.xyz>
 Discussions-To: <TODO>
