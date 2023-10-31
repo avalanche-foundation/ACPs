@@ -9,11 +9,13 @@ Track: Standards
 
 ## Abstract
 
-Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnet and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network. In lieu of staking at least 2000 $AVAX (minimum requirement to become a Primary Network Validator), a SOV locks 500 $AVAX on the P-Chain for the duration of their staking period. The semantics of Subnet Validation for Primary Network Validators are left unchanged.
+Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnet and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network. Require SOVs to lock (not rewarded like existing staking) 500 $AVAX on the P-Chain for the duration of their staking period instead of staking at least 2000 $AVAX, the minimum requirement to become a Primary Network Validator. Preview a future transation to Pay-As-You-Go Subnet Validation and $AVAX-Augmented Subnet Security.
+
+_This ACP does not modify/deprecate the existing Subnet Validation semantics for Primary Network Validators._
 
 ## Motivation
 
-Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating.
+Each node operator must stake at least 2000 $AVAX (~$20k at the time of writing) to first become a Primary Network validator before they qualify to become a Subnet Validator. All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating. 
 
 TODO: work in 2000 $AVAX here? 
 Although the fee paid to the Primary Network to operate a Subnet does not go up with the amount of activity on the Subnet, the fixed, upfront cost of setting up a Subnet Validator on the Primary Network deters new projects that prefer smaller, even variable, costs until demand is observed. _Unlike L2s that pay some increasing fee (usually denominated in units per transaction byte) to an external chain for data availability and security as activity scales, Subnets provide their own security/data availability and the only cost operators must pay from processing more activity is the hardware cost of supporting additional load._
@@ -25,6 +27,8 @@ A popular Subnet ("popular" meaning validated by many nodes) could destabilitze 
 
 TODO: don't give up ability to use AWM
 Don't give up ability
+
+Elastic Subnets allow any community to weight Subnet Validation based on some staking token and reward Subnet Validators with high uptime with said staking token. However, there is no way for $AVAX holders on the Primary Network to augment the security of such Subnets.
 
 
 ## Specification
