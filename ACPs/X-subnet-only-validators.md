@@ -41,13 +41,42 @@ Elastic Subnets allow any community to weight Subnet Validation based on some st
 
 Because SOVs do not validate the Primary Network, they will not be rewarded with $AVAX for "locking" the 500 $AVAX required to become an SOV. This enables people interested in validating Subnets to opt for a lower upfront $AVAX commitment and lower infrastructure costs instead of $AVAX rewards. Additionally, SOVs will only be required to sync the P-chain (not X/C-Chain) to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation. If an SOV wishes to sync the entire Primary Network, they still can.
 
-### TODO
+### Future Work
 
-#### `AddSubnetOnlyValidatorTx`
+The previously described specification is a minimal, additive change to Subnet Validation semantics that prepares the Avalanche Network for a more flexible Subnet model. It alone, however, fails to communicate this flexibility nor provides an alternative use of $AVAX that would have otherwise been used to create Subnet Validators.
 
-_This is the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58). The exception being that the minimum staked tokens are ...._
+Below are two high-level ideas (Pay-As-You-Go Subnet Validation Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
 
-TODO: change StakeOuts to LockOuts
+#### Pay-As-You-Go Subnet Validation Fees
+
+_Transition Subnet Validator registration to a dynamically priced, continuously charged fee (that doesn't require locking large amounts of $AVAX upfront)._
+
+While it would be possible to just transition to a lower required "lock" amount, many think that it would be more competitve to transition to a dynamically priced, continuous payment mechanism to register as a Subnet Validator. This new mechanism would target some $Y nAVAX fee that would be paid by each Subnet Validator per Subnet per second (pulling from a "Subnet Validator's Account") instead of requiring a large upfront lockup of $AVAX.
+
+The rate of nAVAX/second should be set by the demand for validating Subnets on Avalanche compared to some usage target per Subnet and across all Subnets. This rate should be locked for each Subnet Validation period to ensure operators are not subject to suprise costs if demand rises significantly over time. The optimization work outlined in [BLS Multi-Signature Voting](https://hackmd.io/@patrickogrady/100k-subnets#How-will-BLS-Multi-Signature-uptime-voting-work) should allow the min rate to be set as low as ~512-4096 nAVAX/second (or 1.3-10.6 $AVAX/month).
+
+Fees paid to the Avalanche Network for PAYG could be burned, like all other P-Chain, X-Chain, and C-Chain transactions, or they could be partially rewarded to Primary Network Validators as a "boost" over the existing staking rewards. The nice byproduct of the latter approach is that it better aligns Primary Network Validators with the growth of Subnets.
+
+#### $AVAX-Augmented Subnet Security
+
+_Allow pledging unstaked $AVAX to Subnet Validators on Elastic Subnets that can be slashed if said Subnet Validator commits an attributable fault (i.e. proposes/signs conflicting blocks/AWM payloads). Reward locked $AVAX associated with Subnet Validators that were not slashed with Elastic Subnet staking rewards._
+
+Currently, the only way to secure an Elastic Subnet is to stake its custom staking token (defined in the `TransformSubnetTx`). Many have requested the option to use $AVAX for this token, however, this could easily allow an adversary to takeover small Elastic Subnets (where the amount of $AVAX staked may be much less than the circulating supply).
+
+$AVAX-Augmented Subnet Security would allow anyone holding $AVAX to lock it to specific Subnet Validators and earn Elastic Subnet reward tokens for supporting honest participants. Recall, all stake management on the Avalanche Network (even for Subnets) occurs on the P-Chain. Thus, staked tokens ($AVAX and/or custom staking tokens used in Elastic Subnets) and stake weights (used for AWM verification) are secured by the full $AVAX stake of the Primary Network. $AVAX-Augmented Subnet Security, like staking, would be implemented on the P-Chain and enjoy the full security of the Primary Network. This approach means locking $AVAX occurs on the Primary Network (no need to transfer $AVAX to a Subnet, which may not be secured by meaningful value yet) and proofs of malicious behavior are processed on the Primary Network (a colluding Subnet could otherwise chose not to process a proof that would lead to their "lockers" being slashed).
+
+_This native approach is comparable to the idea of using $ETH to secure DA on [EigenLayer](https://www.eigenlayer.xyz/) (without reusing stake) or $BTC to secure Cosmos Zones on [Babylon](https://babylonchain.io/) (but not using an external ecosystem)._
+
+## Backwards Compatibility
+
+* Existing Subnet Validation semantics for Primary Network Validators are not modified by this ACP. This means that All existing Subnet Validators can continue validating both the Primary Network and whatever Subnets they are validating. This change would just provide a new option for Subnet Validators that allows them to sacrifice their staking rewards for a smaller upfront $AVAX commitment and lower infrastructure costs.
+* Support for this ACP would require adding a new transaction type to the P-Chain (i.e. `AddSubnetOnlyValidatorTx`). This new transaction is an execution-breaking change that would require a mandatory Avalanche Network upgrade to activate.
+
+## Reference Implementation
+
+A full implementation will be provided once this ACP is considered `Implementable`. However, some initial ideas are presented below.
+
+### `AddSubnetOnlyValidatorTx`
 
 ```text
 type AddSubnetOnlyValidatorTx struct {
@@ -63,8 +92,8 @@ type AddSubnetOnlyValidatorTx struct {
 	//       This means that validators can share a key if they so choose.
 	//       However, a NodeID does uniquely map to a BLS key
 	Signer signer.Signer `serialize:"true" json:"signer"`
-	// Where to send staked tokens when done validating
-	StakeOuts []*avax.TransferableOutput `serialize:"true" json:"stake"`
+	// Where to send locked tokens when done validating
+	LockOuts []*avax.TransferableOutput `serialize:"true" json:"lock"`
 	// Where to send validation rewards when done validating
 	ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
 	// Where to send delegation rewards when done validating
@@ -76,8 +105,11 @@ type AddSubnetOnlyValidatorTx struct {
 }
 ```
 
+_`AddSubnetOnlyValidatorTx` is almost the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58), the only exception being that `StakeOuts` are now `LockOuts`._
+
 ### P2P
-TODO
+
+To support tracking 
 
 #### Version
 
@@ -155,38 +187,6 @@ message PeerListAck {
 }
 ```
 
-### Future Work
-
-The previously described specification is a minimal, additive change to Subnet Validation semantics that prepares the Avalanche Network for a more flexible Subnet model. It alone, however, fails to communicate this flexibility nor provides an alternative use of $AVAX that would have otherwise been used to create Subnet Validators.
-
-Below are two high-level ideas (Pay-As-You-Go Subnet Validation Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
-
-#### Pay-As-You-Go Subnet Validation Fees
-
-_Transition Subnet Validator registration to a dynamically priced, continuously charged fee (that doesn't require locking large amounts of $AVAX upfront)._
-
-While it would be possible to just transition to a lower required "lock" amount, many think that it would be more competitve to transition to a dynamically priced, continuous payment mechanism to register as a Subnet Validator. This new mechanism would target some $Y nAVAX fee that would be paid by each Subnet Validator per Subnet per second (pulling from a "Subnet Validator's Account") instead of requiring a large upfront lockup of $AVAX.
-
-The rate of nAVAX/second should be set by the demand for validating Subnets on Avalanche compared to some usage target per Subnet and across all Subnets. This rate should be locked for each Subnet Validation period to ensure operators are not subject to suprise costs if demand rises significantly over time. The optimization work outlined in [BLS Multi-Signature Voting](https://hackmd.io/@patrickogrady/100k-subnets#How-will-BLS-Multi-Signature-uptime-voting-work) should allow the min rate to be set as low as ~512-4096 nAVAX/second (or 1.3-10.6 $AVAX/month).
-
-Fees paid to the Avalanche Network for PAYG could be burned, like all other P-Chain, X-Chain, and C-Chain transactions, or they could be partially rewarded to Primary Network Validators as a "boost" over the existing staking rewards. The nice byproduct of the latter approach is that it better aligns Primary Network Validators with the growth of Subnets.
-
-#### $AVAX-Augmented Subnet Security
-
-_Allow pledging unstaked $AVAX to Subnet Validators on Elastic Subnets that can be slashed if said Subnet Validator commits an attributable fault (i.e. proposes/signs conflicting blocks/AWM payloads). Reward locked $AVAX associated with Subnet Validators that were not slashed with Elastic Subnet staking rewards._
-
-Currently, the only way to secure an Elastic Subnet is to stake its custom staking token (defined in the `TransformSubnetTx`). Many have requested the option to use $AVAX for this token, however, this could easily allow an adversary to takeover small Elastic Subnets (where the amount of $AVAX staked may be much less than the circulating supply).
-
-$AVAX-Augmented Subnet Security would allow anyone holding $AVAX to lock it to specific Subnet Validators and earn Elastic Subnet reward tokens for supporting honest participants. Recall, all stake management on the Avalanche Network (even for Subnets) occurs on the P-Chain. Thus, staked tokens ($AVAX and/or custom staking tokens used in Elastic Subnets) and stake weights (used for AWM verification) are secured by the full $AVAX stake of the Primary Network. $AVAX-Augmented Subnet Security, like staking, would be implemented on the P-Chain and enjoy the full security of the Primary Network. This approach means locking $AVAX occurs on the Primary Network (no need to transfer $AVAX to a Subnet, which may not be secured by meaningful value yet) and proofs of malicious behavior are processed on the Primary Network (a colluding Subnet could otherwise chose not to process a proof that would lead to their "lockers" being slashed).
-
-_This native approach is comparable to the idea of using $ETH to secure DA on [EigenLayer](https://www.eigenlayer.xyz/) (without reusing stake) or $BTC to secure Cosmos Zones on [Babylon](https://babylonchain.io/) (but not using an external ecosystem)._
-
-## Backwards Compatibility
-
-* Existing Subnet Validation semantics for Primary Network Validators are not modified by this ACP. This means that All existing Subnet Validators can continue validating both the Primary Network and whatever Subnets they are validating. This change would just provide a new option for Subnet Validators that allows them to sacrifice their staking rewards for a smaller upfront $AVAX commitment and lower infrastructure costs.
-* Support for this ACP would require adding a new transaction type to the P-Chain (i.e. `AddSubnetOnlyValidatorTx`). This new transaction is an execution-breaking change that would require a mandatory Avalanche Network upgrade to activate.
-
-## Reference Implementation
 
 `TODO` (will start once "Implementable")
 
