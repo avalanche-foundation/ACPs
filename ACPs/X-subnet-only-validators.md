@@ -198,11 +198,11 @@ _This native approach is comparable to the idea of using $ETH to secure DA on [E
 
 * Any Subnet Validator running in "Partial Sync Mode" will not be able to verify Atomic Imports on the P-Chain and will rely entirely on Primary Network consensus to only accept valid P-Chain blocks.
 * High-throughput Subnets will be better isolated from the Primary Network and should improve its resilience (i.e. surges of traffic on some Subnet cannot destabilize a Primary Network Validator).
-* AvalancheGo must support tracking IPs for non-validators
+* Avalanche Network Clients (ANCs) must track IPs and provide allocated bandwidth for SOVs eventhough they are not Primary Network Validators.
 
 ## Open Questions
 
-* Bond amount?
+N/A
 
 ## Straw Poll
 
