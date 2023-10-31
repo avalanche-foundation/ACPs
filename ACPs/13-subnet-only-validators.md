@@ -117,9 +117,9 @@ message GetSubnetPeers {
 }
 ```
 
-_It would be a nice addition if a bloom filter could also be provided here so that an ANC only sends IPs of peers that the original sender does not know._ 
+_It would be a nice addition if a bloom filter could also be provided here so that an ANC only sends IPs of peers that the original sender does not know._
 
-ANCs should respond to this incoming message with a [`PeerList` message](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L148). 
+ANCs should respond to this incoming message with a [`PeerList` message](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/proto/p2p/p2p.proto#L135-L148).
 
 ## Security Considerations
 
@@ -129,7 +129,7 @@ ANCs should respond to this incoming message with a [`PeerList` message](https:/
 
 ## Open Questions
 
-N/A
+* To help orient the Avalanche Community around this wide-ranging and likely to be long-running conversation around the relationship between the Primary Network and Subnets, should we come up with a project name to describe the effort? I've been casually referring to all of these things as the _Astra Upgrade Track_ but definitely up for discussion (may be more confusing than it is worth to do this).
 
 ## Straw Poll
 
