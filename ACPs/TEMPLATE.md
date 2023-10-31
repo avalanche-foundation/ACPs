@@ -1,9 +1,9 @@
 ```text
 ACP: <PR Number>
 Title: <ACP title>
-Author(s): <a list of the author's name(s) and optionally contact info (email, X, GitHub, etc.): FirstName LastName <foo@bar.com>
+Author(s): <a list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com>>
 Discussions-To: <GitHub Discussion URL>
-Status: <Proposed, Recommended, Stale>
+Status: <Proposed, Implementable, Recommended, Stale>
 Track: <Standards, Best Practices, Meta>
 Replaces (*optional): <ACP number>
 Superseded-By (*optional): <ACP number>
@@ -41,7 +41,7 @@ Optional section that lists any concerns that should be resolved prior to implem
 
 ## Straw Poll
 
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). This PR must include a message + signature indicating ownership of a given amount of $AVAX.
+Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
 
 ### Supporters
 * `<message>/<signature>`
@@ -52,3 +52,4 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
