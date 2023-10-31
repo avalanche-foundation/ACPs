@@ -45,9 +45,9 @@ Because SOVs do not validate the Primary Network, they will not be rewarded with
 
 The previously described specification is a minimal, additive change to Subnet Validation semantics that prepares the Avalanche Network for a more flexible Subnet model. It alone, however, fails to communicate this flexibility nor provides an alternative use of $AVAX that would have otherwise been used to create Subnet Validators.
 
-Below are two high-level ideas (Pay-As-You-Go Subnet Validation Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
+Below are two high-level ideas (Pay-As-You-Go Subnet Validation Registration Fees and $AVAX-Augmented Security) that highlight how this initial change could be extended in the future. If the Avalanche Community is interested in their adoption, they should each be proposed as a unique ACP where they can be properly specified. **These ideas are only suggestions for how the Avalanche Network could be modified in the future if this ACP is adopted. Supporting this ACP does not require supporting these ideas or committing to their rollout.**
 
-#### Pay-As-You-Go Subnet Validation Fees
+#### Pay-As-You-Go Subnet Validation Registration Fees
 
 _Transition Subnet Validator registration to a dynamically priced, continuously charged fee (that doesn't require locking large amounts of $AVAX upfront)._
 
