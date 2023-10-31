@@ -9,15 +9,7 @@ Track: Standards
 
 ## Abstract
 
-Introduce Subnet-Only Validators (SOVs), a new type of staker that can validate any Avalanche Subnet but is not required to validate the Primary Network. SOVs retain the ability to participate in Avalanche Warp Messaging (AWM) but do not need to sync the X/C-Chains must post an $AVAX-denominated bond...
-
-Introduce a new type of Validator that is not required to validate the Primary Network...
-
-Remove the requirement that Subnet Validators must validate the Primary Network without revoking support for Subnet Validators to send/verify Avalanche Warp Messages (AWM). Allow Subnet Validators to stake on a Subnet by posting an $AVAX-deonimated bond.
-
-and instead require bond...
-
-Validators without restricting their ability to send or verify Avalanche Warp Messages (AWM). Preview a future transition to Pay-As-You-Go Subnet Validation and $AVAX-Augmented Subnet Security.
+Introduce a new type of staker, Subnet-Only Validators (SOVs), that can validate an Avalanche Subnet and participate in Avalanche Warp Messaging (AWM) without syncing or becoming a Validator on the Primary Network. In lieu of staking at least 2000 $AVAX (minimum requirement to become a Primary Network Validator), a SOV locks 500 $AVAX on the P-Chain for the duration of their staking period. The semantics of Subnet Validation for Primary Network Validators are left unchanged.
 
 ## Motivation
 
@@ -47,6 +39,8 @@ Don't give up ability
   * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L181-L188
   * https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/config/keys.go#L198-L203
 
+No rewards
+
 Without the requirement to validate the Primary Network, the need for Subnet Validators to instantiate and sync the C-Chain and X-Chain can be relaxed. Subnet Validators will only be required to sync the P-chain to track any validator set changes in their Subnet and to support Cross-Subnet communication via AWM (see “Primary Network Partial Sync” mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation.
 
 _The value of the required "bond" (X) is open for debate. To avoid impacting network stability, I think it should be at least 250-750 \$AVAX. To set this "bond" lower, I think the PlatformVM should be futher optimized (assumes that lower fees lead to a corresponding increase in Subnets)._
@@ -56,6 +50,8 @@ _The value of the required "bond" (X) is open for debate. To avoid impacting net
 #### `AddSubnetOnlyValidatorTx`
 
 _This is the same as [`AddPermissionlessValidatorTx`](https://github.com/ava-labs/avalanchego/blob/638000c42e5361e656ffbc27024026f6d8f67810/vms/platformvm/txs/add_permissionless_validator_tx.go#L33-L58). The exception being that the minimum staked tokens are ...._
+
+TODO: change StakeOuts to LockOuts
 
 ```text
 type AddSubnetOnlyValidatorTx struct {
