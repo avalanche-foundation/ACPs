@@ -161,6 +161,11 @@ message PeerListAck {
 
 ### Future Work
 
+The previously described specification is a minimal, additive change to Subnet Validation semantics. It alone, however, fails to communicate what is possible if Subnet Validation is decoupled from Primary Network validation or provide an alternative use of $AVAX that would've otherwise been staked to create Subnet Validators.
+
+
+
+
 The following ideas require their own ACPs...
 
 Shared to (TODO: if not blocked by this, should share?)
