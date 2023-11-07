@@ -51,7 +51,7 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 
 ## Acknowledgements
 
-Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@abi87](https://github.com/abi87] for their feedback on the reference implementation.
+Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@abi87](https://github.com/abi87) for their feedback on the reference implementation.
 
 ## Copyright
 
