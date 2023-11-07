@@ -1,6 +1,6 @@
 ```text
 ACP: <PR Number>
-Title: P-chain native transfers
+Title: P-chain Native Transfers
 Author(s): Dhruba Basu <https://github.com/dhrubabasu>
 Discussions-To: <GitHub Discussion URL>
 Status: Proposed
@@ -9,21 +9,21 @@ Track: Standards
 
 ## Abstract
 
-Support native transfers on P-chain.
+Support native transfers on P-chain. This enables users to transfer P-chain assets without leaving the P-chain or using a transaction type that's not meant for native transfers.
 
 ## Motivation
 
-Currently, the P-chain has no simple transfer transaction type. The X-chain supports this functionality through a `BaseTx`. Although the P-chain contains transaction types that extend `BaseTx`, the `BaseTx` transaction type itself is not a valid transaction.
-
-This ACP details the functionality of the new transaction type. Activation of `BaseTx` on the Avalanche Network must be done in a mandatory upgrade.
+Currently, the P-chain has no simple transfer transaction type. The X-chain supports this functionality through a `BaseTx`. Although the P-chain contains transaction types that extend `BaseTx`, the `BaseTx` transaction type itself is not a valid transaction. This leads to abnormal implementations of P-chain native transfers like in the AvalancheGo wallet which abuses [`CreateSubnetTx`](https://github.com/ava-labs/avalanchego/blob/v1.10.15/wallet/chain/p/builder.go#L54-L63) to replicate the functionality contained in `BaseTx`.
 
 ## Specification
 
-Support `BaseTx` as a valid transaction on P-chain. The transaction itself is fully implemented as most other P-chain transactions extend this type. Implementors must take care of adding `BaseTx` to the appropriate codecs used by AvalancheGo.
+To support `BaseTx`, Avalanche Network Clients (like AvalancheGo) must register `BaseTx` with the type ID `0x22` in codec version `0x00`.
+
+For the specification of the transaction itself, see [here](https://github.com/ava-labs/avalanchego/blob/v1.10.15/vms/platformvm/txs/base_tx.go#L29). Note that most other P-chain transactions extend this type, the only change in this ACP is to register it as a valid transaction itself.
 
 ## Backwards Compatibility
 
-Adding a new transaction type is an execution change and requires a mandatory upgrade for activation. Implementors must take care to reject this transaction prior to activation.
+Adding a new transaction type is an execution change and requires a mandatory upgrade for activation. Implementors must take care to reject this transaction prior to activation. This ACP only details the specification of the added `BaseTx` transaction type.
 
 ## Reference Implementation
 
