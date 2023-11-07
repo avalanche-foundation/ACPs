@@ -15,7 +15,7 @@ Support native transfers on P-chain.
 
 Currently, the P-chain has no simple transfer transaction type. The X-chain supports this functionality through a `BaseTx`. Although the P-chain contains transaction types that extend `BaseTx`, the `BaseTx` transaction type itself is not a valid transaction.
 
-This ACP only details the functionality of the new transaction type. Deployment and activation of this ACP must be done in a subsequent ACP.
+This ACP details the functionality of the new transaction type. Activation of `BaseTx` on the Avalanche Network must be done in a mandatory upgrade.
 
 ## Specification
 
