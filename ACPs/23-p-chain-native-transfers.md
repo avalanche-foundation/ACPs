@@ -1,0 +1,58 @@
+```text
+ACP: <PR Number>
+Title: P-chain native transfers
+Author(s): Dhruba Basu <https://github.com/dhrubabasu>
+Discussions-To: <GitHub Discussion URL>
+Status: Proposed
+Track: Standards
+```
+
+## Abstract
+
+Support native transfers on P-chain.
+
+## Motivation
+
+Currently, the P-chain has no simple transfer transaction type. The X-chain supports this functionality through a `BaseTx`. Although the P-chain contains transaction types that extend `BaseTx`, the `BaseTx` transaction type itself is not a valid transaction.
+
+This ACP only details the functionality of the new transaction type. Deployment and activation of this ACP must be done in a subsequent ACP.
+
+## Specification
+
+Support `BaseTx` as a valid transaction on P-chain. The transaction itself is fully implemented as most other P-chain transactions extend this type. Implementors must take care of adding `BaseTx` to the appropriate codecs used by AvalancheGo.
+
+## Backwards Compatibility
+
+Adding a new transaction type is an execution change and requires a mandatory upgrade for activation. Implementors must take care to reject this transaction prior to activation.
+
+## Reference Implementation
+
+An implementation of `BaseTx` support was created [here](https://github.com/ava-labs/avalanchego/pull/2232) and subsequently merged into AvalancheGo. Since the "D" Upgrade is not activated, this transaction will be rejected by AvalancheGo.
+
+If modifications are made to the specification of the transaction as part of the ACP process, the code must be updated prior to activation.
+
+## Security Considerations
+
+The P-chain has fixed fees which does not place any limits on chain throughput. A potentially popular transaction type like `BaseTx` may cause periods of high usage. The reference implementation in AvalancheGo sets the transaction fee to 0.001 AVAX as a deterrent (equivalent to `ImportTx` and `ExportTx`). This should be sufficient for the time being but a dynamic fee mechanism will need to be added to the P-chain in the future to mitigate this security concern. This is not addressed in this ACP as it requires a larger change to the fee dynamics on the P-chain as a whole.
+
+## Open Questions
+
+No open questions.
+
+## Straw Poll
+
+Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
+
+### Supporters
+* `<message>/<signature>`
+
+### Objectors
+* `<message>/<signature>`
+
+## Acknowledgements
+
+Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@abi87](https://github.com/abi87] for their feedback on the reference implementation.
+
+## Copyright
+
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
