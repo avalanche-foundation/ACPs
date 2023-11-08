@@ -45,7 +45,7 @@ Refer to the original EIPs for security considerations:
 
 ## Open Questions
 
-Optional section that lists any concerns that should be resolved prior to implementation.
+No open questions.
 
 ## Straw Poll
 
@@ -60,4 +60,3 @@ Anyone can open a PR against an ACP and mark themselves as a supporter (you want
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
-
