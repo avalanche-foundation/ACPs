@@ -2,7 +2,7 @@
 ACP: 24
 Title: Activate Shanghai EIPs on C-Chain
 Author(s): Darioush Jalali <https://github.com/darioush>
-Discussions-To: <GitHub Discussion URL>
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/27
 Status: Proposed
 Track: Standards
 ```
