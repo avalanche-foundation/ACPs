@@ -118,7 +118,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## Proposals
 
-_You can view the status of each ACP on the [Tracker](https://github.com/orgs/avalanche-foundation/projects/1/views/1)._
+_You can view the status of each ACP on the [ACP Tracker](https://github.com/orgs/avalanche-foundation/projects/1/views/1)._
 
 | Number | Title |  Author(s) | Type |
 |:-------|:------|:-------|:-----|
