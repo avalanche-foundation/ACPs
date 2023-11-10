@@ -24,6 +24,8 @@ Implement a new transaction type (`TransferSubnetOwnershipTx`) that:
 
 This transaction type should have type ID `0x21` in codec version `0x00`.
 
+This transaction type should have a fee of `0.001 AVAX`, equivalent to adding a subnet validator/delegator.
+
 ## Backwards Compatibility
 
 Adding a new transaction type is an execution change and requires a mandatory upgrade for activation. Implementors must take care to reject this transaction prior to activation. This ACP only details the specification of the `TransferSubnetOwnershipTx` type.
