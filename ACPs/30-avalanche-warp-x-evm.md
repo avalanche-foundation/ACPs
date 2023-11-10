@@ -13,9 +13,9 @@ Integrate Avalanche Warp Messaging into the C-Chain and Subnet-EVM in order to b
 
 ## Motivation
 
-Avalanche Subnets enable the creation of independent blockchains within the Avalanche Network. Each Avalanche Subnet registers its validator set on the Avalanche P-Chain, which serves as an effective "membership chain" for every Subnet on the Avalanche Network.
+Avalanche Subnets enable the creation of independent blockchains within the Avalanche Network. Each Avalanche Subnet registers its validator set on the Avalanche P-Chain, which serves as an effective "membership chain" for the entire Avalanche Ecosystem.
 
-By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can look up the validator set of any other Subnet within the Avalanche Ecosystem to verify an Avalanche Warp Message. This registry of validator set info completely replaces he need for point-to-point exchange of validator set info between Subnets resulting in a light weight protocol that allows seamles, on-demand communication between Subnets.
+By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can look up the validator set of any other Subnet within the Avalanche Ecosystem to verify an Avalanche Warp Message, which replaces the need for point-to-point exchange of validator set info between Subnets. This enables a light weight protocol that allows seamless, on-demand communication between Subnets.
 
 For more information on the Avalanche Warp Messaging message and payload formats see here:
 
@@ -90,7 +90,7 @@ interface IWarpMessenger {
 
 Signed Avalanche Warp Messages are encoded in the [EIP-2930 Access List](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2930.md) of a transaction, so that they can be pre-verified before executing the transactions in the block.
 
-The access list can specify any number of access tuples, which are a pair of an address and an array of storage slots in EIP-2930. Warp Predicate verification borrows this functionality to encode signed warp messages according to the serialization format defined [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/predicate/Predicate.md).
+The access list can specify any number of access tuples: a pair of an address and an array of storage slots in EIP-2930. Warp Predicate verification borrows this functionality to encode signed warp messages according to the serialization format defined [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/predicate/Predicate.md).
 
 Each Warp specific access tuple included in the access list specifies the Warp Precompile address as the address. The first tuple that specifies the Warp Precompile address is considered to be at index. Each subsequent access tuple that specifies the Warp Precompile address increases the Warp Message index by 1. Access tuples that specify any other address are not included in calculating the index for a specific warp message.
 
