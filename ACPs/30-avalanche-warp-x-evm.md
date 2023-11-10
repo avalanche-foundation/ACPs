@@ -26,7 +26,7 @@ This ACP proposes to activate Avalanche Warp Messaging on the C-Chain and offer 
 
 ## Specification
 
-The specification will be broken down into the Solidity interface of the precompile through which contracts can interact with the Warp Precompile, a Golang implementation example providing exact implementation steps for any ANC to follow, the predicate verification, and the proposed gas costs for the Warp Precompile.
+The specification will be broken down into the Solidity interface of the Warp Precompile, a Golang example implementation, the predicate verification, and the proposed gas costs for the Warp Precompile.
 
 The Warp Precompile address is `0x0200000000000000000000000000000000000005`.
 
@@ -105,8 +105,6 @@ Each Warp Message in the access list is charged gas to pay for verifying the War
 ### Precompile Implementation
 
 All types, events, and function arguments/outputs are encoded using the ABI package according to the official [Solidity ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html).
-
-Like any contract, the precompile can be called by the available CALL opcodes: `CALL`, `DELEGATECALL`, `STATICCALL`, and `CALLCODE`. Note: `DELEGATECALL` is treated as a normal call when calling precompiles.
 
 When the precompile is invoked with a given `calldata` argument, the first four bytes (`calldata[0:4]`) are read as the [function selector](https://docs.soliditylang.org/en/latest/abi-spec.html#function-selector). If the function selector matches the function selector of one of the functions defined by the Solidity interface, the contract invokes the corresponding execution function with the remaining calldata ie. `calldata[4:]`.
 
