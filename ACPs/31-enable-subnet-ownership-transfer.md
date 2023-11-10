@@ -13,7 +13,7 @@ Allow the current owner of a Subnet to transfer ownership to a new owner.
 
 ## Motivation
 
-Once a Subnet is created on the P-chain through a [CreateSubnetTx](https://github.com/ava-labs/avalanchego/blob/v1.10.15/vms/platformvm/txs/create_subnet_tx.go#L14-L19), the `Owner` of the subnet is currently immutable. Subnet operators may want to transition ownership of the Subnet to a new owner for a number of reasons, not least of all being rotating the key periodically.
+Once a Subnet is created on the P-chain through a [CreateSubnetTx](https://github.com/ava-labs/avalanchego/blob/v1.10.16/vms/platformvm/txs/create_subnet_tx.go#L14-L19), the `Owner` of the subnet is currently immutable. Subnet operators may want to transition ownership of the Subnet to a new owner for a number of reasons, not least of all being rotating the key periodically.
 
 ## Specification
 
