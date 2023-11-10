@@ -125,6 +125,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[13](./ACPs/13-subnet-only-validators.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
 |[20](./ACPs/20-ed25519-p2p.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[24](./ACPs/24-shanghai-eips.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
+|[30](./ACPs/30-avalanche-warp-x-evm.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
 
 ## Contributing
 
