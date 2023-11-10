@@ -116,14 +116,18 @@ ACP authors must waive any copyright claims before an ACP will be merged into th
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 ```
 
-## Previous Proposals
+## Proposals
 
-| Number | Title |  Author(s) | Type | Status |
-|:-------|:------|:-------|:-----|:-------|
-|[13](./ACPs/13-subnet-only-validators.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|Proposed|
-|[20](./ACPs/20-ed25519-p2p.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|Proposed|
-|[24](./ACPs/24-shanghai-eips.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|Proposed|
-|[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|Proposed|
+_You can view the status of each ACP on the [ACP Tracker](https://github.com/orgs/avalanche-foundation/projects/1/views/1)._
+
+| Number | Title |  Author(s) | Type |
+|:-------|:------|:-------|:-----|
+|[13](./ACPs/13-subnet-only-validators.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
+|[20](./ACPs/20-ed25519-p2p.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[24](./ACPs/24-shanghai-eips.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
+|[30](./ACPs/30-avalanche-warp-x-evm.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
+|[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+
 ## Contributing
 
 Before contributing to ACPs, please read the [ACP Terms of Contribution](./CONTRIBUTING.md).
