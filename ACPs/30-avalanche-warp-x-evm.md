@@ -2,6 +2,7 @@
 ACP: 30
 Title: Integrate Avalanche Warp Messaging into the EVM
 Author(s): Aaron Buchwald <aaron.buchwald56@gmail.com>
+Discussions-To: <GitHub Discussion URL>
 Status: Proposed
 Track: Standards
 ```
@@ -14,7 +15,7 @@ Integrate Avalanche Warp Messaging into the C-Chain and Subnet-EVM in order to b
 
 Avalanche Subnets enable the creation of independent blockchains within the Avalanche Network. Each Avalanche Subnet registers its validator set on the Avalanche P-Chain, which serves as an effective "membership chain" for every Subnet on the Avalanche Network.
 
-By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can verify an Avalanche Warp Message from any other Subnet including the Avalanche Primary Network within the Avalanche Ecosystem. This completely replaces the need for any point-to-point communication between two Subnets resulting in a light weight protocol that allows seamless, on-demand communication between Subnets.
+By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can look up the validator set of any other Subnet within the Avalanche Ecosystem to verify an Avalanche Warp Message. This registry of validator set info completely replaces he need for point-to-point exchange of validator set info between Subnets resulting in a light weight protocol that allows seamles, on-demand communication between Subnets.
 
 For more information on the Avalanche Warp Messaging message and payload formats see here:
 
@@ -31,7 +32,7 @@ The Warp Precompile address is `0x0200000000000000000000000000000000000005`.
 
 ### Precompile Solidity Interface
 
-```sol
+```solidity
 // (c) 2022-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
@@ -91,9 +92,9 @@ Signed Avalanche Warp Messages are encoded in the [EIP-2930 Access List](https:/
 
 The access list can specify any number of access tuples, which are a pair of an address and an array of storage slots in EIP-2930. Warp Predicate verification borrows this functionality to encode signed warp messages according to the serialization format defined [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/predicate/Predicate.md).
 
-Each Warp specific access tuple included in the access list specifies the Warp Precompile address as the address. The first tuple that specifies the Warp Precompile address is considered to be at index 0 and the index increases for each subsequent access tuple that specifies the Warp Precompile address. Access tuples that specify any other address are not included in calculating the index for a specific warp message.
+Each Warp specific access tuple included in the access list specifies the Warp Precompile address as the address. The first tuple that specifies the Warp Precompile address is considered to be at index. Each subsequent access tuple that specifies the Warp Precompile address increases the Warp Message index by 1. Access tuples that specify any other address are not included in calculating the index for a specific warp message.
 
-Avalanche Warp Messages are pre-verified (prior to block execution), and outputs a bitset for each transaction where a 1 indicates an Avalanche Warp Message that failed verification at that index. Throughout the EVM execution, the Warp Precompile checks the status of the resulting bit set to determine whether pre-verified messages are considered valid rather than accessing the P-Chain state at execution time. This has the additional benefit of encoding the Warp pre-verification results in the block, so that verifying a historical block can use the encoded results instead of needing to access potentially old P-Chain state. The result bitset is encoded in the block according to the predicate result specification [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/predicate/Results.md).
+Avalanche Warp Messages are pre-verified (prior to block execution), and outputs a bitset for each transaction where a 1 indicates an Avalanche Warp Message that failed verification at that index. Throughout the EVM execution, the Warp Precompile checks the status of the resulting bit set to determine whether pre-verified messages are considered valid. This has the additional benefit of encoding the Warp pre-verification results in the block, so that verifying a historical block can use the encoded results instead of needing to access potentially old P-Chain state. The result bitset is encoded in the block according to the predicate result specification [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/predicate/Results.md).
 
 Each Warp Message in the access list is charged gas to pay for verifying the Warp Message (gas costs are covered below) and is verified with the following steps (see [here](https://github.com/ava-labs/subnet-evm/blob/v0.5.9/x/warp/config.go#L218) for reference implementation):
 
@@ -132,12 +133,8 @@ These numbers were determined experimentally using the benchmarks available [her
 
 In addition to the benchmarks, the following assumptions and goals were taken into account:
 
-- BLS Public Key Aggregation is extremely fast, resulting in charging more for the base cost of a single BLS Multi-Signature Verification than each individual key
+- BLS Public Key Aggregation is extremely fast, resulting in charging more for the base cost of a single BLS Multi-Signature Verification than for adding an additional public key
 - The cost per byte included in the transaction should be strictly higher for including Avalanche Warp Messages than via transaction calldata, so that the Warp Precompile does not change the worst case maximum block size
-
-Note: the verification cost of performing a validator set lookup on the P-Chain is currently excluded. The cost of this lookup is variable depending on how old the referenced P-Chain height is from the perspective of each validator.
-
-These gas costs reflect a conservative baseline for Avalanche Warp Message verification in the EVM. [Ongoing work](https://github.com/ava-labs/avalanchego/pull/1611) can parallelize P-Chain validator set lookups and message verification to reduce the impact on block verification latency to be negligible and reduce costs to reflect the additional bandwidth of encoding Avalanche Warp Messages in the transaction.
 
 #### Execution Gas Costs
 
@@ -145,17 +142,26 @@ The execution gas costs were determined by summing the cost of the EVM operation
 
 ##### sendWarpMessage
 
-`sendWarpMessage` charges a base cost of 41,875 gas for the log containing an unsigned warp message that it produces, which contains 4 topics and charges 8 gas per byte of log data. Signing a warp message also requires that validators are willing to sign the requested message, so there's an additional cost charged for the signature and storage based off of the cost of writing a single storage slot to the active state.
+`sendWarpMessage` charges a base cost of 41,875 gas
 
-Note: this is a conservative estimate since writing to the active state merkle trie is more expensive than storing in a separate key-value database. Additionally, the cost of serving valid signatures is significantly cheaper than serving state sync and bootstrapping requests, so the cost to validators of serving signatures over time is not considered a concern that requires charging a higher gas cost up-front.
+This is comprised of charging for the following components:
+
+- 375 gas / log operation
+- 4 topics * 375 gas / topic
+- 20k gas to produce and serve a BLS Signature
+- 20k gas to store the Unsigned Warp Message
+
+This charges 20k gas for storing an Unsigned Warp Message although the message is stored in an independent key-value database instead of the active state. This makes it less expensive to store, so 20k gas is a conservative estimate.
+
+Additionally, the cost of serving valid signatures is significantly cheaper than serving state sync and bootstrapping requests, so the cost to validators of serving signatures over time is not considered a significant concern.
 
 ##### getBlockchainID
 
-`getBlockchainID` serves an already in-memory value the blockchainID, which is available on the Avalanche Context, so this is charged 2 gas commensurate with other in-memory only operations such as accessing the block number.
+`getBlockchainID` charges 2 gas to serve an already in-memory 32 byte valu commensurate with existing in-memory operations.
 
-##### getVerifiedWarpBlockHash and getVerifiedWarpMessage
+##### getVerifiedWarpBlockHash / getVerifiedWarpMessage
 
-`GetVerifiedWarpMessageBaseCost` is charged for serving a warp message (either payload type). This operation is fully in-memory, so it only charges 2 gas.
+`GetVerifiedWarpMessageBaseCost` charges 2 gas for serving a Warp Message (either payload type). Warp message are already in-memory, so it charges 2 gas for access.
 
 `GasCostPerWarpMessageBytes` charges 100 gas per byte of the Avalanche Warp Message that is unpacked into a Solidity struct.
 
@@ -177,15 +183,11 @@ To efficiently handle historical blocks containing Avalanche Warp Messages, the 
 
 ## Open Questions
 
-_How can Avalanche Warp Messaging best be integrated into other Virtual Machines?_
+_How should validator set lookups in Warp Message verification be effectively charged for gas?_
 
-Any other Virtual Machine can send and verify Warp Messages/Payloads compatible with the payload types used by the C-Chain and defined in AvalancheGo.
+The verification cost of performing a validator set lookup on the P-Chain is currently excluded from the implemenation. The cost of this lookup is variable depending on how old the referenced P-Chain height is from the perspective of each validator.
 
-_How can networks outside of the Avalanche Ecoystem communicate with Avalanche Warp Messaging?_
-
-Any network or service outside of the Avalanche Ecosystem only needs access to the P-Chain state in order to verify warp messages from any Avalanche Subnet.
-
-Additionally, any network or service that wants to create a route into the Avalanche Ecosystem only needs to create a Subnet to register a validator set on the P-Chain and then it can immediately communicate with any Subnet in the Avalanche Ecosystem that has activated Avalanche Warp Messaging.
+[Ongoing work](https://github.com/ava-labs/avalanchego/pull/1611) can parallelize P-Chain validator set lookups and message verification to reduce the impact on block verification latency to be negligible and reduce costs to reflect the additional bandwidth of encoding Avalanche Warp Messages in the transaction.
 
 ## Straw Poll
 
