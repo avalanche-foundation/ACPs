@@ -1,8 +1,7 @@
 ```text
-ACP: XXX
+ACP: 30
 Title: Integrate Avalanche Warp Messaging into the EVM
 Author(s): Aaron Buchwald <aaron.buchwald56@gmail.com>
-Discussions-To: <GitHub Discussion URL>
 Status: Proposed
 Track: Standards
 ```
@@ -15,7 +14,7 @@ Integrate Avalanche Warp Messaging into the C-Chain and Subnet-EVM in order to b
 
 Avalanche Subnets enable the creation of independent blockchains within the Avalanche Network. Each Avalanche Subnet registers its validator set on the Avalanche P-Chain, which serves as an effective "membership chain" for every Subnet on the Avalanche Network.
 
-By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can verify an Avalanche Warp Message from any other Subnet including the Avalanche Primary Network within the Avalanche Ecosystem. This completely replaces the need for any point-to-point communication between two Subnets resulting in a light weight protocol that allows seamless, on-demand communication between Subnets with extremely low fixed costs.
+By providing read access to the validator set of every Subnet on the Avalanche Network, any Subnet can verify an Avalanche Warp Message from any other Subnet including the Avalanche Primary Network within the Avalanche Ecosystem. This completely replaces the need for any point-to-point communication between two Subnets resulting in a light weight protocol that allows seamless, on-demand communication between Subnets.
 
 For more information on the Avalanche Warp Messaging message and payload formats see here:
 
