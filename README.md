@@ -122,6 +122,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 |:-------|:------|:-------|:-----|:-------|
 |[13](./ACPs/13-subnet-only-validators.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|Proposed|
 |[20](./ACPs/20-ed25519-p2p.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|Proposed|
+|[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|Proposed|
 ## Contributing
 
 Before contributing to ACPs, please read the [ACP Terms of Contribution](./CONTRIBUTING.md).
