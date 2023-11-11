@@ -1,6 +1,6 @@
 ```text
 ACP: 23
-Title: P-chain Native Transfers
+Title: P-Chain Native Transfers
 Author(s): Dhruba Basu <https://github.com/dhrubabasu>
 Discussions-To: <GitHub Discussion URL>
 Status: Proposed
