@@ -15,6 +15,8 @@ Support native transfers on P-chain. This enables users to transfer P-chain asse
 
 Currently, the P-chain has no simple transfer transaction type. The X-chain supports this functionality through a `BaseTx`. Although the P-chain contains transaction types that extend `BaseTx`, the `BaseTx` transaction type itself is not a valid transaction. This leads to abnormal implementations of P-chain native transfers like in the AvalancheGo wallet which abuses [`CreateSubnetTx`](https://github.com/ava-labs/avalanchego/blob/v1.10.15/wallet/chain/p/builder.go#L54-L63) to replicate the functionality contained in `BaseTx`.
 
+With the growing number of subnets slated for launch on the Avalanche network, simple transfers will be demanded more by users. While there are work-arounds as mentioned before, the network should support it natively to provide a cheaper option for both validators and end-users.
+
 ## Specification
 
 To support `BaseTx`, Avalanche Network Clients (like AvalancheGo) must register `BaseTx` with the type ID `0x22` in codec version `0x00`.
