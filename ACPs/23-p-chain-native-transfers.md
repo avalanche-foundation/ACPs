@@ -2,7 +2,7 @@
 ACP: 23
 Title: P-Chain Native Transfers
 Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: <GitHub Discussion URL>
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/37
 Status: Proposed
 Track: Standards
 ```
