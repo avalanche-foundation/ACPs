@@ -2,7 +2,7 @@
 ACP: 25
 Title: Virtual Machine Application Errors
 Author(s): Joshua Kim <https://github.com/joshua-kim>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/TODO //TODO
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/26
 Status: Proposed
 Track: Standards
 ```
