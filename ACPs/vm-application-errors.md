@@ -52,7 +52,7 @@ Clients **must** respond to an inbound `AppRequest` message with either a corres
 
 ## Backwards Compatibility
 
-This new message type requires an network activation to require either an `AppResponse` or an `AppError` as a required response to an `AppRequest`.
+This new message type requires a network activation to require either an `AppResponse` or an `AppError` as a required response to an `AppRequest`.
 
 ## Reference Implementation
 
