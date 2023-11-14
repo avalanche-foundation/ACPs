@@ -2,7 +2,7 @@
 ACP: 41
 Title: Remove Pending Stakers
 Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: TODO
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/42
 Status: Proposed
 Track: Standards
 ```
