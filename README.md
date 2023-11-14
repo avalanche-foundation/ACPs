@@ -128,6 +128,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[24](./ACPs/24-shanghai-eips.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
 |[30](./ACPs/30-avalanche-warp-x-evm.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
 |[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[41](./ACPs/41-remove-pending-stakers.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 
 ## Contributing
 
