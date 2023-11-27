@@ -3,7 +3,7 @@ ACP: 31
 Title: Enable Subnet Ownership Transfer
 Author(s): Dhruba Basu <https://github.com/dhrubabasu>
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/35
-Status: Proposed
+Status: Implementable
 Track: Standards
 ```
 
