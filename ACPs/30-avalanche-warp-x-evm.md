@@ -3,7 +3,7 @@ ACP: 30
 Title: Integrate Avalanche Warp Messaging into the EVM
 Author(s): Aaron Buchwald <aaron.buchwald56@gmail.com>
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/33
-Status: Proposed
+Status: Implementable
 Track: Standards
 ```
 
