@@ -30,7 +30,7 @@ By immediately starting every staker on acceptance, the validators do not have t
 
 Modifying the state transition of a transaction type is an execution change and requires a mandatory upgrade for activation. Implementors must take care to not alter the execution behavior prior to activation. This ACP only details the new state transition.
 
-Current wallet implementations will continue to work as-is post-activation of this ACP since no transaction formats are modified or added. Wallet implementations may run into issues with their txs being rejected as a result of this ACP if `EndTime >= CurrentChainTime + MaxStakeDuration`. `CurrentChainTime` is guaratanteed to be >= the latest block timestamp on the P-chain.
+Current wallet implementations will continue to work as-is post-activation of this ACP since no transaction formats are modified or added. Wallet implementations may run into issues with their txs being rejected as a result of this ACP if `EndTime >= CurrentChainTime + MaxStakeDuration`. `CurrentChainTime` is guaranteed to be >= the latest block timestamp on the P-chain.
 
 ## Reference Implementation
 
