@@ -140,12 +140,12 @@ The execution gas costs were determined by summing the cost of the EVM operation
 
 ##### sendWarpMessage
 
-`sendWarpMessage` charges a base cost of 41,875 gas
+`sendWarpMessage` charges a base cost of 41,500 gas
 
 This is comprised of charging for the following components:
 
 - 375 gas / log operation
-- 4 topics * 375 gas / topic
+- 3 topics * 375 gas / topic
 - 20k gas to produce and serve a BLS Signature
 - 20k gas to store the Unsigned Warp Message
 
