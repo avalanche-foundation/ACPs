@@ -159,7 +159,7 @@ Additionally, the cost of serving valid signatures is significantly cheaper than
 A single `SendWarpMessage` log is charged:
 
 - 375 gas base cost
-- 375 gas per topic (`EventID`, `sender`, `messageID`)
+- 375 gas per topic (`eventID`, `sender`, `messageID`)
 - 8 byte per / payload byte encoded in the `message` field
 
 Topics are indexed fields encoded as 32 byte values to support querying based on given specified topic values.
