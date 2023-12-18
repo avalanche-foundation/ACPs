@@ -154,7 +154,15 @@ This charges 20k gas for storing an Unsigned Warp Message although the message i
 
 Additionally, the cost of serving valid signatures is significantly cheaper than serving state sync and bootstrapping requests, so the cost to validators of serving signatures over time is not considered a significant concern.
 
-`sendWarpMessage` also charges for the log operation it includes commensurate with the gas cost of a standard log operation in the EVM. A single log is charged a base cost of 375 gas, each indexed topic (indexed to serve efficient filter queries based on the indexed field) costs 375 gas, and each byte included in the payload costs 8 gas.
+`sendWarpMessage` also charges for the log operation it includes commensurate with the gas cost of a standard log operation in the EVM.
+
+A single `SendWarpMessage` log is charged:
+
+- 375 gas base cost
+- 375 gas per topic (`EventID`, `sender`, `messageID`)
+- 8 byte per / payload byte encoded in the `message` field
+
+Topics are indexed fields encoded as 32 byte values to support querying based on given specified topic values.
 
 ##### getBlockchainID
 
