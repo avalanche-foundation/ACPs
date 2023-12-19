@@ -183,7 +183,7 @@ To efficiently handle historical blocks containing Avalanche Warp Messages, the 
 
 _How should validator set lookups in Warp Message verification be effectively charged for gas?_
 
-The verification cost of performing a validator set lookup on the P-Chain is currently excluded from the implemenation. The cost of this lookup is variable depending on how old the referenced P-Chain height is from the perspective of each validator.
+The verification cost of performing a validator set lookup on the P-Chain is currently excluded from the implementation. The cost of this lookup is variable depending on how old the referenced P-Chain height is from the perspective of each validator.
 
 [Ongoing work](https://github.com/ava-labs/avalanchego/pull/1611) can parallelize P-Chain validator set lookups and message verification to reduce the impact on block verification latency to be negligible and reduce costs to reflect the additional bandwidth of encoding Avalanche Warp Messages in the transaction.
 

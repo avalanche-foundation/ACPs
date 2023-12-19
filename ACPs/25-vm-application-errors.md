@@ -15,7 +15,7 @@ Support a way for a Virtual Machine (VM) to signal application-defined error con
 
 VMs are able to build their own peer-to-peer application protocols using the `AppRequest`, `AppResponse`, and `AppGossip` primitives.
 
-`AppRequest` is a message type that requires a corresponding `AppResponse` to indicate a succesful response. In the unhappy path where an `AppRequest` is unable to be served, there currently is no native way for a peer to signal an error condition. VMs currently resort to timeouts in failure cases, where a client making a request will fallback to marking its request as failed after some timeout period has expired.
+`AppRequest` is a message type that requires a corresponding `AppResponse` to indicate a successful response. In the unhappy path where an `AppRequest` is unable to be served, there currently is no native way for a peer to signal an error condition. VMs currently resort to timeouts in failure cases, where a client making a request will fallback to marking its request as failed after some timeout period has expired.
 
 Having a native application error type would offer a more powerful abstraction where Avalanche nodes would be able to score peers based on perceived errors. This is not currently possible because Avalanche networking isn't aware of the specific implementation details of the messages being delivered to VMs. A native application error type would also guarantee that all clients can potentially expect an `AppError` message to unblock an unsuccessful `AppRequest` and only rely on a timeout when absolutely necessary, significantly decreasing the latency for a client to unblock its request in the unhappy path.
 
@@ -63,7 +63,7 @@ This new message type requires a network activation to require either an `AppRes
 
 Optional section that discusses the security implications/considerations relevant to the proposed change.
 
-Clients should be aware that peers can aribtrarily send `AppError` messages to invoke error handling logic in a VM.
+Clients should be aware that peers can arbitrarily send `AppError` messages to invoke error handling logic in a VM.
 
 ## Open Questions
 

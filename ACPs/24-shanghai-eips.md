@@ -32,7 +32,7 @@ This ACP proposes the EIPs be adopted as specified in the EIPs themselves. ANCs 
 
 The following backward compatibility considerations were highlighted by the original EIP authors:
 
-- [EIP-3855](https://eips.ethereum.org/EIPS/eip-3855#backwards-compatibility): "... introduces a new opcode which did not exists previously. Already deployed contracts using this opcode could change their behaviour after this EIP".
+- [EIP-3855](https://eips.ethereum.org/EIPS/eip-3855#backwards-compatibility): "... introduces a new opcode which did not exist previously. Already deployed contracts using this opcode could change their behaviour after this EIP".
 - [EIP-3860](https://eips.ethereum.org/EIPS/eip-3860#backwards-compatibility) "Already deployed contracts should not be effected, but certain transactions (with initcode beyond the proposed limit) would still be includable in a block, but result in an exceptional abort."
 
 Adoption of this ACP modifies consensus rules for the C-Chain, therefore it requires a network upgrade.
