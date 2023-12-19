@@ -140,18 +140,29 @@ The execution gas costs were determined by summing the cost of the EVM operation
 
 ##### sendWarpMessage
 
-`sendWarpMessage` charges a base cost of 41,875 gas
+`sendWarpMessage` charges a base cost of 41,500 gas + 8 gas / payload byte
 
 This is comprised of charging for the following components:
 
 - 375 gas / log operation
-- 4 topics * 375 gas / topic
+- 3 topics * 375 gas / topic
 - 20k gas to produce and serve a BLS Signature
 - 20k gas to store the Unsigned Warp Message
+- 8 gas / payload byte
 
 This charges 20k gas for storing an Unsigned Warp Message although the message is stored in an independent key-value database instead of the active state. This makes it less expensive to store, so 20k gas is a conservative estimate.
 
 Additionally, the cost of serving valid signatures is significantly cheaper than serving state sync and bootstrapping requests, so the cost to validators of serving signatures over time is not considered a significant concern.
+
+`sendWarpMessage` also charges for the log operation it includes commensurate with the gas cost of a standard log operation in the EVM.
+
+A single `SendWarpMessage` log is charged:
+
+- 375 gas base cost
+- 375 gas per topic (`eventID`, `sender`, `messageID`)
+- 8 byte per / payload byte encoded in the `message` field
+
+Topics are indexed fields encoded as 32 byte values to support querying based on given specified topic values.
 
 ##### getBlockchainID
 
