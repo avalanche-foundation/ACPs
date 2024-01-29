@@ -9,7 +9,7 @@ Track: Standards
 
 ## Abstract
 
-Disable `AddValidatorTx` and `AddDelegatorTx` to push all new stakers to use `AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx`. `AddPermissionlessValidatorTx` requires validators to register a BLS key. Wide adoption of registered BLS keys accelerates the timeline for future P-chain upgrades. Additionally, this reduces the number of ways to participate in Primary Network validation from two to one.
+Disable `AddValidatorTx` and `AddDelegatorTx` to push all new stakers to use `AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx`. `AddPermissionlessValidatorTx` requires validators to register a BLS key. Wide adoption of registered BLS keys accelerates the timeline for future P-Chain upgrades. Additionally, this reduces the number of ways to participate in Primary Network validation from two to one.
 
 ## Motivation
 
@@ -23,7 +23,7 @@ These new transaction types can also be used to register a Primary Network valid
 
 By disabling support of `AddValidatorTx`, all new validators on the Primary Network must use `AddPermissionlessValidatorTx` and register a BLS key with their NodeID. As more validators attach BLS keys to their nodes, future upgrades using these BLS keys can be activated through the ACP process. BLS keys can be used to efficiently sign a common message via [Public Key Aggregation](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html). Applications of this include, but are not limited to:
 
-- **Arbitrary Subnet Rewards**: The P-chain currently restricts Elastic Subnets to follow the reward curve defined in a `TransformSubnetTx``. With sufficient BLS key adoption, Elastic Subnets can define their own reward curve and reward conditions. The P-chain can be modified to take in a message indicating if a Subnet validator should be rewarded with how many tokens signed with a BLS Multi-Signature.
+- **Arbitrary Subnet Rewards**: The P-Chain currently restricts Elastic Subnets to follow the reward curve defined in a `TransformSubnetTx``. With sufficient BLS key adoption, Elastic Subnets can define their own reward curve and reward conditions. The P-Chain can be modified to take in a message indicating if a Subnet validator should be rewarded with how many tokens signed with a BLS Multi-Signature.
 - **Subnet Attestations**: Elastic Subnets can attest to the state of their Subnet with a BLS Multi-Signature. This can enable clients to fetch the current state of the Subnet without syncing the entire Subnet. `StateSync` enables clients to download chain state from peers up to a recent block near tip. However, it is up to the client to query these peers and resolve any potential conflicts in the responses. With Subnet Attestations, clients can query an API node to prove information about a Subnet without querying the Subnet's validators. This can especially be useful for [Subnet-Only Validators](./13-subnet-only-validators.md) to prove information about the C-Chain.
 
 To accelerate future BLS-powered advancements in the Avalanche Network, this ACP aims to disable `AddValidatorTx` and `AddDelegatorTx` in Durango.
@@ -36,7 +36,7 @@ To accelerate future BLS-powered advancements in the Avalanche Network, this ACP
 
 Disabling a transaction type is an execution change and requires a mandatory upgrade for activation. Implementers must take care to not alter the execution behavior prior to activation.
 
-After this ACP is activated, any new issuance of `AddValidatorTx` or `AddDelegatorTx` will be considered invalid and dropped by the network. Any consumers of these transactions must transition to using `AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx` to participate in Primary Network validation. The Avalanche Ledger App supports both of these transaction types.
+After this ACP is activated, any new issuance of `AddValidatorTx` or `AddDelegatorTx` will be considered invalid and dropped by the network. Any consumers of these transactions must transition to using `AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx` to participate in Primary Network validation. The [Avalanche Ledger App](https://github.com/LedgerHQ/app-avalanche) supports both of these transaction types.
 
 Note that `AddSubnetValidatorTx` and `RemoveSubnetValidatorTx` are unchanged by this ACP.
 
