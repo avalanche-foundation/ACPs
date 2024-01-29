@@ -13,7 +13,7 @@ Disable `AddValidatorTx` and `AddDelegatorTx` to push all new stakers to use `Ad
 
 ## Motivation
 
-`AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx` were activated on the Avalanche Network in October 2022 with Banff (v1.9.0). This unlocked the ability for Subnet creators to activate Proof-of-Stake validation using their own token on their own subnet. See more details about Banff [here](https://medium.com/avalancheavax/banff-elastic-subnets-44042f41e34c).
+`AddPermissionlessValidatorTx` and `AddPermissionlessDelegatorTx` were activated on the Avalanche Network in October 2022 with Banff (v1.9.0). This unlocked the ability for Subnet creators to activate Proof-of-Stake validation using their own token on their own Subnet. See more details about Banff [here](https://medium.com/avalancheavax/banff-elastic-subnets-44042f41e34c).
 
 These new transaction types can also be used to register a Primary Network validator, leaving two redundant transactions: `AddValidatorTx` and `AddDelegatorTx`.
 
@@ -23,8 +23,8 @@ These new transaction types can also be used to register a Primary Network valid
 
 By disabling support of `AddValidatorTx`, all new validators on the Primary Network must use `AddPermissionlessValidatorTx` and register a BLS key with their NodeID. As more validators attach BLS keys to their nodes, future upgrades using these BLS keys can be activated through the ACP process. BLS keys can be used to efficiently sign a common message via [Public Key Aggregation](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html). Applications of this include, but are not limited to:
 
-- **Arbitrary Subnet Rewards**: The P-chain currently restricts permissionless subnets to follow the reward curve defined in a TransformSubnetTx. With sufficient BLS key adoption, permissionless subnets can define their own reward curve and reward conditions. The P-chain can be modified to take in a message indicating if a subnet validator should be rewarded with how many tokens signed with a BLS Multi-Signature.
-- **Subnet Attestations**: Permissionless subnets can attest to the state of their subnet with a BLS Multi-Signature. This can enable clients to fetch the current state of the subnet without syncing the entire subnet.
+- **Arbitrary Subnet Rewards**: The P-chain currently restricts Elastic Subnets to follow the reward curve defined in a `TransformSubnetTx``. With sufficient BLS key adoption, Elastic Subnets can define their own reward curve and reward conditions. The P-chain can be modified to take in a message indicating if a Subnet validator should be rewarded with how many tokens signed with a BLS Multi-Signature.
+- **Subnet Attestations**: Elastic Subnets can attest to the state of their Subnet with a BLS Multi-Signature. This can enable clients to fetch the current state of the Subnet without syncing the entire Subnet.
 
 To accelerate future BLS-powered advancements in the Avalanche Network, this ACP aims to disable `AddValidatorTx` and `AddDelegatorTx` in Durango.
 
