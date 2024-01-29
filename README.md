@@ -130,6 +130,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[30](./ACPs/30-avalanche-warp-x-evm.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
 |[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[41](./ACPs/41-remove-pending-stakers.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 
 ## Contributing
 
