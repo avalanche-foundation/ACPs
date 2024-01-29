@@ -3,7 +3,7 @@ ACP: 62
 Title: Disable `AddValidatorTx` and `AddDelegatorTx`
 Author(s): Jacob Everly <https://twitter.com/JacobEv3rly>, Dhruba Basu <https://github.com/dhrubabasu>
 Discussions-To: TODO
-Status: Proposed
+Status: Implementable
 Track: Standards
 ```
 
