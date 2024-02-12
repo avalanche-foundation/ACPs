@@ -1,5 +1,7 @@
 # What is an Avalanche Community Proposal?
 
+[Link to Github](https://github.com/avalanche-foundation/ACPs)
+
 An Avalanche Community Proposal is a concise document that introduces a change or best practice for adoption on the [Avalanche Network](https://www.avax.com). ACPs should provide clear technical specifications of any proposals and a compelling rationale for their adoption.
 
 ACPs are an open framework for proposing improvements and gathering consensus around changes to the Avalanche Network. ACPs can be proposed by anyone and will be merged into this repository as long as they are well-formatted and coherent. The Avalanche Foundation may, from time to time, recommend specific ACPs that it believes benefit the Avalanche Network/Community but it is ultimately up to members of the Avalanche Network/Community to adopt ACPs they support by running a compatible Avalanche Network Client (ANC), such as [AvalancheGo](https://github.com/ava-labs/avalanchego). The Avalanche Foundation's recommendation is not binding and is made without representations, warranties or guarantees of any kind.
