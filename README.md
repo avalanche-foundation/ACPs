@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="80%" src="LOGO.png">
+  <img width="80%" src="LOGO.png"/>
 </div>
 
 ## What is an Avalanche Community Proposal (ACP)?
