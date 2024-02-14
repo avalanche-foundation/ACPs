@@ -94,7 +94,7 @@ Signature: "34k8j3w1rxL5wtLCi5AsP93CtjwUWoV5wnyiRucRtSDs9CgAUU8bsYNbgtAAuCmHdG37
 
 * `AVALANCHE_STRAW_POLL` is included to prevent signing a message that could somehow be replayed on-chain.
 * `timestamp` is included so that Avalanche Community members can update their preference if they change their mind as the ACP evolves.
-* `metadata` is an optional field that can be used by Avalanche Community members to link their vote to a social identity (where they must also post the same message + signature) for maintainers to verify before merging.
+* `metadata` is an optional field that can be used by Avalanche Community members to link their preference to a social identity (where they must also post the same message + signature) for maintainers to verify before merging.
 
 ### ACP Formats and Templates
 
