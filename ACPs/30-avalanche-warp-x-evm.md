@@ -198,16 +198,6 @@ The verification cost of performing a validator set lookup on the P-Chain is cur
 
 [Ongoing work](https://github.com/ava-labs/avalanchego/pull/1611) can parallelize P-Chain validator set lookups and message verification to reduce the impact on block verification latency to be negligible and reduce costs to reflect the additional bandwidth of encoding Avalanche Warp Messages in the transaction.
 
-## Straw Poll
-
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
-
-### Supporters
-* `<message>/<signature>`
-
-### Objectors
-* `<message>/<signature>`
-
 ## Acknowledgements
 
 Avalanche Warp Messaging and this effort to integrate it into the EVM has been a monumental effort. Thanks to all of the contributors who contributed their ideas, feedback, and development to this effort.

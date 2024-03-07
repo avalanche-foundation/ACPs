@@ -41,7 +41,7 @@ Once the author(s) feels confident that an idea has a decent chance of acceptanc
 
 ### Step 3: Build Consensus on [GitHub Discussions](https://github.com/avalanche-foundation/ACPs/discussions/categories/discussion) and Provide an Implementation (if Applicable)
 
-ACPs will be merged by ACP maintainers if the proposal is generally well-formatted and coherent. ACP editors will attempt to merge anything worthy of discussion, regardless of feasibility or complexity, that is not a duplicate or incomplete. After an ACP is merged, an official GitHub Discussion will be opened for the ACP and linked to the proposal for community discussion. It is recommended for author(s) or supportive Avalanche Community members to post an accompanying non-technical overview of their ACP for general consumption in this GitHub Discussion. The ACP should be reviewed and broadly supported before a reference implementation is started, again to avoid wasting the author(s) and the Avalanche Community's time, unless a reference implementation will aid people in studying the ACP. At any point in time, Avalanche Community members can sign a message indicating their support/objection to the ACP in the "Straw Poll".
+ACPs will be merged by ACP maintainers if the proposal is generally well-formatted and coherent. ACP editors will attempt to merge anything worthy of discussion, regardless of feasibility or complexity, that is not a duplicate or incomplete. After an ACP is merged, an official GitHub Discussion will be opened for the ACP and linked to the proposal for community discussion. It is recommended for author(s) or supportive Avalanche Community members to post an accompanying non-technical overview of their ACP for general consumption in this GitHub Discussion. The ACP should be reviewed and broadly supported before a reference implementation is started, again to avoid wasting the author(s) and the Avalanche Community's time, unless a reference implementation will aid people in studying the ACP.
 
 ### Step 4: Mark ACP as `Implementable` via [Pull Request](https://github.com/avalanche-foundation/ACPs/pulls)
 
@@ -64,7 +64,6 @@ Each ACP must have the following parts:
 Each ACP can have the following parts:
 
 * `Open Questions`: Questions that should be resolved before implementation
-* `Straw Poll`: Collection of advocates/objectors of an ACP
 
 Each `Standards Track` ACP must have the following parts:
 
@@ -75,28 +74,6 @@ Each `Best Practices Track` ACP can have the following parts:
 
 * `Backwards Compatibility`: List of backwards incompatible changes required to implement the ACP and their impact on the Avalanche Community
 * `Reference Implementation`: Code, documentation, and telemetry (from a local network) of the ACP change
-
-### ACP "Straw Poll"
-
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). This PR must include a message + signature indicating ownership of a given amount of $AVAX. This action is non-binding and only meant to gauge support of an ACP in the Avalanche Community.
-
-If you wish to do this, please sign the following payload on the [Avalanche Wallet](https://wallet.avax.network/wallet/advanced):
-
-```text
-AVALANCHE_STRAW_POLL|<ACP Number>|<yes/no>|<timestamp (unix time)>|<metadata (optional)>
-```
-
-Here is an example:
-
-```text
-Address: "P-avax12xnpg0ecyvc70xqqf9ellc7kqlxpvtmt30ezzy"
-Message: "AVALANCHE_STRAW_POLL|1|yes|1696288255|x.com/avax/status/<permalink>"
-Signature: "34k8j3w1rxL5wtLCi5AsP93CtjwUWoV5wnyiRucRtSDs9CgAUU8bsYNbgtAAuCmHdG375qa7fimhodxJg2rMxmLfPYrD31E"
-```
-
-* `AVALANCHE_STRAW_POLL` is included to prevent signing a message that could somehow be replayed on-chain.
-* `timestamp` is included so that Avalanche Community members can update their preference if they change their mind as the ACP evolves.
-* `metadata` is an optional field that can be used by Avalanche Community members to link their vote to a social identity (where they must also post the same message + signature) for maintainers to verify before merging.
 
 ### ACP Formats and Templates
 

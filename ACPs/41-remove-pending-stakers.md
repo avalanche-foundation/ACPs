@@ -50,16 +50,6 @@ As mentioned above, the beginning of your staking period is the block acceptance
 
 Delegators can maximize their staking period by setting the same `EndTime` as the Validator they are delegating to.
 
-## Straw Poll
-
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
-
-### Supporters
-* `<message>/<signature>`
-
-### Objectors
-* `<message>/<signature>`
-
 ## Acknowledgements
 
 Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@abi87](https://github.com/abi87) for their feedback on these ideas.

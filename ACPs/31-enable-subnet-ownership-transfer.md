@@ -59,16 +59,6 @@ No security considerations.
 
 No open questions.
 
-## Straw Poll
-
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
-
-### Supporters
-* `<message>/<signature>`
-
-### Objectors
-* `<message>/<signature>`
-
 ## Acknowledgements
 
 Thank you [@friskyfoxdk](https://github.com/friskyfoxdk) for filing an [issue](https://github.com/ava-labs/avalanchego/issues/1946) requesting this feature. Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@abi87](https://github.com/abi87) for their feedback on the reference implementation.
