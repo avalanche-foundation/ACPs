@@ -6,7 +6,7 @@
 
 An Avalanche Community Proposal is a concise document that introduces a change or best practice for adoption on the [Avalanche Network](https://www.avax.com). ACPs should provide clear technical specifications of any proposals and a compelling rationale for their adoption.
 
-ACPs are an open framework for proposing improvements and gathering consensus around changes to the Avalanche Network. ACPs can be proposed by anyone and will be merged into this repository as long as they are well-formatted and coherent. The Avalanche Foundation may, from time to time, recommend specific ACPs that it believes benefit the Avalanche Network/Community but it is ultimately up to members of the Avalanche Network/Community to adopt ACPs they support by running a compatible Avalanche Network Client (ANC), such as [AvalancheGo](https://github.com/ava-labs/avalanchego). The Avalanche Foundation's recommendation is not binding and is made without representations, warranties or guarantees of any kind.
+ACPs are an open framework for proposing improvements and gathering consensus around changes to the Avalanche Network. ACPs can be proposed by anyone and will be merged into this repository as long as they are well-formatted and coherent. Once an overwhelming majority of the Avalanche Network/Community have [signaled their support for an ACP](https://docs.avax.network/nodes/configure/avalanchego-config-flags#avalanche-community-proposals), it may be scheduled for activation on the Avalanche Network by Avalanche Network Clients (ANCs). It is ultimately up to members of the Avalanche Network/Community to adopt ACPs they support by running a compatible ANC, such as [AvalancheGo](https://github.com/ava-labs/avalanchego). 
 
 ## ACP Tracks
 
@@ -15,14 +15,15 @@ There are three kinds of ACP:
 * A `Standards Track` ACP describes a change to the design or function of the Avalanche Network, such as a change to the P2P networking protocol, P-Chain design, Subnet architecture, or any change/addition that affects the interoperability of Avalanche Network Clients (ANCs).
 * A `Best Practices Track` ACP describes a design pattern or common interface that should be used across the Avalanche Network to make it easier to integrate with Avalanche or for Subnets to interoperate with each other. This would include things like proposing a smart contract interface, not proposing a change to how smart contracts are executed.
 * A `Meta Track` ACP describes a change to the ACP process or suggests a new way for the Avalanche Community to collaborate.
+* A `Subnet Track` ACP describes a change to a particular Subnet. This would include things like configuration changes or coordinated Subnet upgrades.
 
 ## ACP Statuses
 
 There are four statuses of an ACP:
 
 * A `Proposed` ACP has been merged into the main branch of the ACP repository. It is actively being discussed by the Avalanche Community and may be modified based on feedback.
-* An `Implementable` ACP is considered "ready for implementation" by the author(s) and will no longer change meaningfully from its current form (which would require a new ACP). ACPs that are `Implementable` may be `Recommended` by the Avalanche Foundation, if the Avalanche Foundation believes that the `Implementable` ACP benefits the Avalanche Network/Community. Such recommendation does not create any obligation on the part of any individual in the Avalanche Community or the Avalanche Foundation.
-* A `Recommended` ACP means that it has been recommended by the Avalanche Foundation; it being understood that neither a recommendation nor a lack of a recommendation creates any obligation or liability on any individual or the Avalanche Foundation. A recommendation by the Avalanche Foundation is merely the opinion of the Avalanche Foundation and is made without any representations, warranties or guarantees of any kind.
+* An `Implementable` ACP is considered "ready for implementation" by the author(s) and will no longer change meaningfully from its current form (which would require a new ACP).
+* An `Activated` ACP has been activated on the Avalanche Network via a coordinated upgrade by the Avalanche Community. Once an ACP is `Activated`, it is locked.
 * A `Stale` ACP has been abandoned by its author(s) because it is not supported by the Avalanche Community or has been replaced with another ACP.
 
 ## ACP Workflow
