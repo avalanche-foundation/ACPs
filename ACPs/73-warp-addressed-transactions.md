@@ -129,6 +129,20 @@ def verify_warp_signature(
 	)
 ```
 
+To illustrate the full flow, we provide a sequence graph showing the issuance of a Warp Addressed Transaction from Account1 on BlockchainA to BlockchainB. Note that there are no restrictions on whether BlockchainA and BlockchainB are the same, different, on the same Subnet, or the Primary Network. They only need to agree on the standard for Warp Addressed Transactions.
+
+To keep the diagram compact, we use the following abbreviations:
+
+* `WAT` - Warp Addressed Transaction
+* `WAS` - Warp Addressed Signature
+
+```mermaid
+flowchart TB
+    A[Account1 on BlockchainA] -->|1. Call Warp with WAT Payload| B[BlockchainA]
+    B -->|2. Accept Account1 Tx and Generate WAS| C[WAS]
+    C -->|3. Issue WAT to BlockchainB| D[BlockchainB]
+```
+
 ## Backwards Compatibility
 
 This proposes a new standard that can be adopted by VMs on a case-by-case basis and an integration on the Avalanche P-Chain.
