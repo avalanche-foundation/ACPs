@@ -139,7 +139,7 @@ To keep the diagram compact, we use the following abbreviations:
 ```mermaid
 flowchart TB
     A[Account1 on BlockchainA] -->|1. Call Warp with WAT Payload| B[BlockchainA]
-    B -->|2. Accept Account1 Tx and Generate WAS| C[WAS]
+    B -->|2. Accept Account1 Tx and Generate WAS| C[Relayer]
     C -->|3. Issue WAT to BlockchainB| D[BlockchainB]
 ```
 
