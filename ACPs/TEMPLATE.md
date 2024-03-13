@@ -3,8 +3,8 @@ ACP: <PR Number>
 Title: <ACP title>
 Author(s): <a list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com>>
 Discussions-To: <GitHub Discussion URL>
-Status: <Proposed, Implementable, Recommended, Stale>
-Track: <Standards, Best Practices, Meta>
+Status: <Proposed, Implementable, Activated, Stale>
+Track: <Standards, Best Practices, Meta, Subnet>
 Replaces (*optional): <ACP number>
 Superseded-By (*optional): <ACP number>
 ```
@@ -42,4 +42,3 @@ Optional section that lists any concerns that should be resolved prior to implem
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
-
