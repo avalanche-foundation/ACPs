@@ -131,16 +131,6 @@ ANCs should respond to this incoming message with a [`PeerList` message](https:/
 
 * To help orient the Avalanche Community around this wide-ranging and likely to be long-running conversation around the relationship between the Primary Network and Subnets, should we come up with a project name to describe the effort? I've been casually referring to all of these things as the _Astra Upgrade Track_ but definitely up for discussion (may be more confusing than it is worth to do this).
 
-## Straw Poll
-
-Anyone can open a PR against an ACP and mark themselves as a supporter (you want an ACP to be adopted) or as an objector (you want the ACP to be rejected). [This PR must include a message + signature indicating ownership of a given amount of $AVAX](https://github.com/avalanche-foundation/ACPs#acp-straw-poll).
-
-### Supporters
-* `<message>/<signature>`
-
-### Objectors
-* `<message>/<signature>`
-
 ## Appendix
 
 A draft of this ACP was posted on in the ["Ideas" Discussion Board](https://github.com/avalanche-foundation/ACPs/discussions/10#discussioncomment-7373486), as suggested by the [ACP README](https://github.com/avalanche-foundation/ACPs#step-1-post-your-idea-to-github-discussions). Feedback on this draft was collected and addressed on both the "Ideas" Discussion Board and on [HackMD](https://hackmd.io/@patrickogrady/100k-subnets#Feedback-to-Draft-Proposal).
