@@ -29,34 +29,50 @@ Further, this standard could be implemented by any VM that wants to enable Warp 
 
 ## Specification
 
-Warp Addresed Transactions would require a new credential type on the P-Chain, which we'll denote as a `WarpAddressedCredential`. The P-Chain currently only uses the [secp256k1fx.Credential](https://github.com/ava-labs/avalanchego/blob/ddf66eaed1659c2caa8531bbda83b360ca85900e/vms/secp256k1fx/credential.go#L17). This credential type is used to authorize all actions on the P-Chain through the following function calls:
+Warp Addressed Transactions utilize an alternative signature/credential scheme, which we'll denote a `WarpAddressedSignature`.
 
-1. VerifySpend (passes through to VerifySpendUTXOs)
-2. VerifySpendUTXOs (passes through to VerifyTransfer on vm.fx on each UTXO)
-3. VerifyPermission (subnet tx verification)
+A `WarpAddressedSignature` includes a valid Warp Signature, networkID, sourceChainID, sourceAddress, and the txHash of the transaction it's authorizing. The transaction itself is assumed to contain replay protection, so that a `destinationChainID` is unnecessary.
 
-Each of these pass eventually perform a type check to ensure that the credential is the expected `secp256k1fx.Credential` type and then call [VerifyCredentials](https://github.com/ava-labs/avalanchego/blob/ddf66eaed1659c2caa8531bbda83b360ca85900e/vms/secp256k1fx/fx.go#L180) to verify the credential matches the authorization on the UTXO itself.
+```go
+Message{
+	UnsignedMessage: UnsignedMessage{
+		NetworkID: networkID,
+		SourceChainID: sourceChainID,
+		Payload: AddressedCall{
+			SourceAddress: sourceAddress,
+			Payload: txHashBytes,
+		},
+	},
+	Signature: warpSignature,
+}
+```
 
-Warp Addressed Transactions will create an alternative implementation of the same Fx interface the P-Chain currently uses: https://github.com/ava-labs/avalanchego/blob/ddf66eaed1659c2caa8531bbda83b360ca85900e/vms/platformvm/fx/fx.go#L20. The new implementation will replace the Credential type check with a switch to determine if the credential should be verified as a `secp256k1.Credential` (verification is identical) or a `WarpAddressedCredential`.
+TODO: re-define this in a python spec
+Verification will perform the following checks:
 
-A reference implementation is provided below for a full example specification.
-
-The verification conditions are modified to handle the assumption that a `WarpAddressedCredential` only authorizes the use of outputs that are controlled by a single address.
-
-The Warp Address
-
-
-The sample implementation uses the ripemd160(sha256(sourceChainID | sourceAddress)) as the corresponding P-Chain address. This is done to ensure compatibility with the existing P-Chain UTXO format, which specifies output addresses as 20 byte values. This is secure assuming there are no hash collisions between secp256k1 derived addresses and Warp Addressed Call derived addresses.
-
-The produced address is already replay protected since it includes the sourceChainID and additionally 
-This enables any P-Chain UTXO to be controlled directly by an account on any chain within the Avalanche Ecosystem
+1. Verify networkID
+2. Verify TxHash matches the attached Tx payload
+3. Verify Address(sourceChainID, SourceAddress) == expectedAddress
+4. Verify Warp signature against ProposerVM wrapper's P-Chain height
 
 
 ## Backwards Compatibility
 
-Adding an alternative signature scheme to the P-Chain changes transaction validity and requires a coordinated network upgrade.
+Previous signature schemes will remain unaffected by these changes. This proposal adds an alternative signature scheme, which requires a coordinated network upgrade to activate on the P-Chain.
+
+Activating Warp Addressed Transactions on another chain requires a separate coordinated network upgrade.
 
 ## Reference Implementation
+
+Here we provide a reference implementation introducing `WarpAddressedSignatures` to the P-Chain's PlatformVM in the form of a `WarpAddressedCredential`. `WarpAddressedCredential` is a direct replacement for the only currently supported signature scheme credential: [secp256k1fx.Credential](https://github.com/ava-labs/avalanchego/blob/ddf66eaed1659c2caa8531bbda83b360ca85900e/vms/secp256k1fx/credential.go#L17).
+
+This credential type is used on the P-Chain through the PlatformVM's [Fx interface](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/fx/fx.go).
+
+Each of these secp256k1fx verification checks performs basic transaction validity checks, type checks on the credential type, and eventually passes through to call [VerifyCredentials](https://github.com/ava-labs/avalanchego/blob/ddf66eaed1659c2caa8531bbda83b360ca85900e/vms/secp256k1fx/fx.go#L180).
+
+This reference implementation assumes that the type checks are changed to allow for an alternative credential type, the remaining transaction validity checks are kept identical, and that it only needs to modify the credential verification.
+
+The credential verification is defined on a new type `WarpAddressedCredential` to authorize the use of any inputs that specify a single address matching the `WarpAddressedCredential`. We assume that deriving an address from a standard `WarpAddressedCredential` is specific to the VM implemenation, and define that address on the P-Chain to be given by ripemd160(sha256(sourceChainID, sourceAddress)). This is chosen to resemble the address derivation from a secp256k1 public key and to maintain the same 20 byte address format currently used on the P-Chain to minimize the necessary changes.
 
 ```go
 // Copyright (C) 2019-2024, Ava Labs, Inc. All rights reserved.
@@ -153,6 +169,12 @@ Warp Addressed Transactions assume that there will never be a hash collision bet
 This change enables a Warp `AddressedCall` payload to authorize an action on the P-Chain. If an existing VM or Subnet has already started using Warp, it's possible that validators have already begun signing valid `AddressedCall` payloads. This warrants calling out, but does not represent a security concern.
 
 P-Chain UTXOs including funds or Subnet Control must be transferred to a Warp Address before an already signed `AddressedCall` payload can authorize any meaningful action on the P-Chain. This means users only need to be aware that they should only transfer P-Chain UTXOs to a Warp Address if the program at that address was designed to correctly handle Warp Addressed Transactions.
+
+## Introduced Terminology
+
+Warp Transaction Signature - a Warp signature used as the signature scheme for an arbitrary transaction payload
+Warp Addressed Transaction - an arbitrary transaction using a Warp Transaction Signature as its signature scheme
+Warp Derived Address - the address derived from a Warp Transaction Signature for which the signature can authorize actions
 
 ## Open Questions
 
