@@ -143,6 +143,8 @@ flowchart TB
     C -->|3. Issue WAT to BlockchainB| D[BlockchainB]
 ```
 
+Note: if the Warp Addressed Transaction can be issued entirely on its own, the relayer can be replaced by sending a cross-chain message over the network to the destination chain.
+
 ## Backwards Compatibility
 
 This proposes a new standard that can be adopted by VMs on a case-by-case basis and an integration on the Avalanche P-Chain.
