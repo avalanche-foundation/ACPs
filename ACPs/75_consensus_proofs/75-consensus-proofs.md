@@ -69,10 +69,10 @@ The `Container` message is used to send a container with its corresponding
 consensus proof.
 
 ```diff
-message Container {
-    bytes container = 1;
-    bytes proof = 2;
-}
++ message Container {
++   bytes container = 1;
++   bytes proof = 2;
++ }
 ```
 
 ## Security Considerations
