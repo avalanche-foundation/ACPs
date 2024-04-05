@@ -7,8 +7,6 @@ Status: Proposed
 Track: Standards
 ```
 
-This is the suggested template for new ACPs.
-
 ## Abstract
 
 Introduces support for a proof of a block’s acceptance in consensus.
