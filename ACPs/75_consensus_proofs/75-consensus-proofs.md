@@ -24,12 +24,15 @@ If many nodes disagree about the current tip of the P-Chain, it can lead to a li
 If ProposerVM blocks were produced with a proof of the P-Chain block to be verified against instead of just its height, verifiers could continue making progress by requesting any block they had not accepted yet from another peer and verifying their corresponding acceptance proofs. If a block’s proof is valid, the blocks can be executed in-order locally to finally verify the proposed subnet block.
 
 ![figure 1](./1.jpg)
+
 Figure 1: A Validator is verifying a subnet’s block `Z` which references an unknown P-Chain block `C` in its block header
 
 ![figure 2](./2.jpg)
+
 Figure 2: A Validator requests the blocks and proofs for `B` and `C` from a peer
 
 ![figure 3](./3.jpg)
+
 Figure 3: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 
 ## Specification
