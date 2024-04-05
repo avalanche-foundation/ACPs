@@ -1,7 +1,7 @@
 ```text
 ACP: 75
 Title: Consensus Proofs
-Author(s): <a list of the author's name(s) and optionally contact info: Joshua Kim
+Author(s): Joshua Kim
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/76
 Status: Proposed
 Track: Standards
