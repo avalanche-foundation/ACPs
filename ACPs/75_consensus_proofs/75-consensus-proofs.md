@@ -60,7 +60,8 @@ field which will supply a set of containers with their corresponding proofs.
 message Ancestors {
     bytes chain_id = 1;
     uint32 request_id = 2;
--   repeated bytes containers = 3;
+-   bytes containers = 3;
++   reserved bytes containers = 3;
 +   repeated Container containers = 4;
 }
 ```
@@ -71,7 +72,7 @@ consensus proof.
 ```diff
 + message Container {
 +   bytes container = 1;
-+   bytes proof = 2;
++   bytes bls_multi_signature = 2;
 + }
 ```
 
