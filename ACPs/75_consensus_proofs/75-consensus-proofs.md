@@ -19,7 +19,9 @@ One key invariant is that nodes cannot verify a block that was produced at a P-C
 
 If many nodes disagree about the current tip of the P-Chain, it can lead to a liveness failure where a subnet is not able to produce any blocks because nodes might have copies of the P-Chain that are out-of-sync with each other. In practice, this almost never happens because nodes produce blocks with a P-Chain height in the past, using a few blocks as a buffer since it’s likely that most nodes would have accepted an old block. This however, relies on an assumption that validators are constantly making progress in consensus to prevent the subnet from potentially stalling. This leaves an open concern where the P-Chain stalling on a node would prevent it from verifying any blocks, leading to a subnet potentially unable to produce blocks if many validators stalled at different heights due to a P-Chain outage.
 
-If ProposerVM blocks were produced with a proof of the P-Chain block to be verified against instead of just its height, verifiers could continue making progress by requesting any block they had not accepted yet from another peer and verifying their corresponding acceptance proofs. If a block’s proof is valid, the blocks can be executed in-order locally to finally verify the proposed subnet block.
+If ProposerVM blocks were produced with a proof of the P-Chain block to be verified against instead of just its height, verifiers could continue making progress by requesting any block they had not accepted yet from another peer and verifying their corresponding acceptance proofs. If a block’s proof is valid, the blocks can be executed in-order locally to finally verify the proposed subnet block. Peers can request blocks without explicitly being required to communicate with a validator and verify them without having to run consensus locally, which requires less connections and load served by validators.
+
+---
 
 Figure 1: A Validator is verifying a subnet’s block `Z` which references an unknown P-Chain block `C` in its block header
 
