@@ -82,8 +82,9 @@ acceptance proof.
 
 Nodes that bootstrap using state sync may not have the entire history of the
 P-Chain and therefore will not be able to provide the entire history for a block
-that is referenced in a block they propose. This would be needed to unblock a node that is attempting to fast-forward their P-Chain, as they require the entire ancestry between their current accepted tip and the block they are attempting to forward to. This is considered to be acceptable as
-nodes will be expected to maintain some minimum of some recent state. An alternative is to make a churn assumption and validate the proposed block's proof with a stale validator set.
+that is referenced in a block that they propose. This would be needed to unblock a node that is attempting to fast-forward their P-Chain, as they require the entire ancestry between their current accepted tip and the block they are attempting to forward to. It is assumed that nodes will have some minimum amount of recent state so that the requester can eventually be unblocked by retrying, as only one node with the requested ancestry is required to unblock the requester.
+
+An alternative is to make a churn assumption and validate the proposed block's proof with a stale validator set to avoid complexity, but this introduces more security concerns.
 
 ## Copyright
 
