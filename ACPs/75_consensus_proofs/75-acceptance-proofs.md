@@ -1,6 +1,6 @@
 ```text
 ACP: 75
-Title: Consensus Proofs
+Title: Acceptance Proofs
 Author(s): Joshua Kim
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/76
 Status: Proposed
@@ -69,7 +69,7 @@ message Ancestors {
 ```
 
 The `Container` message is used to send a container with its corresponding
-consensus proof.
+acceptance proof.
 
 ```diff
 + message Container {
