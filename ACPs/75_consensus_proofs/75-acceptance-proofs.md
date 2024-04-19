@@ -13,7 +13,7 @@ Introduces support for a proof of a block’s acceptance in consensus.
 
 ## Motivation
 
-Subnets use the ProposerVM to determine the block producer for the next block in the chain through soft-leader election. ProposerVM determines the block producer schedule from a randomly shuffled validator set for that subnet at each block height.  Each block proposed by an elected block producer contains the height of the P-Chain parent block it should be verified at, so that other verifying validators can verify that the block was produced at a valid time.
+Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement a soft leader mechanism. The ProposerVM determines the block producer schedule from a randomly shuffled validator set for that subnet at each block height. The ProposerVM wrapper specifies the P-Chain height where it was verified.
 
 One key invariant is that nodes cannot verify a block that was produced at a P-Chain height that they have not heard of yet. Verifiers assume that a block height that is beyond the P-Chain height that they have accepted is invalid because that block does not exist yet from the verifier’s perspective.
 
