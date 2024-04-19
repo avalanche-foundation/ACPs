@@ -46,10 +46,10 @@ to be verified at corresponding to the existing height field.
 
 ```diff
 type BlockHeader struct {
-    PChainHeight uint64
-    Timestamp    time.Time
-    Proposer     ids.NodeID
-+   Proof        []byte
+    PChainHeight    uint64
+    Timestamp       time.Time
+    Proposer        ids.NodeID
++   AcceptanceProof warp.BitSetSignature
   }
 ```
 
@@ -74,7 +74,7 @@ acceptance proof.
 ```diff
 + message Container {
 +   bytes container = 1;
-+   bytes bls_multi_signature = 2;
++   bytes warp_signature = 2;
 + }
 ```
 
