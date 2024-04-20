@@ -41,8 +41,8 @@ Note: The following is pseudocode and is provided only as visual aid.
 
 ### ProposerVM
 
-The block header will require an update to include a Proof of the parent block
-to be verified at corresponding to the existing height field.
+The block header will include a proof-of-acceptance of the parent block which is
+a [Warp signature](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/README.md#awm-serialization) of the parent block id.
 
 ```diff
 type BlockHeader struct {
