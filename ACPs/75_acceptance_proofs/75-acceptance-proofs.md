@@ -173,6 +173,10 @@ that is referenced in a block that they propose. This would be needed to unblock
 
 An alternative is to make a churn assumption and validate the proposed block's proof with a stale validator set to avoid complexity, but this introduces more security concerns.
 
+## Open Questions
+
+* How frequently should signatures be generated?
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
