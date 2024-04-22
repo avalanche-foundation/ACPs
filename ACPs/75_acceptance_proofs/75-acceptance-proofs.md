@@ -47,7 +47,7 @@ Figure 4: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 
 ## Specification
 
-Note: The following is pseudocode and is provided only as visual aid.
+Note: The following is pseudocode.
 
 ### ProposerVM
 
@@ -65,8 +65,7 @@ type BlockHeader struct {
 
 ### P2P
 
-The `Ancestors` message is replaced with the `containers`
-field which will supply a set of containers with their corresponding proofs.
+#### Bootstrap
 
 ```diff
 message Ancestors {
@@ -78,8 +77,8 @@ message Ancestors {
 }
 ```
 
-The `Container` message is used to send a container with its corresponding
-acceptance proof.
+The `Ancestors` message is replaced with the `containers`
+field which will supply a set of containers with their corresponding proofs.
 
 ```diff
 + message Container {
@@ -87,6 +86,84 @@ acceptance proof.
 +   bytes warp_signature = 2;
 + }
 ```
+
+The `Container` message is used to send a container with its corresponding
+acceptance proof.
+
+#### Aggregation
+
+```diff
++ message GetAcceptanceSignatureRequest {
++   bytes block_id = 1;
++ }
+```
+
+The `GetAcceptanceSignatureRequest` message is sent to a peer to request their signature for a given block id.
+
+```diff
++ message GetAcceptanceSignatureResponse {
++   bytes bls_signature = 1;
++ }
+```
+
+`GetAcceptanceSignatureResponse` is sent to a peer as a response for `GetAcceptanceSignatureRequest`. `bls_signature` is the peer’s signature using their registered primary network BLS staking key over the requested `block_id`. An empty `bls_signature` field indicates that the block was not accepted yet.
+
+#### Gossip
+```diff
++ message GetAcceptanceProofRequest {
++   bytes block_id = 1;
++ }
+```
+
+`GetAcceptanceProofRequest` requests an acceptance proof for `block_id` from a peer.
+
+```diff
++ message GetAcceptanceProofResponse {
++   bytes acceptance_proof = 1;
++ }
+```
+
+`GetAcceptanceProofResponse` is sent in response to a `GetAcceptanceProofRequest` message. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the requested block id. An empty `acceptance_proof` field indicates that the peer does not have the requested acceptance proof.
+
+```diff
++ message AcceptanceProofGossip {
++   bytes acceptance_proof = 1;
++ }
+```
+
+`AcceptanceProofGossip` is sent once an aggregate signature has been generated. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the corresponding block id. `acceptance_proof` must be non-empty.
+
+### Signature Aggregation
+
+#### Summary
+
+The signature aggregation protocol uses soft-leader election to elect a signature aggregator, and uses a push-pull gossip protocol to disseminate the aggregated signature.
+
+#### Arguments
+
+`h`: Block height
+
+#### Parameters
+
+`d`: Duration of each leader slot: `5 seconds`
+`m`: maximum amount of leader slots: `6`
+`f` : Safety threshold (proportion of stake): `2/3`
+`g`: Initial push gossip size: `20`
+
+##### Aggregation
+
+1. Sort validators at `h` in ascending order by their node ids.
+2. Use `h` as a random seed for a MT19937_64 pseudo-random number generator.
+3. `m` validators are pseudo-randomly sampled from the sorted validator set, using the pseudo-random number generator to create the leader schedule.
+4. Each validator at index `i` in the leader schedule must wait until `i * d` time elapses before it is elected a leader.
+5. After `m * d` time elapses, all nodes are elected to become leaders.
+
+When elected, a leader aggregates messages by sending out `GetAcceptanceSignatureRequest` messages to request a signature for block `h` and aggregating the responses. Once a proportion of `f` signers have signed the block the proof is complete and the leader sends an `AcceptanceProofGossip` message to `g` arbitrary validators and completes aggregation.
+
+##### Gossip
+
+Nodes request acceptance proofs for `h` by periodically sending `GetAcceptanceProofRequests` to random validators. Upon receiving a `GetAcceptanceProofResponse`, the signature is verified and accepted if it satisfies `f`.
+
 
 ## Security Considerations
 
