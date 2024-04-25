@@ -109,6 +109,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[41](./ACPs/41-remove-pending-stakers.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[77](./ACPs/77-reinventing-subnets.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 
 ## Contributing
 
