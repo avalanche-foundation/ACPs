@@ -89,8 +89,8 @@ type RegisterSubnetValidatorTx struct {
     // owner after it is removed from the validator set.
     ChangeOwner fx.Owner `json:"changeOwner"`
     // Warp message should include:
-    //   - NodeID (must be Ed25519 NodeID)
     //   - Subnet
+    //   - NodeID (must be Ed25519 NodeID)
     //   - Weight of the validator
     //   - Timestamp
     //   - Ed25519 Signature
