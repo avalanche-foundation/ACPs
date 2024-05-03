@@ -2,7 +2,7 @@
 ACP: 75
 Title: Acceptance Proofs
 Author(s): Joshua Kim
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/76
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/82
 Status: Proposed
 Track: Standards
 ```
