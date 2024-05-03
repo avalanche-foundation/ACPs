@@ -78,11 +78,11 @@ Each `Best Practices Track` ACP can have the following parts:
 
 ### ACP Formats and Templates
 
-ACPs should be written in [markdown](https://daringfireball.net/projects/markdown/syntax) format. Please see the [ACP template](./ACPs/TEMPLATE.md) for an example of the correct layout.
+Each ACP is allocated a unique subdirectory in the `ACPs` directory. The name of this subdirectory must be of the form `N-T` where `N` is the ACP number and `T` is the ACP title with any spaces replaced by hyphens. ACPs must be written in [markdown](https://daringfireball.net/projects/markdown/syntax) format and stored at `ACPs/N-T/README.md`. Please see the [ACP template](./ACPs/TEMPLATE.md) for an example of the correct layout.
 
 ### Auxiliary Files
 
-ACPs may include auxiliary files such as diagrams. Image files should be included in a subdirectory for that ACP. Auxiliary files must be named `ACP-XXXX-Y.ext`, where "XXXX" is the ACP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension (e.g. "png").
+ACPs may include auxiliary files such as diagrams or code snippets. Such files should be stored in the ACP's subdirectory (`ACPs/N-T/*`). There is no required naming convention for auxiliary files.
 
 ### Waived Copyright
 
@@ -100,16 +100,17 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 
 | Number | Title |  Author(s) | Type |
 |:-------|:------|:-------|:-----|
-|[13](./ACPs/13-subnet-only-validators.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
-|[20](./ACPs/20-ed25519-p2p.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[23](./ACPs/23-p-chain-native-transfers.md)|P-Chain Native Transfers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[24](./ACPs/24-shanghai-eips.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
-|[25](./ACPs/25-vm-application-errors.md)|Virtual Machine Application Errors|Joshua Kim (https://github.com/joshua-kim)|Standards|
-|[30](./ACPs/30-avalanche-warp-x-evm.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
-|[31](./ACPs/31-enable-subnet-ownership-transfer.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[41](./ACPs/41-remove-pending-stakers.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[77](./ACPs/77-reinventing-subnets.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[13](./ACPs/13-subnet-only-validators/README.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
+|[20](./ACPs/20-ed25519-p2p/README.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[23](./ACPs/23-p-chain-native-transfers/README.md)|P-Chain Native Transfers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[24](./ACPs/24-shanghai-eips/README.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
+|[25](./ACPs/25-vm-application-errors/README.md)|Virtual Machine Application Errors|Joshua Kim (https://github.com/joshua-kim)|Standards|
+|[30](./ACPs/30-avalanche-warp-x-evm/README.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
+|[31](./ACPs/31-enable-subnet-ownership-transfer/README.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[41](./ACPs/41-remove-pending-stakers/README.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
+|[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim (https://github.com/joshua-kim)|Standards|
+|[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 
 ## Contributing
 

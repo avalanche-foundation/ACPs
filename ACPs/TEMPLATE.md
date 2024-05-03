@@ -29,7 +29,7 @@ All ACPs that introduce backwards incompatibilities must include a section descr
 
 ## Reference Implementation
 
-A reference/example implementation that people can use to assist in understanding or implementing this specification. If the implementation is too large to reasonably be included inline, then consider adding it as one or more files in `./ACP-####-implementation/*` or linking to a PR on an external repository.
+A reference/example implementation that people can use to assist in understanding or implementing this specification. If the implementation is too large to reasonably be included inline, then consider adding it to the ACP subdirectory or linking to a PR in an external repository.
 
 ## Security Considerations
 
