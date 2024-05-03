@@ -135,7 +135,7 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 ### Signature Aggregation
 
-TODO: An aggregation protocol must be included in this ACP prior to being `Implementable`
+TODO: An aggregation protocol must be included in this ACP prior to being `Implementable`.
 
 ## Security Considerations
 
