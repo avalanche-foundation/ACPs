@@ -11,7 +11,7 @@ Track: Standards
 
 Introduce a dynamic and multidimensional fees scheme for both P-chain and X-chain.  
 A dynamic fee scheme helps to preserve the stability of the chains as it provides an economic incentive for users to hold their transactions issuance in times of high load.  
-A multidimensional fee scheme ensures that different resources consumed during transaction processing, like bandwidth, chain state occupation and cpu needed to verify cryptographic signatures, are metered and priced differently, according to their different capacities. When network resources are independently metered, they can be granularly priced and thus optimally utilized by the network participants.
+A multidimensional fee scheme ensures that different resources consumed to process transactions, like bandwidth, chain state occupation and cpu to verify cryptographic signatures, are metered and priced differently, according to their different capacities. When network resources are independently metered, they can be granularly priced and thus optimally utilized by the network participants.
 
 ## Motivation
 
@@ -22,7 +22,7 @@ Unlike the C-chain, however, we propose a multidimensional fee scheme with expon
 
 ## Specification
 
-We introduce the multidimensional scheme first and then we should how fees can be updated by the dynamic fee components. Finally we list the new block verification rules, valid once the scheme activates.  
+We introduce the multidimensional scheme first and then we show how fees can be updated by the dynamic fee components. Finally we list the new block verification rules, valid once the scheme activates.  
 
 ### Multidimensional scheme components
 
@@ -56,11 +56,12 @@ We wish to maintain a *target complexity rate* $T_i$, i.e. we would want to proc
 
 The fee rates $r_{i,t+\Delta T}$ applied to the incoming blocks are defined with the following *update formula*:
 
-$$r_{i,t+\Delta T} = max\{ r^{min}_i, e^{k_i \frac{B_i-T_i \times \Delta T}{T_i \times \Delta T}} \}$$
+$$r_{i,t+\Delta T} = max \bigl( r^{min}_i, e^{k_i \frac{B_i-T_i \times \Delta T}{T_i \times \Delta T}} \bigr)$$
 
 where $r^{min}_i$ and $k_i$ are the minimal fee rate allowed and the update constants along dimension $i$ respectivelly.
 
-The update formula guarantees that fee rates increase if parent block is complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease if parent block is less complex and if blocks are produced less frequently.
+The update formula guarantees that fee rates increase if parent block is complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease if parent block is less complex and if blocks are produced less frequently. We introduce a minimal, non-zero fee rate, to avoid fee rates reaching zero, which would cause any subsequent fee to be zero as well.  
+The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to a [section below](#how-will-the-update-formula-parameters-be-tuned).
 
 ## Block verification rules
 
