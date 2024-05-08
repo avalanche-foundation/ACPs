@@ -72,8 +72,7 @@ Upon activation of the dynamic multidimensional fees scheme we modify block proc
 
 ## Backwards Compatibility
 
-Modifying the fee scheme for P-chain and X-chain requires a mandatory upgrade for activation.  
-Wallet implementations must be modified to handle the new fee scheme to be able to properly finance transactions once the upgrade is activated.
+Modifying the fee scheme for P-chain and X-chain requires a mandatory upgrade for activation. Moreover wallets must be modified to handle the new fee scheme to be able to properly finance transactions once the upgrade is activated.
 
 ## Reference Implementation
 
@@ -91,7 +90,7 @@ Note finally that the exponential fee update mechanism detailed above is [proven
 
 ### How will the wallets estimate the fees?
 
-AvalancheGo nodes will provide new APIs exposing the current and expected fee rates, as they are likely to change block by block. Wallets can then use the fees rates to select UTXOs to pay the transaction fees. Moreover Avalanchego implementation proposed above offers a fees.Calculator struct that can be reused by wallets and downstreams to evaluate calculate fees
+AvalancheGo nodes will provide new APIs exposing the current and expected fee rates, as they are likely to change block by block. Wallets can then use the fees rates to select UTXOs to pay the transaction fees. Moreover Avalanchego implementation proposed above offers a `fees.Calculator` struct that can be reused by wallets and downstreams to evaluate calculate fees.
 
 ### How will wallets be able to re-issue Txs at a higher fee?
 
@@ -127,7 +126,7 @@ A principled way to set max block complexity may be the following:
 
 ## Acknowledgements
 
-Thanks to @StephenButtolph and @patrick-ogrady for their feedback on these ideas.
+Thanks to @StephenButtolph @patrick-ogrady and @dhrubabasu for their feedback on these ideas.
 
 ## Copyright
 
