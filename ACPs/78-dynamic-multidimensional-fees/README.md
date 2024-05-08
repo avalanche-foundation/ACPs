@@ -61,7 +61,7 @@ $$r_{i,t+\Delta T} = max \bigl( r^{min}_i, e^{k_i \frac{B_i-T_i \times \Delta T}
 where $r^{min}_i$ and $k_i$ are the minimal fee rate allowed and the update constants along dimension $i$ respectivelly.
 
 The update formula guarantees that fee rates increase if parent block is complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease if parent block is less complex and if blocks are produced less frequently. We introduce a minimal, non-zero fee rate, to avoid fee rates reaching zero, which would cause any subsequent fee to be zero as well.  
-The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to a [section below](#how-will-the-update-formula-parameters-be-tuned).
+The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to the [implementation section](#tuning-the-update-formula).
 
 ## Block verification rules
 
@@ -81,6 +81,43 @@ Implementation is splitted across multiple PRs.
 - P-chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2707>
 - X-chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2708>
 
+A very important implementation step is tuning the update formula parameters for each chain and each fee dimension. We show here the principles we followed for tuning and a simulation based on historical data.
+
+### Tuning the update formula
+
+The basic ideais to measure the complexity of blocks already accepted and derive the parameters from it. You can find the historical data in [this repo](https://github.com/abi87/complexities).  
+To simplify the exposition I am purposefully ignoring chain specifities (like P-chain proposal blocks). We can account for chain specificities while processing the historical data. Here's the principles:
+
+- **Target block complexity rate**: calculate the distribution of block complexity and pick a high enough quantile.
+- **Max block complexity**: this is probably the trickiest parameter to set.
+Historically we had [pretty big transactions](https://subnets.avax.network/p-chain/tx/27pjHPRCvd3zaoQUYMesqtkVfZ188uP93zetNSqk3kSH1WjED1) (more than $1.000$ referenced utxos). Setting a max block complexity so high that these big transactions are allowed is akin to setting no complexity cap.
+On the other side, we still want to allow, even encourage, utxos consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
+A principled way to set max block complexity may be the following:
+  - calculate the target block complexity rate (see previous point)
+  - calculate the median time elapsed among consecutive blocks
+  - The product of these two quantities should gives us something like a target block complexity.
+  - Set the max block complexity to say $\times 50$ the target value.
+- **Update coefficient**: this is the $k_i$ parameter in the exponential fee update. I suggest we size it as follows:
+  - Find the largest historical peak, i.e. the sequence of consecutive blocks which contained the most complexity in the shortest period of time
+  - Tune $k_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milli Avaxs we normally pay under stable network condition up to tens of Avax.
+- **Initial fee rates** : this are the rate to be used as soon as dynamic fees activate.
+ We could size them so that transactions fees won't change very much with respect to currently fixes values.
+ Note that we do currently support zero fees transactions, which are not allowed a dynamic fees world.  Zero fees transaction would immediately see the largest increase when dynamic fees kick in. Still we could make the change as small as possible
+- **Minimal fee rates** :  these are required since we cannot have zero fee rates in our dynamic fees proposal.
+  We update fee rates via a multiplicative process so as soon as a fee rate is zero all sequent fee rates would be zero.
+  We could set minimal fee rates to equal to initial fee rates or to a fraction of them.
+
+We simulate below how the update formula would behave on an peak period from Avalanche mainnet.
+
+<p align="center">
+  <img src=./complexities.png />
+  <img src=./fee.png />
+</p>
+
+Figure 1 shows a peak period, starting with block [wqKJcvEv86TBpmJY2pAY7X65hzqJr3VnHriGh4oiAktWx5qT1](https://subnets.avax.network/p-chain/block/wqKJcvEv86TBpmJY2pAY7X65hzqJr3VnHriGh4oiAktWx5qT1) and going for roughly 30 blocks. We only show `Bandwidth` for clarity, but other fees dimensions have similar behaviour.
+The network load is much larger than target and sustained.  
+Figure 2 show the fee dynamic in response to the peak: fees scale up from a few milliAvax up to around 25 Avax. Moreover as soon as the peak is over, and complexity goes back to the target value, fees are reduced very rapidly.
+
 ## Security Considerations
 
 The new fee scheme is expected to help network stability as it offers economic incentives to users to hold transactions issuance in times of high load. While fees are expected to remain generally low when the system is not loaded, a sudden load increase, with fuller blocks, would push the dynamic fees algo to increase fee rates. The increase is expected to continue until the load is reduced. Load reduction happens by both dropping unconfirmed transactions whose fee-rate is not sufficient anymore and by pushing users that optimize their transactions costs to delay transaction issuance until the fee rate goes down to an acceptable level.  
@@ -99,30 +136,6 @@ Wallets should be able to simply re-issue the transaction since current Avalanch
 ### How does priority fees guarantee a faster block inclusion?
 
 AvalancheGo mempool will be restructured to order transactions by priority fees. Transactions paying priority fees will be selected for block inclusion first, without violating any spend dependency.
-
-### How will the update formula parameters be tuned?
-
-The basic idea is to measure the complexity of blocks already accepted and derive the parameters from it. You can find the historical data in [this repo](https://github.com/abi87/complexities).  
-To simplify the exposition I am purposefully ignoring chain specifities (like P-chain proposal blocks). We can account for chain specificities while processing the historical data.
-
-- **Target block complexity rate**: consider the median block complexity and stretch in up say `20%`.
-- **Max block complexity**: this is probably the trickiest parameter to set.
-Historically we had [pretty big transactions](https://subnets.avax.network/p-chain/tx/27pjHPRCvd3zaoQUYMesqtkVfZ188uP93zetNSqk3kSH1WjED1) (more than $1.000$ referenced utxos). Setting a max block complexity so high that these big transactions are allowed is akin to setting no complexity cap.
-On the other side, we still want to allow, even encourage, utxos consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
-A principled way to set max block complexity may be the following:
-  - come up with the target block complexity rate (see previous point)
-  - come up with the median time elapsed among consecutive blocks
-  - The product of these two quantities should gives us something like a median block complexity.
-  - Set the max block complexity to $\times 10$ or $\times 20$ that median value.
-- **Update coefficient**: this is the $k_i$ parameter in the exponential fee update. I suggest we size it as follows:
-  - Find the largest historical peak, i.e. the sequence of consecutive blocks which contained the most complexity in the shortest period of time
-  - Tune $k_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This means pushing fees from the normal milli Avax up to tens of Avax.
-- **Initial fee rates** : this are the rate to be used as soon as dynamic fees activate.
- We could size them so that transactions fees won't change very much with respect to currently fixes values.
- Note that we do currently support zero fees transactions, which are not allowed a dynamic fees world.  Zero fees transaction would immediately see the largest increase when dynamic fees kick in. Still we could make the change as small as possible
-- **Minimal fee rates** :  these are required since we cannot have zero fee rates in our dynamic fees proposal.
-  We update fee rates via a multiplicative process so as soon as a fee rate is zero all sequent fee rates would be zero.
-  We could set minimal fee rates to equal to initial fee rates or to a fraction of them.
 
 ## Acknowledgements
 
