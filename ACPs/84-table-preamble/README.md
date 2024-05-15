@@ -2,7 +2,7 @@
 ACP: 84
 Title: Table Preamble for ACPs
 Author(s): Gauthier Leonard <https://github.com/Nuttymoon>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/85
+Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
 Status: Proposed
 Track: Meta
 ```
