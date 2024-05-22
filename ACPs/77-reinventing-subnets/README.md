@@ -102,7 +102,7 @@ type RegisterSubnetValidatorTx struct {
     //   - SubnetID
     //   - NodeID (must be Ed25519 NodeID)
     //   - Weight of the validator
-    //   - Expiry Time
+    //   - Expiry
     //   - Ed25519 Signature over "[subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]"
     //   - BLS multisig over the above payload
     Message warp.Message `json:"message"`
@@ -163,7 +163,7 @@ The `Message` field in the above transaction must be an Avalanche Warp Message u
 ```
 
 - `subnetID`, `nodeID`, and `weight` are for the Subnet Validator being modified
-- `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction. The P-Chain will store the largest `nonce` that has been used to modify the `nodeID`'s weight. The `nonce` is not required to be incremented by `1` with each successive validator weight update. If the `nonce` is equal to MaxUint64, `weight` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in the future.
+- `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction. The P-Chain will store the largest `nonce` that has been used to modify the `nodeID`'s weight on `subnetID`. The `nonce` is not required to be incremented by `1` with each successive validator weight update. If the `nonce` is equal to MaxUint64, the transaction will only be considered valid if `weight` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in the future.
 
 #### ExitValidatorSetTx
 
@@ -220,7 +220,8 @@ A `typeID` for distinguishing between the different payload types on the P-Chain
                       +-------------------+
 ```
 
-- `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to modify the `weight` of the `nodeID` on `subnetID`. For replay protection, the P-Chain will store used `messageID`s (hash of the entire Avalanche Warp Message). To prevent the P-Chain from having to store an unbounded number of `messageID`s, the `expiry` is required to be no longer than 48 hours in the future of the time the transaction is issued on the P-Chain.
+- `subnetID` is the Subnet that is being modified
+- `chainID` and `address` is the location of the new validator manager for `subnetID`
 
 #### IncreaseBalanceTx
 
