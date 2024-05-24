@@ -356,8 +356,3 @@ Special thanks to [@StephenButtolph](https://github.com/StephenButtolph), [@aaro
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
-
-
-## Notes
-
-- Make sure time can't be increased if people can be evicted.
