@@ -341,7 +341,7 @@ This ACP significantly reduces the cost of becoming a Subnet Validator. This can
 
 With the additional sovereignty Subnets gain from the P-Chain, Subnet staking tokens are no longer locked on the P-Chain for Permissionless Subnets. This poses a new security consideration for Subnet Validators: Malicious Subnets can choose to remove validators at will and take any funds that the Subnet Validator has on the Subnet. The P-Chain only provides the guarantee that Subnet Validators can retrieve the remaining $AVAX Balance for their Validator via an `ExitValidatorSetTx`. Any assets on the Subnet is entirely under the purview of the Subnet. The onus is now on Subnet Validators to vet the Subnet's security.
 
-With a long window of expiry (48 hours) for the warp message in `RegisterSubnetValidatorTx`, transaction spam of these transactions could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
+With a long window of expiry (48 hours) for the warp message in `RegisterSubnetValidatorTx`, spam of Subnet Validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
 
 ## Open Questions
 
@@ -356,3 +356,8 @@ Special thanks to [@StephenButtolph](https://github.com/StephenButtolph), [@aaro
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+
+## Notes
+
+- Make sure time can't be increased if people can be evicted.
