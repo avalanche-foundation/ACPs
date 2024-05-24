@@ -72,7 +72,7 @@ To provide increased optionality over Subnet Validator requirements, the P-Chain
 
 - `subnetID`, `nodeID`, and `weight` are for the Subnet Validator being added
 - `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`. For replay protection, the P-Chain will store used `messageID`s (hash of the entire Avalanche Warp Message). To prevent the P-Chain from having to store an unbounded number of `messageID`s, the `expiry` is required to be no longer than 48 hours in the future of the time the transaction is issued on the P-Chain. After `RegisterSubnetValidatorTx` is accepted, the P-Chain state will store a `minNonce` of `0` corresponding to the warp `messageID`. The `minNonce` will be used to validate the `SetSubnetValidatorWeightTx` below.
-- `signature` is the raw bytes of the Ed25519 signature over the concatenated bytes of `[subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]`. This signature must correspond to the Ed25519 public key that is used for the `nodeID`. This approach prevents NodeIDs from being unwillingly added to Subnets. `balance` is the minimum initial $AVAX balance that must be attached to the validator serialized as a uint64. The `signature` field will be validated by the P-Chain in Step 2. A Subnet may choose to validate that the `signature` field is well-formed but it is not required.
+- `signature` is the raw bytes of the Ed25519 signature over the concatenated bytes of `[subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]`. This signature must correspond to the Ed25519 public key that is used for the `nodeID`. This approach prevents NodeIDs from being unwillingly added to Subnets. `balance` is the minimum initial $nAVAX balance that must be attached to the validator serialized as a uint64. The `signature` field will be validated by the P-Chain in Step 2. A Subnet may choose to validate that the `signature` field is well-formed but it is not required.
 
 Subnets are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
@@ -115,13 +115,11 @@ When any validator is removed from the set (whether forcefully or per the valida
 
 This transaction is, by design, not required to be submitted by the validator themselves. With the Ed25519 signature, the validator guarantees that they can only be added to the validator set if `Signer` corresponds to the `blsPublicKey` and `Balance` >= `balance`. The `RegisterSubnetValidatorTx` is considered invalid if those two properties are not satisfied.
 
-When the `RegisterSubnetValidatorTx` transaction is issued, `Balance` (but not `balance`) is required to cover two weeks worth of the continuous fee based on the market price at time of registry. This matches the Primary Network's `MinStakeDuration`. Subnets are not required to have a `MinStakeDuration` of two weeks and can remove a validator at any time.
-
 Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0` or `ExitValidatorTx` is issued.
 
 #### SetSubnetValidatorWeightTx
 
-`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. For this transaction to be valid, 67% of the current Subnet Validator weight must sign the warp message included in `Message`. The fee to pay for this transaction is taken from the `Balance` of the Subnet Validator being modified. This enables Subnet Validators to automatically broadcast this transaction to the P-Chain once the multisig has sufficient participation. Applications of this transaction could include:
+`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. For this transaction to be valid, 67% of the current Subnet Validator weight must sign the warp message included in `Message`. Applications of this transaction could include:
 
 - Increase the voting weight of a Subnet Validator if a delegation is made on the Subnet
 - Increase the voting weight of a Subnet Validator if the stake amount is increased (by staking rewards for example)
@@ -130,15 +128,11 @@ Note: There is no `EndTime` specified in this transaction. Subnet Validators are
 Since there are no `EndTime`s enforced by the P-Chain, Subnets must use this transaction to set an expired validator's weight to `0`. When a validator's weight is set to `0`, they will be removed from the validator set. After the transaction is accepted, any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `ChangeOwner` defined in the `RegisterSubnetValidatorTx`.
 
 ```golang
-// Fee for this transaction will be deducted from the [Balance] of the validator.
 type SetSubnetValidatorWeightTx struct {
-    // ID of the network this chain lives on
-    NetworkID uint32 `json:"networkID"`
-    // ID of the chain on which this transaction exists (prevents replay attacks)
-    BlockchainID ids.ID `json:"blockchainID"`
+    // Metadata, inputs and outputs
+    BaseTx
     // Warp message should include:
-    //   - SubnetID of the validator
-    //   - NodeID of the validator
+    //   - MessageID corresponding to the warp message in the RegisterSubnetValidatorTx that added the validator (SHA256)
     //   - Weight of the validator
     //   - Nonce
     //   - BLS multisig over the above payload
@@ -149,21 +143,19 @@ type SetSubnetValidatorWeightTx struct {
 The `Message` field in the above transaction must be an Avalanche Warp Message using the `AddressedCall` format with the below payload. A `typeID` for distinguishing between the different payload types on the P-Chain must be included prior to this ACP being considered "Implementable".
 
 ```text
-+----------+----------+----------+
-| subnetID : [32]byte | 32 bytes |
-+----------+----------+----------+
-|   nodeID : [32]byte | 32 bytes |
-+----------+----------+----------+
-|   weight :   uint64 |  8 bytes |
-+----------+----------+----------+
-|    nonce :   uint64 |  8 bytes |
-+----------+----------+----------+
-                      | 80 bytes |
-                      +----------+
++-----------+----------+----------+
+| messageID : [32]byte | 32 bytes |
++-----------+----------+----------+
+|    weight :   uint64 |  8 bytes |
++-----------+----------+----------+
+|     nonce :   uint64 |  8 bytes |
++-----------+----------+----------+
+                       | 48 bytes |
+                       +----------+
 ```
 
-- `subnetID`, `nodeID`, and `weight` are for the Subnet Validator being modified
-- `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction. The P-Chain state will store a `minNonce` associated with the warp `messageID` used in `RegisterSubnetValidatorTx` above. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` was set to `0`. `nonce` must satisfy `nonce >= minNonce` for `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a future transaction. When a Subnet Validator is removed from the active set, the `minNonce` and `messageID` will be removed from the P-Chain state.
+- `messageID` is the sha256 hash of the warp message in the `RegisterSubnetValidatorTx` that registered the Subnet Validator
+- `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction. The P-Chain state will store a `minNonce` associated with `messageID`. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` was set to `0` for `messageID`. `nonce` must satisfy `nonce >= minNonce` for `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a future transaction. When a Subnet Validator is removed from the active set (`weight == 0`), the `minNonce` and `messageID` will be removed from the P-Chain state. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`.
 
 #### ExitValidatorSetTx
 
