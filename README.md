@@ -111,7 +111,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim (https://github.com/joshua-kim)|Standards|
 |[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo|Standards|
+|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo  (https://github.com/abi87)|Standards|
 |[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard (https://github.com/Nuttymoon)|Meta|
 
 ## Contributing
