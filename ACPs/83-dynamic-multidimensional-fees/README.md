@@ -1,7 +1,7 @@
 ```text
 ACP: 83
 Title: Dynamic multidimensional fees for P-chain and X-chain
-Author(s): Alberto Benegiamo
+Author(s): Alberto Benegiamo <https://github.com/abi87>
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/89
 Status: Proposed
 Track: Standards
@@ -10,15 +10,21 @@ Track: Standards
 ## Abstract
 
 Introduce a dynamic and multidimensional fees scheme for both P-chain and X-chain.  
+
 A dynamic fee scheme helps to preserve the stability of the chains as it provides an economic incentive for users to hold their transactions issuance in times of high load.  
+
 A multidimensional fee scheme ensures that different resources consumed to process transactions, like bandwidth, chain state occupation and cpu to verify cryptographic signatures, are metered and priced differently, according to their different capacities. When network resources are independently metered, they can be granularly priced and thus optimally utilized by the network participants.
 
 ## Motivation
 
-P-chain and X-chain fees have currently fixed values and in some cases they are zero.  
+P-chain and X-chain fees have currently fixed values and in some cases they are zero.
+
 This makes transaction issuance very predictable but it does not help preserving stability of the chains in high load situations. In fact, users do not have any economic incentive to delay their transaction issuances when chains are loaded, thus contributing to sustaining the load.  
+
 The C-chain is the Primary Network chain with the heaviest traffic, and it already has a dynamic fees scheme. We should introduce a dynamic fees scheme for P-chain and X-chain as well to improve Primary Network stability in anticipation of an increase in the network activity.  
+
 Unlike the C-chain, however, we propose a multidimensional fee scheme with exponential updates. A multidimensional fee scheme with optional priority fees is already in use in our [HyperSDK](https://github.com/ava-labs/hypersdk) and its efficiency is backed by [academic research](https://arxiv.org/abs/2208.07919). We propose to adopt the same scheme for the P-chain and X-chain with a single change: the use of an exponential update scheme which is proven to have nicer stability properties than the scheme currently used by the HyperSDK.
+
 Finally we will split the fees into two parts: there will be a `base fee`, calculated by the network and updated block by block, which must be paid by transactions to be included in a block. Moreover there will be an optional `priority fee` to be paid on top of the `base fee` which may be included by the transaction issuer to speed up inclusion.
 
 ## Specification
@@ -44,6 +50,7 @@ $$base \  fee = \sum_{i=0}^3 r_i \times u_i$$
 ### Dynamic scheme components
 
 Fee rates are updated in time, to allow a fee increase when network is getting congested. Each new block is a potential source of congestion, as its transactions carry complexity that each validator must process to verify and eventually accept the block. The more complexity carries a block, and the more rapidly blocks are produced, the higher the congestion.  
+
 We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly).
 
 Suppose that a block $B$ is the current chain tip. $B$ has the following features:
