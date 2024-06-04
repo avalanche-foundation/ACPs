@@ -31,11 +31,11 @@ We introduce the multidimensional scheme first and then how to apply the dynamic
 
 ### Multidimensional scheme components
 
-We define four fee dimensions, `Bandwidth`, `DBReads`, `DBWrites`, `Compute`, to describe transactions complexity. In more details:
+We define four fee dimensions, `Bandwidth`, `Reads`, `Writes`, `Compute`, to describe transactions complexity. In more details:
 
 - `Bandwidth` measures the transaction size in bytes, as encoded by the AvalancheGo codec. Byte length is a proxy for the network resources needed to disseminate the transaction.
-- `DBReads` measures the number of DB reads needed to verify the transactions. DB reads include UTXOs reads and any other state quantity relevant for the specific transaction.
-- `DBWrites` measures the number of DB writes following the transaction verification. DB writes include UTXOs generated as outputs of the transactions and any other state quantity relevant for the specific transaction.
+- `Reads` measures the number of DB reads needed to verify the transactions. DB reads include UTXOs reads and any other state quantity relevant for the specific transaction.
+- `Writes` measures the number of DB writes following the transaction verification. DB writes include UTXOs generated as outputs of the transactions and any other state quantity relevant for the specific transaction.
 - `Compute` measures the number of signatures to be verified, including UTXOs ones and those related to authorization of specific operations.
 
 For each fee dimension $i$, we define:
