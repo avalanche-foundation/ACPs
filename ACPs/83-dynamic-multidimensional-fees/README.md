@@ -15,7 +15,6 @@ Dynamic fees helps to preserve the stability of the chain as it provides a feedb
 
 Multidimensional fees ensures that high demand for orthogonal resources does not drive up the price of underutilized resources. For example, networks provide and consume orthogonal resources including, but not limited to, bandwidth, chain state, read/write throughput, and CPU. By independently metering each resource, they can be granularly priced and stay closer to optimal resource utilization.
 
-
 ## Motivation
 
 The P-Chain and X-Chain currently have fixed fees and in some cases those fees are fixed to zero.
@@ -50,24 +49,39 @@ $$base \  fee = \sum_{i=0}^3 r_i \times u_i$$
 
 Fee rates are updated in time, to allow a fee increase when network is getting congested. Each new block is a potential source of congestion, as its transactions carry complexity that each validator must process to verify and eventually accept the block. The more complexity carries a block, and the more rapidly blocks are produced, the higher the congestion.  
 
-We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly).
+We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly). We define the desired threshold as a *target complexity rate* $T_i$: we would want to process every second a block whose cumulated complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees; any congestion below $T_i$ causes the network to be under utilized.
 
-Suppose that a block $B$ is the current chain tip. $B$ has the following features:
+In order to update fees rates we will track, per each block and each fee dimension, a parameter called cumulated excess complexity. Fee rates applied to a block will be defined in terms of cumulated excess complexity as we show in the following.
+
+Let's define cumulated excess complexity first.
+
+Suppose that a block $B_t$ is the current chain tip. $B_t$ has the following features:
 
 - $t$ is its timestamp.
-- $B_i$ is the cumulated complexity of all its transactions along the fee dimension $i$.
-- $r_{i,t}$ is the fee rate applied to all of its transactions along the fee dimension $i$.
+- $Excess_{i,t}$ is the cumulated excess complexity along fee dimension $i$.
 
-A new block is incoming, whose timestamp is $t + \Delta T$.  
-We wish to maintain a *target complexity rate* $T_i$, i.e. we would want to process every second a block whose cumulated complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees; any congestion below $T_i$ causes the network to be under utilized.
+Say a new block $B_{t + \Delta T}$ is accepted on top of $B$, with the following features:
 
-The fee rates $r_{i,t+\Delta T}$ applied to the incoming blocks are defined with the following *update formula*:
+- $t + \Delta T$ is its timestamp
+- $B_i$ is its complexity.
 
-$$r_{i,t+\Delta T} = max \bigl( r^{min}_i, e^{k_i \frac{B_i-T_i \times \Delta T}{T_i \times \Delta T}} \bigr)$$
+Then cumulated excess complexity once $B_{t + \Delta T}$ is accepted is updated as follow:
 
-where $r^{min}_i$ and $k_i$ are the minimal fee rate allowed and the update constants along dimension $i$ respectivelly.
+$$Excess_{i,t + \Delta T} = max\large(0, Excess_{i,t} - T_i \times \Delta T\large) + B_i$$
 
-The update formula guarantees that fee rates increase if parent block is complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease if parent block is less complex and if blocks are produced less frequently. We introduce a minimal, non-zero fee rate, to avoid fee rates reaching zero, which would cause any subsequent fee to be zero as well.  
+Finally let's define the fee rates update formula.
+
+Say block $B_t$ is chain tip and a block $B_{t + \Delta T}$ is incoming on top of it. Then
+
+$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{Excess_{i,t} - T_i \times \Delta T}{Denom}} $$
+
+where
+
+- $r_{i,t + \Delta T}$ is the fee rate applied to block $B_{t + \Delta T}$ along fee dimension $i$
+- $r^{min}_i$ is the minimal fee rate along fee dimension $i$
+- $Denom$ is a normalization constant
+
+The update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
 The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to the [implementation section](#tuning-the-update-formula).
 
 ## Block verification rules
@@ -109,8 +123,8 @@ A very important implementation step is tuning the update formula parameters for
 The basic idea is to measure the complexity of blocks already accepted and derive the parameters from it. You can find the historical data in [this repo](https://github.com/abi87/complexities).  
 To simplify the exposition I am purposefully ignoring chain specifics (like P-chain proposal blocks). We can account for chain specifics while processing the historical data. Here are the principles:
 
-- **Target block complexity rate**: calculate the distribution of block complexity and pick a high enough quantile.
-- **Max block complexity**: this is probably the trickiest parameter to set.
+- **Target block complexity rate $T_i$**: calculate the distribution of block complexity and pick a high enough quantile.
+- **Max block complexity $C_i$**: this is probably the trickiest parameter to set.
 Historically we had [pretty big transactions](https://subnets.avax.network/p-chain/tx/27pjHPRCvd3zaoQUYMesqtkVfZ188uP93zetNSqk3kSH1WjED1) (more than $1.000$ referenced utxos). Setting a max block complexity so high that these big transactions are allowed is akin to setting no complexity cap.
 On the other side, we still want to allow, even encourage, UTXO consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
 A principled way to set max block complexity may be the following:
@@ -118,15 +132,10 @@ A principled way to set max block complexity may be the following:
   - calculate the median time elapsed among consecutive blocks
   - The product of these two quantities should gives us something like a target block complexity.
   - Set the max block complexity to say $\times 50$ the target value.
-- **Update coefficient**: this is the $k_i$ parameter in the exponential fee update. I suggest we size it as follows:
+- **Normalization coefficient $Denom$**: I suggest we size it as follows:
   - Find the largest historical peak, i.e. the sequence of consecutive blocks which contained the most complexity in the shortest period of time
-  - Tune $k_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milliAVAX we normally pay under stable network condition up to tens of AVAX.
-- **Initial fee rates** : this is the initial base fee set at activation.
- We could size them so that transactions fees do not change very much with respect to the currently fixes values.
- Note that we do currently support zero fees transactions, which are not allowed in the new fee scheme.  Zero fee transactions would immediately see the largest increase when dynamic fees kick in. Still we could make the change as small as possible
-- **Minimal fee rates** :  these are required since we cannot have zero fee rates in our dynamic fees proposal.
-  We update fee rates via a multiplicative process so as soon as a fee rate is zero all sequent fee rates would be zero.
-  We could set minimal fee rates to equal to initial fee rates or to a fraction of them.
+  - Tune  $Denom$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milliAVAX we normally pay under stable network condition up to tens of AVAX.
+- **Minimal fee rates $r^{min}$**: we could size them so that transactions fees do not change very much with respect to the currently fixed values.
 
 We simulate below how the update formula would behave on an peak period from Avalanche mainnet.
 
