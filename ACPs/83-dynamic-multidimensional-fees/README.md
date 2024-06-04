@@ -9,27 +9,26 @@ Track: Standards
 
 ## Abstract
 
-Introduce a dynamic and multidimensional fees scheme for both P-chain and X-chain.  
+Introduce a dynamic and multidimensional fees scheme for the P-chain and X-chain.
 
-A dynamic fee scheme helps to preserve the stability of the chains as it provides an economic incentive for users to hold their transactions issuance in times of high load.  
+Dynamic fees helps to preserve the stability of the chain as it provides a feedback mechanism that increases the cost of resources when the network operates above its target utilization.
 
-A multidimensional fee scheme ensures that different resources consumed to process transactions, like bandwidth, chain state occupation and cpu to verify cryptographic signatures, are metered and priced differently, according to their different capacities. When network resources are independently metered, they can be granularly priced and thus optimally utilized by the network participants.
+Multidimensional fees ensures that high demand for orthogonal resources does not drive up the price of underutilized resources. For example, networks provide and consume orthogonal resources including, but not limited to, bandwidth, chain state, read/write throughput, and CPU. By independently metering each resource, they can be granularly priced and stay closer to optimal resource utilization.
+
 
 ## Motivation
 
-P-chain and X-chain fees have currently fixed values and in some cases they are zero.
+The P-Chain and X-Chain currently have fixed fees and in some cases those fees are fixed to zero.
 
-This makes transaction issuance very predictable but it does not help preserving stability of the chains in high load situations. In fact, users do not have any economic incentive to delay their transaction issuances when chains are loaded, thus contributing to sustaining the load.  
+This makes transaction issuance predictable, but does not provide feedback mechanism to preserve chain stability under high load. In contrast, the C-Chain, which has the highest and most regular load among the chains on the Primary Network, already supports dynamic fees. This ACP proposes to introduce a similar dynamic fee mechanism for the P-Chain and X-Chain to further improve the Primary Network's stability and resilience under load.
 
-The C-chain is the Primary Network chain with the heaviest traffic, and it already has a dynamic fees scheme. We should introduce a dynamic fees scheme for P-chain and X-chain as well to improve Primary Network stability in anticipation of an increase in the network activity.  
-
-Unlike the C-chain, however, we propose a multidimensional fee scheme with exponential updates. A multidimensional fee scheme with optional priority fees is already in use in our [HyperSDK](https://github.com/ava-labs/hypersdk) and its efficiency is backed by [academic research](https://arxiv.org/abs/2208.07919). We propose to adopt the same scheme for the P-chain and X-chain with a single change: the use of an exponential update scheme which is proven to have nicer stability properties than the scheme currently used by the HyperSDK.
+However, unlike the C-Chain, we propose a multidimensional fee scheme with an exponential update rule for each fee dimension. The [HyperSDK](https://github.com/ava-labs/hypersdk) already utilizes a multidimensional fee scheme with optional priority fees and its efficiency is backed by [academic research](https://arxiv.org/abs/2208.07919).
 
 Finally we will split the fees into two parts: there will be a `base fee`, calculated by the network and updated block by block, which must be paid by transactions to be included in a block. Moreover there will be an optional `priority fee` to be paid on top of the `base fee` which may be included by the transaction issuer to speed up inclusion.
 
 ## Specification
 
-We introduce the multidimensional scheme first and then we show how fees can be updated by the dynamic fee components. Finally we list the new block verification rules and some indications around the new user experience that dynamic multifees will provide.  
+We introduce the multidimensional scheme first and then how to apply the dynamic fee update rule for each fee dimension. Finally we list the new block verification rules, valid once the new fee scheme activates.
 
 ### Multidimensional scheme components
 
@@ -42,7 +41,7 @@ We define four fee dimensions, `Bandwidth`, `DBReads`, `DBWrites`, `Compute`, to
 
 For each fee dimension $i$, we define:
 
-- *fee rate* $r_i$ as the price, denominated in Avax, to be paid for a transaction with complexity $u_i$ along the fee dimension $i$.
+- *fee rate* $r_i$ as the price, denominated in AVAX, to be paid for a transaction with complexity $u_i$ along the fee dimension $i$.
 - *base fee* as the minimal fee needed to accept a transaction. Base fee is given be the formula
 $$base \  fee = \sum_{i=0}^3 r_i \times u_i$$
 - *priority fee* as an optional fee paid on top of the base fee to speed up the transaction inclusion in a block.
@@ -75,8 +74,8 @@ The update formula has a few paramenters to be tuned, independently, for each fe
 
 Upon activation of the dynamic multidimensional fees scheme we modify block processing as follows:
 
-- **Bound block complexity**. For each fee dimension $i$, we define a *maximal block complexity* $C_i$. We accept a block only if, for each dimension $i$, the cumulated block complexity $B_i$ is below the maximal block complexity: $B_i \leq C_i$.
-- **Verify transaction fee**. When verifying each block transaction, we check that it can pay for its own dynamic fees. Note that both base fee and optional priority fees are burned.
+- **Bound block complexity**. For each fee dimension $i$, we define a *maximal block complexity* $C_i$. A block is only valid if the block complexity $B_i$ is less than the maximum block complexity: $B_i \leq C_i$.
+- **Verify transaction fee**. When verifying each transaction in a block, we confirm that it can cover its own base fee. Note that both base fee and optional priority fees are burned.
 
 ## User Experience
 
@@ -86,7 +85,7 @@ AvalancheGo nodes will provide new APIs exposing the current and expected fee ra
 
 ### How will wallets be able to re-issue Txs at a higher fee?
 
-Wallets should be able to simply re-issue the transaction since current AvalancheGo implementation drops mempool transactions whose fee rate is lower than current one. More specifically a transaction may be valid the moment it enters the mempool and it won’t be re-verified as long as it stays in there. However as soon as the transaction is selected to be included in the next block, it is re-verified against the latest preferred tip. If fees are not enough by this time, the transaction is dropped and the wallet can simply re-issue it at a higher fee, or wait for the fee rate to go down. Note that priority fees offer an edge against fee rate spike. A transaction paying just the base fee will be evicted from the mempool in thel face of a fee rate increase, while a transaction paying some extra priority fee may pay enough overall fees to still be accepted despite the fee rate increase.
+Wallets should be able to simply re-issue the transaction since current AvalancheGo implementation drops mempool transactions whose fee rate is lower than current one. More specifically, a transaction may be valid the moment it enters the mempool and it won’t be re-verified as long as it stays in there. However, as soon as the transaction is selected to be included in the next block, it is re-verified against the latest preferred tip. If fees are not enough by this time, the transaction is dropped and the wallet can simply re-issue it at a higher fee, or wait for the fee rate to go down. Note that priority fees offer some buffer space against an increase in the fee rate. A transaction paying just the base fee will be evicted from the mempool in the face of a fee rate increase, while a transaction paying some extra priority fee may have enough buffer room to stay valid after some amount of fee increase.
 
 ### How does priority fees guarantee a faster block inclusion?
 
@@ -94,26 +93,26 @@ AvalancheGo mempool will be restructured to order transactions by priority fees.
 
 ## Backwards Compatibility
 
-Modifying the fee scheme for P-chain and X-chain requires a mandatory upgrade for activation. Moreover wallets must be modified to handle the new fee scheme to be able to properly finance transactions once the upgrade is activated.
+Modifying the fee scheme for P-Chain and X-Chain requires a mandatory upgrade for activation. Moreover, wallets must be modified to properly handle the new fee scheme once activated.
 
 ## Reference Implementation
 
-Implementation is splitted across multiple PRs.
+The implementation is split across multiple PRs:
 
-- P-chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2707>
-- X-chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2708>
+- P-Chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2707>
+- X-Chain work is tracked in this issue: <https://github.com/ava-labs/avalanchego/issues/2708>
 
 A very important implementation step is tuning the update formula parameters for each chain and each fee dimension. We show here the principles we followed for tuning and a simulation based on historical data.
 
 ### Tuning the update formula
 
-The basic ideais to measure the complexity of blocks already accepted and derive the parameters from it. You can find the historical data in [this repo](https://github.com/abi87/complexities).  
-To simplify the exposition I am purposefully ignoring chain specifities (like P-chain proposal blocks). We can account for chain specificities while processing the historical data. Here's the principles:
+The basic idea is to measure the complexity of blocks already accepted and derive the parameters from it. You can find the historical data in [this repo](https://github.com/abi87/complexities).  
+To simplify the exposition I am purposefully ignoring chain specifics (like P-chain proposal blocks). We can account for chain specifics while processing the historical data. Here are the principles:
 
 - **Target block complexity rate**: calculate the distribution of block complexity and pick a high enough quantile.
 - **Max block complexity**: this is probably the trickiest parameter to set.
 Historically we had [pretty big transactions](https://subnets.avax.network/p-chain/tx/27pjHPRCvd3zaoQUYMesqtkVfZ188uP93zetNSqk3kSH1WjED1) (more than $1.000$ referenced utxos). Setting a max block complexity so high that these big transactions are allowed is akin to setting no complexity cap.
-On the other side, we still want to allow, even encourage, utxos consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
+On the other side, we still want to allow, even encourage, UTXO consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
 A principled way to set max block complexity may be the following:
   - calculate the target block complexity rate (see previous point)
   - calculate the median time elapsed among consecutive blocks
@@ -121,10 +120,10 @@ A principled way to set max block complexity may be the following:
   - Set the max block complexity to say $\times 50$ the target value.
 - **Update coefficient**: this is the $k_i$ parameter in the exponential fee update. I suggest we size it as follows:
   - Find the largest historical peak, i.e. the sequence of consecutive blocks which contained the most complexity in the shortest period of time
-  - Tune $k_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milli Avaxs we normally pay under stable network condition up to tens of Avax.
-- **Initial fee rates** : this are the rate to be used as soon as dynamic fees activate.
- We could size them so that transactions fees won't change very much with respect to currently fixes values.
- Note that we do currently support zero fees transactions, which are not allowed a dynamic fees world.  Zero fees transaction would immediately see the largest increase when dynamic fees kick in. Still we could make the change as small as possible
+  - Tune $k_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milliAVAX we normally pay under stable network condition up to tens of AVAX.
+- **Initial fee rates** : this is the initial base fee set at activation.
+ We could size them so that transactions fees do not change very much with respect to the currently fixes values.
+ Note that we do currently support zero fees transactions, which are not allowed in the new fee scheme.  Zero fee transactions would immediately see the largest increase when dynamic fees kick in. Still we could make the change as small as possible
 - **Minimal fee rates** :  these are required since we cannot have zero fee rates in our dynamic fees proposal.
   We update fee rates via a multiplicative process so as soon as a fee rate is zero all sequent fee rates would be zero.
   We could set minimal fee rates to equal to initial fee rates or to a fraction of them.
@@ -138,7 +137,7 @@ We simulate below how the update formula would behave on an peak period from Ava
 
 Figure 1 shows a peak period, starting with block [wqKJcvEv86TBpmJY2pAY7X65hzqJr3VnHriGh4oiAktWx5qT1](https://subnets.avax.network/p-chain/block/wqKJcvEv86TBpmJY2pAY7X65hzqJr3VnHriGh4oiAktWx5qT1) and going for roughly 30 blocks. We only show `Bandwidth` for clarity, but other fees dimensions have similar behaviour.
 The network load is much larger than target and sustained.  
-Figure 2 show the fee dynamic in response to the peak: fees scale up from a few milliAvax up to around 25 Avax. Moreover as soon as the peak is over, and complexity goes back to the target value, fees are reduced very rapidly.
+Figure 2 show the fee dynamic in response to the peak: fees scale up from a few milliAVAX up to around 25 AVAX. Moreover as soon as the peak is over, and complexity goes back to the target value, fees are reduced very rapidly.
 
 ## Security Considerations
 

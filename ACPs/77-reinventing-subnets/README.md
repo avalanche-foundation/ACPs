@@ -115,6 +115,8 @@ When any validator is removed from the set (whether forcefully or per the valida
 
 This transaction is, by design, not required to be submitted by the validator themselves. With the Ed25519 signature, the validator guarantees that they can only be added to the validator set if `Signer` corresponds to the `blsPublicKey` and `Balance` >= `balance`. The `RegisterSubnetValidatorTx` is considered invalid if those two properties are not satisfied.
 
+For a `RegisterSubnetValidatorTx` to be valid, `Balance` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of a `Balance` where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining `Balance` to the `ChangeOwner` defined in the transaction.
+
 Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0` or `ExitValidatorTx` is issued.
 
 #### SetSubnetValidatorWeightTx
@@ -124,6 +126,7 @@ Note: There is no `EndTime` specified in this transaction. Subnet Validators are
 - Increase the voting weight of a Subnet Validator if a delegation is made on the Subnet
 - Increase the voting weight of a Subnet Validator if the stake amount is increased (by staking rewards for example)
 - Decrease the voting weight of a misbehaving Subnet Validator
+- Remove an inactive Subnet Validator
 
 Since there are no `EndTime`s enforced by the P-Chain, Subnets must use this transaction to set an expired validator's weight to `0`. When a validator's weight is set to `0`, they will be removed from the validator set. After the transaction is accepted, any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `ChangeOwner` defined in the `RegisterSubnetValidatorTx`.
 
@@ -159,19 +162,16 @@ The `Message` field in the above transaction must be an Avalanche Warp Message u
 
 #### ExitValidatorSetTx
 
-Subnet Validators can use `ExitValidatorSetTx` to gracefully exit the validator set. An Ed5519 Signature is required using the Subnet Validator's Ed25519 private key for this transaction to be valid. Remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `ChangeOwner` defined when adding this validator to the validator set.
+Subnet Validators can use `ExitValidatorSetTx` to exit the validator set without interacting with the Subnet. An Ed25519 Signature is required using the Subnet Validator's Ed25519 private key for this transaction to be valid. Remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `ChangeOwner` defined when adding this validator to the validator set.
 
 This transaction can be issued on the P-Chain without explicit consent of the Subnet. It is expected that validators should be removed from the Subnet's validator set through a `SetSubnetValidatorWeightTx` with weight `0` by initiating Subnet Validator removal on the Subnet. However, the ability to exit a Subnet Validator set is critical for censorship-resistance and/or failed Subnets. If a validator ever wishes to stop participating in Subnet consensus, they will be able to do so through this transaction. This is enforced on the P-Chain to prevent Subnets from locking Validators into participating in consensus indefinitely.
 
 Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
 
 ```golang
-// Fee for this transaction will be deducted from the [Balance] prior to refunding.
 type ExitValidatorSetTx struct {
-    // ID of the network this chain lives on
-    NetworkID uint32 `json:"networkID"`
-    // ID of the chain on which this transaction exists (prevents replay attacks)
-    BlockchainID ids.ID `json:"blockchainID"`
+    // Metadata, inputs and outputs
+    BaseTx
     // ID of the tx that created the validator being removed
     TxID ids.ID `json:"txID"`
     // Ed25519 Signature on [TxID]
@@ -249,7 +249,7 @@ Currently, the P-Chain operates under a fixed fee mechanism for each transaction
 
 Each additional Subnet Validator on the P-Chain adds load to the network. The discussions for the dynamic multi-dimensional fee charge when a transaction is instantiated but there isn't a solution for charging Subnet Validators for the space they are using over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains and there have been many state rent proposals in the broader blockchain space to address it. This fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of state and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
 
-To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged in proportion to the amount of time they are a Subnet Validator. When this `Balance` reaches `0`, the Subnet Validator will be removed from the validator set. This `Balance` is first set in the transaction that added them to the Subnet Validator set. This `Balance` can be subsequently topped up at any time using the `IncreaseBalanceTx`.
+To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterSubnetValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseBalanceTx`. When this `Balance` reaches `0`, the Subnet Validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseBalanceTx`. Once a Subnet Validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetSubnetValidatorWeightTx` (`Weight` = 0).
 
 Since each Subnet Validator is charged the same amount at each point in time, tracking the fees for the entire validator set is straight-forward. The accumulated dynamic base fee for the entire network is tracked in a single uint. This accumulated value should be equal to the fee charged if a Subnet Validator was active from the time the accumulator was instantiated. The validator set is maintained in a priority queue. A pseudocode implementation of the continuous fee mechanism is provided below.
 
@@ -342,6 +342,8 @@ This ACP significantly reduces the cost of becoming a Subnet Validator. This can
 With the additional sovereignty Subnets gain from the P-Chain, Subnet staking tokens are no longer locked on the P-Chain for Permissionless Subnets. This poses a new security consideration for Subnet Validators: Malicious Subnets can choose to remove validators at will and take any funds that the Subnet Validator has on the Subnet. The P-Chain only provides the guarantee that Subnet Validators can retrieve the remaining $AVAX Balance for their Validator via an `ExitValidatorSetTx`. Any assets on the Subnet is entirely under the purview of the Subnet. The onus is now on Subnet Validators to vet the Subnet's security.
 
 With a long window of expiry (48 hours) for the warp message in `RegisterSubnetValidatorTx`, spam of Subnet Validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
+
+The continuous fee mechanism outlined above does not apply to inactive Subnet Validators since they are not stored in memory. However, inactive Subnet Validators are persisted on disk which can lead to persistent P-Chain state growth. The initial balance requirement (the greater of 5 $AVAX or two weeks of the current fee) should be a sufficient deterrent as it must be fully burned for the Subnet Validator to become inactive. A future ACP can increase the initial balance to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
 
 ## Open Questions
 
