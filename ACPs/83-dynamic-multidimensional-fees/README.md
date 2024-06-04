@@ -73,13 +73,13 @@ Finally let's define the fee rates update formula.
 
 Say block $B_t$ is chain tip and a block $B_{t + \Delta T}$ is incoming on top of it. Then
 
-$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{Excess_{i,t} - T_i \times \Delta T}{Denom}} $$
+$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{Excess_{i,t} - T_i \times \Delta T}{Denom_i}} $$
 
 where
 
 - $r_{i,t + \Delta T}$ is the fee rate applied to block $B_{t + \Delta T}$ along fee dimension $i$
 - $r^{min}_i$ is the minimal fee rate along fee dimension $i$
-- $Denom$ is a normalization constant
+- $Denom_i$ is a normalization constant for the fee dimension $i$
 
 The update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
 The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to the [implementation section](#tuning-the-update-formula).
@@ -132,9 +132,9 @@ A principled way to set max block complexity may be the following:
   - calculate the median time elapsed among consecutive blocks
   - The product of these two quantities should gives us something like a target block complexity.
   - Set the max block complexity to say $\times 50$ the target value.
-- **Normalization coefficient $Denom$**: I suggest we size it as follows:
+- **Normalization coefficient $Denom_i$**: I suggest we size it as follows:
   - Find the largest historical peak, i.e. the sequence of consecutive blocks which contained the most complexity in the shortest period of time
-  - Tune  $Denom$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milliAVAX we normally pay under stable network condition up to tens of AVAX.
+  - Tune  $Denom_i$ so that it would cause a $\times 10000$ increase in the fee rate for such a peak. This increase would push fees from the milliAVAX we normally pay under stable network condition up to tens of AVAX.
 - **Minimal fee rates $r^{min}$**: we could size them so that transactions fees do not change very much with respect to the currently fixed values.
 
 We simulate below how the update formula would behave on an peak period from Avalanche mainnet.
