@@ -23,7 +23,7 @@ This makes transaction issuance predictable, but does not provide feedback mecha
 
 However, unlike the C-Chain, we propose a multidimensional fee scheme with an exponential update rule for each fee dimension. The [HyperSDK](https://github.com/ava-labs/hypersdk) already utilizes a multidimensional fee scheme with optional priority fees and its efficiency is backed by [academic research](https://arxiv.org/abs/2208.07919).
 
-Finally we will split the fees into two parts: there will be a `base fee`, calculated by the network and updated block by block, which must be paid by transactions to be included in a block. Moreover there will be an optional `priority fee` to be paid on top of the `base fee` which may be included by the transaction issuer to speed up inclusion.
+Finally, we split the fee into two parts: a `base fee` and a `priority fee`. The `base fee` is calculated by the network each block to accurately price each resource at a given point in time. Whatever amount greater than the base fee is burnt is treated as the `priority fee` to prioritize faster transaction inclusion.
 
 ## Specification
 
@@ -33,7 +33,7 @@ We introduce the multidimensional scheme first and then how to apply the dynamic
 
 We define four fee dimensions, `Bandwidth`, `DBReads`, `DBWrites`, `Compute`, to describe transactions complexity. In more details:
 
-- `Bandwidth` measures the transaction size in bytes, as encoded by the Avalanchego codec. Byte length is a proxy for the network resources needed to disseminate the transaction.
+- `Bandwidth` measures the transaction size in bytes, as encoded by the AvalancheGo codec. Byte length is a proxy for the network resources needed to disseminate the transaction.
 - `DBReads` measures the number of DB reads needed to verify the transactions. DB reads include UTXOs reads and any other state quantity relevant for the specific transaction.
 - `DBWrites` measures the number of DB writes following the transaction verification. DB writes include UTXOs generated as outputs of the transactions and any other state quantity relevant for the specific transaction.
 - `Compute` measures the number of signatures to be verified, including UTXOs ones and those related to authorization of specific operations.
@@ -49,23 +49,23 @@ $$base \  fee = \sum_{i=0}^3 r_i \times u_i$$
 
 Fee rates are updated in time, to allow a fee increase when network is getting congested. Each new block is a potential source of congestion, as its transactions carry complexity that each validator must process to verify and eventually accept the block. The more complexity carries a block, and the more rapidly blocks are produced, the higher the congestion.  
 
-We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly). We define the desired threshold as a *target complexity rate* $T_i$: we would want to process every second a block whose cumulated complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees; any congestion below $T_i$ causes the network to be under utilized.
+We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly). We define the desired threshold as a *target complexity rate* $T_i$: we would want to process every second a block whose complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees; any congestion below $T_i$ causes the network to be under utilized.
 
-In order to update fees rates we will track, per each block and each fee dimension, a parameter called cumulated excess complexity. Fee rates applied to a block will be defined in terms of cumulated excess complexity as we show in the following.
+In order to update fees rates we will track, per each block and each fee dimension, a parameter called cumulative excess complexity. Fee rates applied to a block will be defined in terms of cumulative excess complexity as we show in the following.
 
-Let's define cumulated excess complexity first.
+Let's define cumulative excess complexity first.
 
 Suppose that a block $B_t$ is the current chain tip. $B_t$ has the following features:
 
 - $t$ is its timestamp.
-- $Excess_{i,t}$ is the cumulated excess complexity along fee dimension $i$.
+- $Excess_{i,t}$ is the cumulative excess complexity along fee dimension $i$.
 
 Say a new block $B_{t + \Delta T}$ is accepted on top of $B$, with the following features:
 
 - $t + \Delta T$ is its timestamp
 - $B_i$ is its complexity.
 
-Then cumulated excess complexity once $B_{t + \Delta T}$ is accepted is updated as follow:
+Then cumulative excess complexity once $B_{t + \Delta T}$ is accepted is updated as follow:
 
 $$Excess_{i,t + \Delta T} = max\large(0, Excess_{i,t} - T_i \times \Delta T\large) + B_i$$
 
@@ -81,7 +81,7 @@ where
 - $r^{min}_i$ is the minimal fee rate along fee dimension $i$
 - $Denom_i$ is a normalization constant for the fee dimension $i$
 
-The update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Simmetrically fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
+The update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Symmetrically, fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
 The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to the [implementation section](#tuning-the-update-formula).
 
 ## Block verification rules
@@ -95,7 +95,7 @@ Upon activation of the dynamic multidimensional fees scheme we modify block proc
 
 ### How will the wallets estimate the fees?
 
-AvalancheGo nodes will provide new APIs exposing the current and expected fee rates, as they are likely to change block by block. Wallets can then use the fees rates to select UTXOs to pay the transaction fees. Moreover Avalanchego implementation proposed above offers a `fees.Calculator` struct that can be reused by wallets and downstreams to evaluate calculate fees.
+AvalancheGo nodes will provide new APIs exposing the current and expected fee rates, as they are likely to change block by block. Wallets can then use the fees rates to select UTXOs to pay the transaction fees. Moreover, the AvalancheGo implementation proposed above offers a `fees.Calculator` struct that can be reused by wallets and downstream projects to evaluate calculate fees.
 
 ### How will wallets be able to re-issue Txs at a higher fee?
 
