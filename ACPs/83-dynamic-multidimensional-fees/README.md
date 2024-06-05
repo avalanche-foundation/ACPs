@@ -58,7 +58,7 @@ Let's define cumulative excess complexity first.
 Suppose that a block $B_t$ is the current chain tip. $B_t$ has the following features:
 
 - $t$ is its timestamp.
-- $Excess_{i,t}$ is the cumulative excess complexity along fee dimension $i$.
+- $\Delta C_{i,t}$ is the cumulative excess complexity along fee dimension $i$.
 
 Say a new block $B_{t + \Delta T}$ is accepted on top of $B$, with the following features:
 
@@ -67,13 +67,13 @@ Say a new block $B_{t + \Delta T}$ is accepted on top of $B$, with the following
 
 Then cumulative excess complexity once $B_{t + \Delta T}$ is accepted is updated as follow:
 
-$$Excess_{i,t + \Delta T} = max\large(0, Excess_{i,t} - T_i \times \Delta T\large) + B_i$$
+$$\Delta C_{i,t + \Delta T} = max\large(0, \Delta C_{i,t} - T_i \times \Delta T\large) + B_i$$
 
 Finally let's define the fee rates update formula.
 
 Say block $B_t$ is chain tip and a block $B_{t + \Delta T}$ is incoming on top of it. Then
 
-$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{Excess_{i,t} - T_i \times \Delta T}{Denom_i}} $$
+$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{\Delta C_{i,t} - T_i \times \Delta T}{Denom_i}} $$
 
 where
 
@@ -88,7 +88,7 @@ The update formula has a few paramenters to be tuned, independently, for each fe
 
 Upon activation of the dynamic multidimensional fees scheme we modify block processing as follows:
 
-- **Bound block complexity**. For each fee dimension $i$, we define a *maximal block complexity* $C_i$. A block is only valid if the block complexity $B_i$ is less than the maximum block complexity: $B_i \leq C_i$.
+- **Bound block complexity**. For each fee dimension $i$, we define a *maximal block complexity* $Max_i$. A block is only valid if the block complexity $B_i$ is less than the maximum block complexity: $B_i \leq Max_i$.
 - **Verify transaction fee**. When verifying each transaction in a block, we confirm that it can cover its own base fee. Note that both base fee and optional priority fees are burned.
 
 ## User Experience
@@ -124,7 +124,7 @@ The basic idea is to measure the complexity of blocks already accepted and deriv
 To simplify the exposition I am purposefully ignoring chain specifics (like P-chain proposal blocks). We can account for chain specifics while processing the historical data. Here are the principles:
 
 - **Target block complexity rate $T_i$**: calculate the distribution of block complexity and pick a high enough quantile.
-- **Max block complexity $C_i$**: this is probably the trickiest parameter to set.
+- **Max block complexity $Max_i$**: this is probably the trickiest parameter to set.
 Historically we had [pretty big transactions](https://subnets.avax.network/p-chain/tx/27pjHPRCvd3zaoQUYMesqtkVfZ188uP93zetNSqk3kSH1WjED1) (more than $1.000$ referenced utxos). Setting a max block complexity so high that these big transactions are allowed is akin to setting no complexity cap.
 On the other side, we still want to allow, even encourage, UTXO consolidation, so we may want to allow transactions [like this](https://subnets.avax.network/p-chain/tx/2LxyHzbi2AGJ4GAcHXth6pj5DwVLWeVmog2SAfh4WrqSBdENhV).
 A principled way to set max block complexity may be the following:
