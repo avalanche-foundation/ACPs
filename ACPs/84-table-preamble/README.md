@@ -3,7 +3,7 @@ ACP: 84
 Title: Table Preamble for ACPs
 Author(s): Gauthier Leonard <https://github.com/Nuttymoon>
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/86
-Status: Proposed
+Status: Implementable
 Track: Meta
 ```
 
@@ -21,15 +21,14 @@ The current ACPs `Preamble` is (i) not very readable and (ii) not user-friendly 
 
 The following Markdown table format is proposed:
 
-| ACP                            | PR Number                                                                                    |
-| :----------------------------- | :------------------------------------------------------------------------------------------- |
-| **Title**                      | ACP title                                                                                    |
-| **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com> |
-| **Discussions-To**             | [Hyperlinked GitHub Discussion name](./README.md)                                            |
-| **Status**                     | Proposed, Implementable, Activated, Stale                                                    |
-| **Track**                      | Standards, Best Practices, Meta, Subnet                                                      |
-| **Replaces (\*optional)**      | [ACP-XX](./README.md)                                                                        |
-| **Superseded-By (\*optional)** | [ACP-XX](./README.md)                                                                        |
+| ACP                            | PR Number                                                                                                                                        |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**                      | ACP title                                                                                                                                        |
+| **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@addre.ss](./README.md)) |
+| **Status**                     | Proposed, Implementable, Activated, Stale ([Discussion](./README.md))                                                                            |
+| **Track**                      | Standards, Best Practices, Meta, Subnet                                                                                                          |
+| **Replaces (\*optional)**      | [ACP-XX](./README.md)                                                                                                                            |
+| **Superseded-By (\*optional)** | [ACP-XX](./README.md)                                                                                                                            |
 
 It features all the existing fields of the current ACP template, and would replace the current `Preamble` code block in [ACPs/TEMPLATE.md](../TEMPLATE.md).
 
@@ -41,13 +40,12 @@ Existing ACPs could be updated to use the new table format, but it is not mandat
 
 For this ACP, the table would look like this:
 
-| ACP                | 84                                              |
-| :----------------- | :---------------------------------------------- |
-| **Title**          | Table Preamble for ACPs                         |
-| **Author(s)**      | Gauthier Leonard <https://github.com/Nuttymoon> |
-| **Discussions-To** | [ACP-84: Table Preable for ACPs](./README.md)   |
-| **Status**         | Proposed                                        |
-| **Track**          | Meta                                            |
+| ACP           | 84                                                                                   |
+| :------------ | :----------------------------------------------------------------------------------- |
+| **Title**     | Table Preamble for ACPs                                                              |
+| **Author(s)** | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))                        |
+| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/86)) |
+| **Track**     | Meta                                                                                 |
 
 ## Security Considerations
 
