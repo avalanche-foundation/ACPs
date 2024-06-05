@@ -49,39 +49,33 @@ $$base \  fee = \sum_{i=0}^3 r_i \times u_i$$
 
 Fee rates are updated in time, to allow a fee increase when network is getting congested. Each new block is a potential source of congestion, as its transactions carry complexity that each validator must process to verify and eventually accept the block. The more complexity carries a block, and the more rapidly blocks are produced, the higher the congestion.  
 
-We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly). We define the desired threshold as a *target complexity rate* $T_i$: we would want to process every second a block whose complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees; any congestion below $T_i$ causes the network to be under utilized.
+We seek a scheme that rapidly increases the fees when blocks complexity goes above a defined threshold and that equally rapidly decreases the fees once complexity goes down (because blocks carry less/simpler transactions, or because they are produced more slowly). We define the desired threshold as a *target complexity rate* $T_i$: we would want to process every second a block whose complexity is $T_i$. Any complexity more than that causes some congestion that we want to penalize via fees.
 
-In order to update fees rates we will track, per each block and each fee dimension, a parameter called cumulative excess complexity. Fee rates applied to a block will be defined in terms of cumulative excess complexity as we show in the following.
-
-Let's define cumulative excess complexity first.
+In order to update fees rates we track, per each block and each fee dimension, a parameter called cumulative excess complexity. Fee rates applied to a block will be defined in terms of cumulative excess complexity as we show in the following.
 
 Suppose that a block $B_t$ is the current chain tip. $B_t$ has the following features:
 
 - $t$ is its timestamp.
 - $\Delta C_{i,t}$ is the cumulative excess complexity along fee dimension $i$.
 
-Say a new block $B_{t + \Delta T}$ is accepted on top of $B$, with the following features:
+Say a new block $B_{t + \Delta T}$ is built on top of $B$, with the following features:
 
 - $t + \Delta T$ is its timestamp
-- $B_i$ is its complexity.
+- $C_{i,t + \Delta T}$ is its complexity.
 
-Then cumulative excess complexity once $B_{t + \Delta T}$ is accepted is updated as follow:
+Then the fee rate $r_{i,t + \Delta T}$ applied for the block $B_{t + \Delta T}$ will be:
 
-$$\Delta C_{i,t + \Delta T} = max\large(0, \Delta C_{i,t} - T_i \times \Delta T\large) + B_i$$
-
-Finally let's define the fee rates update formula.
-
-Say block $B_t$ is chain tip and a block $B_{t + \Delta T}$ is incoming on top of it. Then
-
-$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{\Delta C_{i,t} - T_i \times \Delta T}{Denom_i}} $$
-
+$$ r_{i,t + \Delta T} = r^{min}_i \times e^{\frac{1}{Denom_i} \times max(0, \Delta C_{i,t} - T_i \times \Delta T)} $$
 where
 
-- $r_{i,t + \Delta T}$ is the fee rate applied to block $B_{t + \Delta T}$ along fee dimension $i$
 - $r^{min}_i$ is the minimal fee rate along fee dimension $i$
 - $Denom_i$ is a normalization constant for the fee dimension $i$
 
-The update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Symmetrically, fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
+Moreover, once the block $B_{t + \Delta T}$ is accepted, the cumulative excess complexity is updated as follows:
+
+$$\Delta C_{i,t + \Delta T} = max\large(0, \Delta C_{i,t} - T_i \times \Delta T\large) + C_{i,t + \Delta T}$$
+
+The fee rate update formula guarantees that fee rates increase if incoming blocks are complex (large $B_i$) and if blocks are emitted rapidly (small $\Delta T$). Symmetrically, fee rates decrease to the minimum if incoming blocks are less complex and if blocks are produced less frequently.  
 The update formula has a few paramenters to be tuned, independently, for each fee dimension. We defer discussion about tuning to the [implementation section](#tuning-the-update-formula).
 
 ## Block verification rules
