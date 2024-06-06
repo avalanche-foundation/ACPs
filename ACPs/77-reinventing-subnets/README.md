@@ -136,8 +136,8 @@ type SetSubnetValidatorWeightTx struct {
     BaseTx
     // Warp message should include:
     //   - MessageID corresponding to the warp message in the RegisterSubnetValidatorTx that added the validator (SHA256)
-    //   - Weight of the validator
     //   - Nonce
+    //   - Weight of the validator
     //   - BLS multisig over the above payload
     Message warp.Message `json:"message"`
 }
