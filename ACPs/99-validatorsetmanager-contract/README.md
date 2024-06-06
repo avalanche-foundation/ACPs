@@ -5,6 +5,7 @@ Author(s): Gauthier Leonard <https://github.com/Nuttymoon>
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/98
 Status: Proposed
 Track: Best Practices
+Dependencies: 77
 ```
 
 ## Abstract
@@ -13,13 +14,13 @@ Define (i) a reference implementation for a minimal Solidity smart contract to m
 
 The proposed name for this contract is `ValidatorSetManager`.
 
-This proposal should also help define the payload of the P-Chain notifications sent to the Subnet upon validator addition and removal.
+This proposal should also help define the payload of the P-Chain notifications sent to the Subnet upon validator addition, weight change and removal.
 
-This ACP relies on concepts introduced in [ACP-73 (Warp Addressed Transactions)](https://github.com/avalanche-foundation/ACPs/pull/73) and [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on them to transition to an `Implementable` state.
+This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on it to be marked as `Implementable`.
 
 ## Motivation
 
-[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a Warp Derived Address as the validator set manager. The (blockchainID, address) pair specified by the Warp Derived Address is responsible for sending Warp AddressedCall payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program add, modify the weight of, and remove validators.
+[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a Warp Derived Address as the validator set manager. The `(blockchainID, address)` pair specified by the Warp Derived Address is responsible for sending Warp `AddressedCall` payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program add, modify the weight of, and remove validators.
 
 On each validator set change, the P-Chain generates a Warp message to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. These notification messages have not been specified to date.
 
@@ -226,7 +227,7 @@ Note that the timestamp can also be used to update the `endTime` of the previous
 
 The `ValidatorSetManager` contract will be ownable (e.g. using [OpenZeppelin Ownable](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable)). The ownership can be transferred to a smart contract, the “Security Module”, that will implement the security rules for the Subnet.
 
-![validatorsetmanager-architecture-w-background](https://github.com/avalanche-foundation/ACPs/assets/11584800/945197bf-5f21-4a1d-99a7-e6ccf567b841)
+![ValidatorSetManager architecture](./validatorsetmanager-architecture.png)
 
 The most simple architecture to implement a PoA Subnet would be to use a [Safe Multisig (or Smart Account)](https://docs.safe.global/advanced/smart-account-overview) as owner, effectively reproducing the existing Subnet management functionalities available on the P-Chain today.
 
