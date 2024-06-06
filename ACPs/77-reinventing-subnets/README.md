@@ -183,7 +183,9 @@ type ExitValidatorSetTx struct {
 
 To participate in this new registration flow, Subnets must set the `(blockchainID, address)` pair by using `SetSubnetValidatorManagerTx`. This pair will be used to validate the `AddressedCall` in `SetSubnetValidatorWeightTx` and `RegisterSubnetValidatorTx`.
 
-When a Subnet is created with `CreateSubnetTx`, a validator manager is not specified. To solve this problem, the first `SetSubnetValidatorManagerTx` will expect the Warp `AddressedCall` to have the `sourceChainID` be set to the `SubnetID` and the `sourceAddress` to be zero'd out. Once this transaction is accepted, `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` are enabled for use on the Subnet.
+When a Subnet is created with `CreateSubnetTx`, a validator manager is not specified. To solve this problem, the first `SetSubnetValidatorManagerTx` will expect the Warp `AddressedCall` to have the `SourceChainID` be set to the `SubnetID` and the `SourceAddress` to be zero'd out. This will eventually require the first `SetSubnetValidatorManagerTx` to be manually signed for P-Chain
+
+Once the first `SetSubnetValidatorManagerTx` transaction is accepted, `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` are enabled for use on the Subnet. Subsequent `SetSubnetValidatorManagerTx` will require `SourceAddress` to be the same as specified `Address` in the payload of previously accepted `SetSubnetValidatorManagerTx`.  
 
 ```golang
 type SetSubnetValidatorManagerTx struct {
@@ -192,7 +194,8 @@ type SetSubnetValidatorManagerTx struct {
     // Warp message should include:
     //   - SubnetID
     //   - ChainID (where the validator manager lives)
-    //   - Address (address of the validator manager)
+    //   - SourceAddress (the source address that created the tx) 
+    //   - Address (specified address of the validator manager)
     //   - BLS multisig over the above payload
     Message warp.Message `json:"message"`
 }
