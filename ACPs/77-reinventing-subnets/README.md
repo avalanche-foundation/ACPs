@@ -149,9 +149,9 @@ The `Message` field in the above transaction must be an Avalanche Warp Message u
 +-----------+----------+----------+
 | messageID : [32]byte | 32 bytes |
 +-----------+----------+----------+
-|    weight :   uint64 |  8 bytes |
-+-----------+----------+----------+
 |     nonce :   uint64 |  8 bytes |
++-----------+----------+----------+
+|    weight :   uint64 |  8 bytes |
 +-----------+----------+----------+
                        | 48 bytes |
                        +----------+
