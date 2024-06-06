@@ -19,11 +19,9 @@ This ACP relies on concepts introduced in [ACP-73 (Warp Addressed Transactions)]
 
 ## Motivation
 
-[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from another chain of the Avalanche network. This is achieved by sending updates to the P-Chain from a “validator manager” address on this chain. The “validator manager” address will be the only one able to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain to add, change the weight of, and remove validators.
+[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a Warp Derived Address as the validator set manager. The (blockchainID, address) pair specified by the Warp Derived Address is responsible for sending Warp AddressedCall payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program add, modify the weight of, and remove validators.
 
-`Warp Addressed Transactions` (introduced in [ACP-73](https://github.com/avalanche-foundation/ACPs/pull/73)) could be used to send the validator set updates to the P-Chain.
-
-Upon addition or removal of a validator, the P-Chain is expected to send a Warp message back to the Subnet. The Subnet needs a way to interpret this message and trigger appropriate actions. These notification messages have not been specified to date.
+On each validator set change, the P-Chain generates a Warp message to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. These notification messages have not been specified to date.
 
 Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based (especially the C-Chain, on which we can expect most of the Subnet “validator manager” addresses will be hosted for security reasons), we propose defining a reference implementation for a Solidity smart contract that can:
 
@@ -60,7 +58,7 @@ struct SubnetValidator {
     uint64 nonce,
     // The validator weight
     uint64 weight,
-    // The timestamp at the validator was added
+    // The timestamp the validator was added
     uint64 addTimestamp
 }
 
