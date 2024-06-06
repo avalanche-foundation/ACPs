@@ -21,14 +21,14 @@ The current ACPs `Preamble` is (i) not very readable and (ii) not user-friendly 
 
 The following Markdown table format is proposed:
 
-| ACP                            | PR Number                                                                                                                                        |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Title**                      | ACP title                                                                                                                                        |
-| **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@addre.ss](./README.md)) |
-| **Status**                     | Proposed, Implementable, Activated, Stale ([Discussion](./README.md))                                                                            |
-| **Track**                      | Standards, Best Practices, Meta, Subnet                                                                                                          |
-| **Replaces (\*optional)**      | [ACP-XX](./README.md)                                                                                                                            |
-| **Superseded-By (\*optional)** | [ACP-XX](./README.md)                                                                                                                            |
+| ACP                            | PR Number                                                                                                                                           |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**                      | ACP title                                                                                                                                           |
+| **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@address.com](./README.md)) |
+| **Status**                     | Proposed, Implementable, Activated, Stale ([Discussion](./README.md))                                                                               |
+| **Track**                      | Standards, Best Practices, Meta, Subnet                                                                                                             |
+| **Replaces (\*optional)**      | [ACP-XX](./README.md)                                                                                                                               |
+| **Superseded-By (\*optional)** | [ACP-XX](./README.md)                                                                                                                               |
 
 It features all the existing fields of the current ACP template, and would replace the current `Preamble` code block in [ACPs/TEMPLATE.md](../TEMPLATE.md).
 
