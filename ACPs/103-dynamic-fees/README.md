@@ -66,11 +66,11 @@ A max gas capacity $L$ is defined to limit the gas that can be used every $S$ se
 
 $$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
-Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. After block $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
+Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. After $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
 
 $$r = r - G$$
 
-There is no set gas limit for a block $b$ since it is implicitly derived from $L$.
+A block gas limit does not need to be set as it is implicitly derived from $L$.
 
 The initial parameters will be set to:
 
