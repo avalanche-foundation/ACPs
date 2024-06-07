@@ -82,7 +82,7 @@ The initial parameters for the P-Chain will be set to:
 | $L$ - max gas per second | TODO |
 | $K$ - change constant | TODO |
 
-As the network gains capacity to handle additional load (through the activation of future protocol enhancements), this algorithm can be tuned to increase the number of transactions that can be processed at a specific fee rate.
+As the network gains capacity to handle additional load, this algorithm can be tuned to increase the amount of gas that can be processed at a specific fee rate.
 
 #### A note on $e^x$
 
@@ -112,7 +112,7 @@ Instead of using a FIFO queue for the mempool (like the X-Chain and P-Chain do n
 
 Modfication of a fee mechanism is an execution change and requires a mandatory upgrade for activation. Implementers must take care to not alter the execution behavior prior to activation.
 
-After this ACP is activated, any transaction issued on the P-Chain or X-Chain must account for the fee mechanism defined above. Users are responsible for re-broadcasting transactions or re-constructing their transaction to include a larger fee.
+After this ACP is activated, any transaction issued on the P-Chain or X-Chain must account for the fee mechanism defined above. Users are responsible for re-constructing their transaction to include a larger fee for quicker inclusion when the fee increases.
 
 ## Reference Implementation
 
