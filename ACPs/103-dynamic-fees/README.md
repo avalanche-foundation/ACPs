@@ -46,7 +46,7 @@ $$x = \max(x - (T \cdot \Delta t), 0)$$
 
 Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block.
 
-The required fee per gas for block $b$ is:
+The gas fee for block $b$ is:
 
 $$M \cdot \exp\left(\frac{x}{K}\right)$$
 
@@ -62,24 +62,27 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, automatically dropping the price again. The gas price constantly adjusts to make sure that, on average, the blockchain uses $T$ gas per second.
 
-A max gas capacity $L$ is defined to limit the gas that can be used every $S$ seconds, placing a bound on the amount that the required fee can increase in $S$ seconds. A remaining gas capacity $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
+A gas limit constant $L$ is defined to limit the gas that can be used every $S$ seconds, bounding the amount that the gas fee can increase in $S$ seconds. A remaining gas capacity $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
 
 $$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
-Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. After $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
+Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas used in a $\Delta{t}$ time period can be determined by $r + \Delta{t} \cdot \frac{L}{S}$. The upper bound across all $\Delta{t}$ time periods is $L + \Delta{t} \cdot \frac{L}{S}$.
+
+After $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
 
 $$r = r - G$$
 
-A block gas limit does not need to be set as it is implicitly derived from $L$.
+A block gas limit does not need to be set as it is implicitly derived from $r$.
 
 The initial parameters will be set to:
 
 | Parameter | X-Chain | P-Chain |
 | - | - | - |
-| $M$ - minimum gas price | TODO | TODO |
 | $T$ - target gas usage per second | TODO | TODO |
-| $L$ per $S$ - max gas usage per time period | TODO | TODO |
-| $K$ - change constant | TODO | TODO |
+| $M$ - minimum gas price | TODO | TODO |
+| $K$ - gas price update constant | TODO | TODO |
+| $L$ - gas limit constant | TODO | TODO |
+| $S$ - gas limit time period | TODO | TODO |
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the amount of gas that can be processed at a specific fee rate.
 
@@ -87,7 +90,7 @@ As the network gains capacity to handle additional load, this algorithm can be t
 
 There is a subtle reason why an exponential adjustment function was chosen: The adjustment function should be _equally_ reactive irrespective of the actual fee.
 
-Define $b_n$ as the current block's required fee, $b_{n+1}$ as the next block's required fee, and $x$ as the excess gas usage.
+Define $b_n$ as the current block's gas fee, $b_{n+1}$ as the next block's gas fee, and $x$ as the excess gas usage.
 
 Let's use a linear adjustment function:
 
