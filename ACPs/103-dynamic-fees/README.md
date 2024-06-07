@@ -1,7 +1,7 @@
 ```text
 ACP: 103
 Title: Add Dynamic Fees to the X-Chain and P-Chain
-Author(s): Dhruba Basu (https://github.com/dhrubabasu), Stephen Buttolph (https//github.com/StephenButtolph), Alberto Benegiamo (https://github.com/abi87)
+Author(s): Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)
 Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
 Status: Proposed
 Track: Standards
@@ -112,7 +112,7 @@ Instead of using a FIFO queue for the mempool (like the X-Chain and P-Chain do n
 
 Modfication of a fee mechanism is an execution change and requires a mandatory upgrade for activation. Implementers must take care to not alter the execution behavior prior to activation.
 
-After this ACP is activated, any transaction issued on the P-Chain or X-Chain must account for the fee mechanism defined above. There is a concern of underpriced transactions filling the mempool and causing memory issues on nodes. To alleviate memory pressure, the mempool should be periodically cleared of underpriced transactions. Users are responsible for re-broadcasting underpriced transactions when the fee lowers or re-constructing their transaction to include a larger fee.
+After this ACP is activated, any transaction issued on the P-Chain or X-Chain must account for the fee mechanism defined above. Users are responsible for re-broadcasting transactions or re-constructing their transaction to include a larger fee.
 
 ## Reference Implementation
 
