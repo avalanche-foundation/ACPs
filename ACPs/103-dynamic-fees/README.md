@@ -34,7 +34,7 @@ For each transaction, gas ($G$) can be computed (TODO: The weights for each dime
 
 $$G = B + R + W + C$$
 
-A future ACP could remove the gas standardization to granularly meter usage of each resource in a multidimensional scheme.
+A future ACP could remove the merging of these dimensions and granularly meter usage of each resource in a multidimensional scheme.
 
 ### Mechanism
 
