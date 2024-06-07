@@ -62,25 +62,20 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, automatically dropping the price again. The gas price constantly adjusts to make sure that, on average, the blockchain uses $T$ gas per second.
 
-$L$ is defined as the maximum gas per second that the blockchain has capacity for. For monotonically increasing blocktimes (as on P-Chain and X-Chain), there may be multiple blocks issued at the same on-chain timestamp. $L$ limits the amount of gas that can be used at $t$, placing a bound on the amount that the required fee can increase from $t$ to $t'$. Once the chain has used $L$ amount of gas at time $t$, a new block will only be considered valid if its timestamp is at least $t + 1$.
+A max gas capacity $L$ is defined to limit the gas that can be used every $S$ seconds, placing a bound on the amount that the required fee can increase in $S$ seconds. A remaining gas capacity $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
 
-The initial parameters for the X-Chain will be set to:
+$$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
-| Parameter | Value |
-| - | - |
-| $M$ - minimum gas price | TODO |
-| $T$ - target gas per second | TODO |
-| $L$ - max gas per second | TODO |
-| $K$ - change constant | TODO |
+Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. After block $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, the block is considered invalid. There is no set gas limit for a block $b$ since it is implicitly derived from $L$.
 
-The initial parameters for the P-Chain will be set to:
+The initial parameters will be set to:
 
-| Parameter | Value |
-| - | - |
-| $M$ - minimum gas price | TODO |
-| $T$ - target gas per second | TODO |
-| $L$ - max gas per second | TODO |
-| $K$ - change constant | TODO |
+| Parameter | X-Chain | P-Chain |
+| - | - | - |
+| $M$ - minimum gas price | TODO | TODO |
+| $T$ - target gas usage per second | TODO | TODO |
+| $L$ per $S$ - max gas usage per time period | TODO | TODO |
+| $K$ - change constant | TODO | TODO |
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the amount of gas that can be processed at a specific fee rate.
 
