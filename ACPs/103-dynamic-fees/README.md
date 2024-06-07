@@ -28,7 +28,7 @@ There are four dimensions that will be used to approximate the computational cos
 1. `Bandwidth` ($B$) is the amount of network bandwidth used in transaction broadcast. This is set to the size of the transaction in bytes.
 2. `Reads` ($R$) is the number of state/database reads used in transaction execution.
 3. `Writes` ($W$) is the number of state/database writes used in transaction execution.
-4. `Compute` ($C$) is the total amount of compute used in transaction execution. This is set to the number of signatures verified during transaction execution.
+4. `Compute` ($C$) is the total amount of compute used to verify and execute a transaction.
 
 For each transaction, gas ($G$) can be computed (TODO: The weights for each dimension must be specified prior to this ACP being considered "Implementable"):
 
