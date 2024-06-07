@@ -1,7 +1,7 @@
 ```text
 ACP: 103
 Title: Add Dynamic Fees to the X-Chain and P-Chain
-Author(s): Dhruba Basu (https://github.com/dhrubabasu)
+Author(s): Dhruba Basu (https://github.com/dhrubabasu), Stephen Buttolph (https//github.com/StephenButtolph), Alberto Benegiamo (https://github.com/abi87)
 Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
 Status: Proposed
 Track: Standards
@@ -124,7 +124,7 @@ The existing fixed fee mechanism on the X-Chain and P-Chain have led to periods 
 
 ## Acknowledgements
 
-Thank you to [@abi87](https://github.com/abi87) for authoring the original [ACP-83](../83-dynamic-multidimensional-fees/README.md) that inspired this ACP. Thank you to [@StephenButtolph](https://github.com/StephenButtolph) for his invaluable contributions to the design of the fee mechanism. Thank you to [@aaronbuchwald](https://github.com/aaronbuchwald) and [@patrick-ogrady](https://github.com/patrick-ogrady) for providing feedback prior to publication.
+Thank you to [@aaronbuchwald](https://github.com/aaronbuchwald) and [@patrick-ogrady](https://github.com/patrick-ogrady) for providing feedback prior to publication.
 
 Thank you to the authors of [EIP-4844](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4844.md) for creating the fee design that inspired the above mechanism.
 
