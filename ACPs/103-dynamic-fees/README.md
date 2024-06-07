@@ -84,7 +84,7 @@ The initial parameters will be set to:
 | $L$ - gas limit constant | TODO | TODO |
 | $S$ - gas limit time period | TODO | TODO |
 
-As the network gains capacity to handle additional load, this algorithm can be tuned to increase the amount of gas that can be processed at a specific fee rate.
+As the network gains capacity to handle additional load, this algorithm can be tuned to increase the rate that gas can be processed.
 
 #### A note on $e^x$
 
