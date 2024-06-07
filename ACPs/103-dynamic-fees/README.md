@@ -25,12 +25,12 @@ The X-Chain and P-Chain currently operate under a fixed fee mechanism. To better
 
 There are four dimensions that will be used to approximate the computational cost ("gas" usage) of a transaction:
 
-1. `Bandwidth` or $B$ is the amount of network bandwidth used in transaction broadcast. This is set to the size of the transaction in bytes.
-2. `Reads` or $R$ is the number of state/database reads used in transaction execution.
-3. `Writes` or $W$ is the number of state/database writes used in transaction execution.
-4. `Compute` or $C$ is the total amount of compute used in transaction execution. This is set to the number of signatures verified during transaction execution.
+1. `Bandwidth` ($B) is the amount of network bandwidth used in transaction broadcast. This is set to the size of the transaction in bytes.
+2. `Reads` ($R$) is the number of state/database reads used in transaction execution.
+3. `Writes` ($W$) is the number of state/database writes used in transaction execution.
+4. `Compute` ($C$) is the total amount of compute used in transaction execution. This is set to the number of signatures verified during transaction execution.
 
-For each transaction, we then compute gas $G$ (TODO: The weights for each dimension must be specified prior to this ACP being considered "Implementable"):
+For each transaction, gas ($G$) can be computed (TODO: The weights for each dimension must be specified prior to this ACP being considered "Implementable"):
 
 $$G = B + R + W + C$$
 
