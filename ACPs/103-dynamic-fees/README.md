@@ -46,7 +46,7 @@ $$x = \max(x - (T \cdot \Delta t), 0)$$
 
 Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block.
 
-The gas fee for block $b$ is:
+The required fee per for block $b$ is:
 
 $$M \cdot \exp\left(\frac{x}{K}\right)$$
 
