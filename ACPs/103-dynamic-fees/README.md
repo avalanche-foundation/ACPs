@@ -17,7 +17,7 @@ Under a fixed fee mechanism, there is a greater likelihood of higher network con
 
 The C-Chain, in [Apricot Phase 3](https://medium.com/avalancheavax/apricot-phase-three-c-chain-dynamic-fees-432d32d67b60), employs a dynamic fee mechanism to raise the price during periods of high demand and lowering the price during periods of low demand. As the price gets too expensive, network utilization will decrease, which drops the price.
 
-The X-Chain and P-Chain currently operate under a fixed fee mechanism. To better handle increased load, they should be migrated to a dynamic fee mechanism. This migration should be done in tandem with [ACP-77](../77-reinventing-subnets/README.md) to ensure developers can account for the dynamic fee mechanism.
+The X-Chain and P-Chain currently operate under a fixed fee mechanism. To better handle increased load, they should be migrated to a dynamic fee mechanism.
 
 ## Specification
 
