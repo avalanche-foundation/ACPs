@@ -56,19 +56,19 @@ Where:
 - $\exp\left(x\right)$ is an approximation of $e^x$
 - $K$ is a constant to control the rate of change for gas price
 
-After processing block $b$, $x$ is updated with the total gas in the block $G$:
+After processing block $b$, $x$ is updated with the total gas consumed in the block $G$:
 
 $$x = x + G$$
 
-Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, automatically dropping the price again. The gas price constantly adjusts to make sure that, on average, the blockchain uses $T$ gas per second.
+Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, automatically dropping the price again. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
-A gas limit constant $L$ is defined to limit the gas that can be used every $S$ seconds, bounding the amount that the gas fee can increase in $S$ seconds. A remaining gas capacity $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
+A gas limit constant $L$ is defined to limit the gas that can be consumed every $S$ seconds, bounding the amount that the gas fee can increase in $S$ seconds. A remaining gas capacity variable $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
 
 $$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
-Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas used in a $\Delta{t}$ time period can be determined by $r + \Delta{t} \cdot \frac{L}{S}$. The upper bound across all $\Delta{t}$ time periods is $L + \Delta{t} \cdot \frac{L}{S}$.
+Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas consumed in $\Delta{t}$ is $r + \Delta{t} \cdot \frac{L}{S}$. The upper bound across all $\Delta{t}$ is $L + \Delta{t} \cdot \frac{L}{S}$.
 
-After $b$ is processed, the total gas amount used in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
+After $b$ is processed, the total gas consumed in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
 
 $$r = r - G$$
 
@@ -106,7 +106,7 @@ Assume $b_n = 100$ and the current block is 1 unit above target utilization, or 
 
 ### Block Building Procedure
 
-When a transaction is constructed on the X-Chain and P-Chain, the amount of $AVAX burned in a transaction is given by `sum($AVAX outputs) - sum($AVAX inputs)`. The amount of gas used by the transaction can also be deterministically calculated after construction. Dividing the amount of $AVAX burned by the amount of gas yields the maximum gas price that the transaction can pay.
+When a transaction is constructed on the X-Chain and P-Chain, the amount of $AVAX burned in a transaction is given by `sum($AVAX outputs) - sum($AVAX inputs)`. The amount of gas consumed by the transaction can also be deterministically calculated after construction. Dividing the amount of $AVAX burned by the amount of gas yields the maximum gas price that the transaction can pay.
 
 Instead of using a FIFO queue for the mempool (like the X-Chain and P-Chain do now), the mempool should be a priority queue ordered by the maximum gas price of each transaction. This ensures that higher paying transactions are included first.
 
