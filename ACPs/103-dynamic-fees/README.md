@@ -64,7 +64,7 @@ Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If
 
 A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without overflowing. At the beginning of processing block $b$, $r$ is set:
 
-$$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
+$$r = \min\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
 Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas consumed in $\Delta{t}$ is $r + \frac{L \cdot \Delta{t}}{S}$. The upper bound across all $\Delta{t}$ is $L + \frac{L \cdot \Delta{t}}{S}$.
 
