@@ -68,7 +68,7 @@ $$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
 Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas consumed in $\Delta{t}$ is $r + \Delta{t} \cdot \frac{L}{S}$. The upper bound across all $\Delta{t}$ is $L + \Delta{t} \cdot \frac{L}{S}$.
 
-After $b$ is processed, the total gas consumed in $b$, or $G$, will be known. If $r < G$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
+After $b$ is processed, the total gas consumed in $b$, or $G$, will be known. If $G > r$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
 
 $$r = r - G$$
 
