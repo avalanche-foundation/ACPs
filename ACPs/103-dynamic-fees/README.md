@@ -62,13 +62,13 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, automatically dropping the price again. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
-A gas limit constant $L$ is defined to limit the gas that can be consumed every $S$ seconds, bounding the amount that the gas fee can increase in $S$ seconds. A remaining gas capacity variable $r$ is defined to track the gas amount remaining for new blocks. At the beginning of processing block $b$, $r$ is set:
+A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without overflowing. At the beginning of processing block $b$, $r$ is set:
 
 $$r = \max\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
-Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas consumed in $\Delta{t}$ is $r + \Delta{t} \cdot \frac{L}{S}$. The upper bound across all $\Delta{t}$ is $L + \Delta{t} \cdot \frac{L}{S}$.
+Where $\Delta t$ is the number of seconds between $b$ and $b$'s parent block. The maximum gas consumed in $\Delta{t}$ is $r + \frac{L \cdot \Delta{t}}{S}$. The upper bound across all $\Delta{t}$ is $L + \frac{L \cdot \Delta{t}}{S}$.
 
-After $b$ is processed, the total gas consumed in $b$, or $G$, will be known. If $G > r$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
+After $b$ is processed, the total gas consumed in $b$, or $G$, will be known. If $G \gt r$, $b$ is considered invalid. If $b$ is valid, $r$ is updated:
 
 $$r = r - G$$
 
@@ -84,7 +84,7 @@ The initial parameters will be set to:
 | $L$ - gas limit constant | TODO | TODO |
 | $S$ - gas limit time period | TODO | TODO |
 
-As the network gains capacity to handle additional load, this algorithm can be tuned to increase the rate that gas can be processed.
+As the network gains capacity to handle additional load, this algorithm can be tuned to increase the gas consumption rate.
 
 #### A note on $e^x$
 
