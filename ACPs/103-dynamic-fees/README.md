@@ -13,7 +13,7 @@ Introduce a dynamic fee mechanism to the X-Chain and the P-Chain. Preview a futu
 
 ## Motivation
 
-Blockchains are computation-limited environments. Users are charged for the execution and inclusion of their transactions based on the blockchain's transaction fee mechanism. The mechanism should fluctuate based on supply and demand dynamics to serve as a deterrent against spam and denial-of-service attacks.
+Blockchains are resource-constrained environments. Users are charged for the execution and inclusion of their transactions based on the blockchain's transaction fee mechanism. The mechanism should fluctuate based on supply of and demand for said resources to serve as a deterrent against spam and denial-of-service attacks.
 
 With a fixed fee mechanism, users are provided with simplicity and predictability but network congestion and resource constraints are not taken into account. There is no incentive for users to withhold transactions since the cost is fixed regardless of the demand. The fee does not adjust the execution and inclusion fee of transactions to a market clearing price.
 
@@ -124,7 +124,7 @@ A full reference implementation has not been provided yet. It must be provided p
 
 ## Security Considerations
 
-The current fixed fee mechanism on the X-Chain and P-Chain does not robustly handle spikes in load. Switching these chains to a dynamic fee mechanism will stabilize the load over the long-term.
+The current fixed fee mechanism on the X-Chain and P-Chain does not robustly handle spikes in load. Switching these chains to a dynamic fee mechanism will ensure that load is properly priced given allotted processing capacity.
 
 ## Acknowledgements
 
