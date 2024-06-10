@@ -113,6 +113,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo|Standards|
 |[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard (https://github.com/Nuttymoon)|Meta|
+|[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)|Standards|
 
 ## Contributing
 
