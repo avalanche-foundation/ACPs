@@ -13,11 +13,13 @@ Introduce a dynamic fee mechanism to the X-Chain and the P-Chain. Preview a futu
 
 ## Motivation
 
-Under a fixed fee mechanism, there is a greater likelihood of higher network congestion. During periods of high demand, there is no economic incentive for users to withhold issuance of their transactions, extending the period of high demand.
+Blockchains are computation-limited environments. Users are charged for the execution and inclusion of their transactions based on the blockchain's transaction fee mechanism. The mechanism should fluctuate based on supply and demand dynamics to serve as a deterrent against spam and denial-of-service attacks.
 
-The C-Chain, in [Apricot Phase 3](https://medium.com/avalancheavax/apricot-phase-three-c-chain-dynamic-fees-432d32d67b60), employs a dynamic fee mechanism to raise the price during periods of high demand and lowering the price during periods of low demand. As the price gets too expensive, network utilization will decrease, which drops the price.
+With a fixed fee mechanism, users are provided with simplicity and predictability but network congestion and resource constraints are not taken into account. There is no incentive for users to withhold transactions since the cost is fixed regardless of the demand. The fee does not adjust the execution and inclusion fee of transactions to a market clearing price.
 
-The X-Chain and P-Chain currently operate under a fixed fee mechanism. To better handle increased load, they should be migrated to a dynamic fee mechanism.
+The C-Chain, in [Apricot Phase 3](https://medium.com/avalancheavax/apricot-phase-three-c-chain-dynamic-fees-432d32d67b60), employs a dynamic fee mechanism to raise the price during periods of high demand and lowering the price during periods of low demand. As the price gets too expensive, network utilization will decrease, which drops the price. This ensures the execution and inclusion fee of transactions closely matches the market clearing price.
+
+The X-Chain and P-Chain currently operate under a fixed fee mechanism. To more robustly handle spikes in load, they should be migrated to a dynamic fee mechanism.
 
 ## Specification
 
@@ -122,7 +124,7 @@ A full reference implementation has not been provided yet. It must be provided p
 
 ## Security Considerations
 
-The existing fixed fee mechanism on the X-Chain and P-Chain have led to periods of instability when larger transactions are accepted. Metering these transactions according to their computational cost or "gas" usage will remove those periods of instability at the cost of higher fees for users.
+The current fixed fee mechanism on the X-Chain and P-Chain does not robustly handle spikes in load. Switching these chains to a dynamic fee mechanism will stabilize the load over the long-term.
 
 ## Acknowledgements
 
