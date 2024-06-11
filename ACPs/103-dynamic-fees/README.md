@@ -25,14 +25,14 @@ The X-Chain and P-Chain currently operate under a fixed fee mechanism. To more r
 
 ### Dimensions
 
-There are four dimensions that will be used to approximate the computational cost, or "gas" consumption, of a transaction:
+There are four dimensions that will be used to approximate the computational cost of, or "gas" consumed in, a transaction:
 
 1. Bandwidth $B$ is the amount of network bandwidth used for transaction broadcast. This is set to the size of the transaction in bytes.
 2. Reads $R$ is the number of state/database reads used in transaction execution.
 3. Writes $W$ is the number of state/database writes used in transaction execution.
 4. Compute $C$ is the total amount of compute used to verify and execute a transaction.
 
-The gas consumption $G$ of a transaction is:
+The gas consumed $G$ in a transaction is:
 
 $$G = B + R + W + C$$
 
