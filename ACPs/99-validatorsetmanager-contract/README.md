@@ -24,10 +24,10 @@ This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https:/
 
 On each validator set change, the P-Chain generates a Warp message to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. These notification messages have not been specified to date.
 
-Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based (especially the C-Chain, on which we can expect most of the Subnet “validator manager” addresses will be hosted for security reasons), we propose defining a reference implementation for a Solidity smart contract that can:
+Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose defining a reference implementation for a Solidity smart contract that can:
 
 1. Hold relevant information about the current Subnet validator set, as well as historical information
-2. Send validator set updates by issuing transactions defined in ACP-77 to the P-Chain
+2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
 4. Be easily extended with custom “security modules” to implement any security model
 
