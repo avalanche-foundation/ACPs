@@ -25,22 +25,24 @@ The X-Chain and P-Chain currently operate under a fixed fee mechanism. To more r
 
 ### Dimensions
 
-There are four dimensions that will be used to approximate the computational cost, or "gas" usage, of a transaction:
+There are four dimensions that will be used to approximate the computational cost, or "gas" consumption, of a transaction:
 
 1. Bandwidth $B$ is the amount of network bandwidth used for transaction broadcast. This is set to the size of the transaction in bytes.
 2. Reads $R$ is the number of state/database reads used in transaction execution.
 3. Writes $W$ is the number of state/database writes used in transaction execution.
 4. Compute $C$ is the total amount of compute used to verify and execute a transaction.
 
-For each transaction, gas $G$ can be computed (TODO: The weights for each dimension must be specified prior to this ACP being considered "Implementable"):
+The gas consumption $G$ of a transaction is:
 
 $$G = B + R + W + C$$
+
+TODO: Each dimension will not be equally weighted as shown above. The correct weights for each dimension must be specified prior to this ACP being considered "Implementable"
 
 A future ACP could remove the merging of these dimensions to granularly meter usage of each resource in a multidimensional scheme.
 
 ### Mechanism
 
-This mechanism aims to maintain a target gas usage $T$ per second and adjusts the fee based on the excess gas usage $x$, defined as the difference between the current gas usage and $T$.
+This mechanism aims to maintain a target gas consumption $T$ per second and adjusts the fee based on the excess gas consumption $x$, defined as the difference between the current gas consumption and $T$.
 
 At the start of building/executing block $b$, $x$ is updated:
 
@@ -62,7 +64,7 @@ After processing block $b$, $x$ is updated with the total gas consumed in the bl
 
 $$x = x + G$$
 
-Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average usage drops, and $x$ starts decreasing, dropping the price. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
+Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average gas consumption drops, and $x$ starts decreasing, dropping the price. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
 A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing. At the beginning of processing block $b$, $r$ is set:
 
@@ -80,7 +82,7 @@ The parameters at activation are:
 
 | Parameter | X-Chain | P-Chain |
 | - | - | - |
-| $T$ - target gas usage per second | TODO | TODO |
+| $T$ - target gas consumed per second | TODO | TODO |
 | $M$ - minimum gas price | TODO | TODO |
 | $K$ - gas price update constant | TODO | TODO |
 | $L$ - gas limit constant | TODO | TODO |
@@ -92,7 +94,7 @@ As the network gains capacity to handle additional load, this algorithm can be t
 
 There is a subtle reason why an exponential adjustment function was chosen: The adjustment function should be _equally_ reactive irrespective of the actual fee.
 
-Define $b_n$ as the current block's gas fee, $b_{n+1}$ as the next block's gas fee, and $x$ as the excess gas usage.
+Define $b_n$ as the current block's gas fee, $b_{n+1}$ as the next block's gas fee, and $x$ as the excess gas consumption.
 
 Let's use a linear adjustment function:
 
