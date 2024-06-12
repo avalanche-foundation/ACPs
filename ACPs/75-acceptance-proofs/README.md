@@ -13,7 +13,7 @@ Introduces support for a proof of a block’s acceptance in consensus.
 
 ## Motivation
 
-Subnets are able to prove arbitrary events using warp messaging, but native support for proving block acceptance at the protocol layer enables more utility. Acceptance proofs can be used to prove a block's acceptance, which enables use-cases such as proving a subnet validator set to other subnets. One example use case for acceptance proofs within the primary network is to provide stronger fault isolation guarantees from the primary network to subnets.
+Subnets are able to prove arbitrary events using warp messaging, but native support for proving block acceptance at the protocol layer enables more utility. Acceptance proofs can be used to prove that a block has been accepted by a subnet. One example use case for acceptance proofs is to provide stronger fault isolation guarantees from the primary network to subnets.
 
 Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement soft leader election for block proposal. The ProposerVM determines the block producer schedule from a randomly shuffled validator set at a specified P-Chain block height. Validators are therefore required to have the P-Chain block referenced in a block's header to verify the block producer against the expected block producer schedule. If a block's header specifies a P-Chain height that has not been accepted yet, the block is treated as invalid. If a block referencing an unknown P-Chain height was produced virtuously, it is expected that the validator will eventually discover the block as its P-Chain height advances and accept the block.
 
