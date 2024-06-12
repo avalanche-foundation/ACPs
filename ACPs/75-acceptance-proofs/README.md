@@ -49,6 +49,12 @@ Figure 4: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 
 Note: The following is pseudocode.
 
+### ProposerVM
+
+The ProposerVM currently considers a block that references an unknown P-Chain height in its header as invalid. This behavior will change to consider an unknown P-Chain height invalid if we are unable to receive a proof for it.
+
+Upon receiving an unknown P-Chain height greater than the local P-Chain, a node will attempt to request the proofs between the locally accepted tip and the referenced P-Chain height from the block producer.
+
 ### P2P
 
 #### Aggregation
