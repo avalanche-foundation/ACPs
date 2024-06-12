@@ -27,7 +27,7 @@ Figure 1: A Validator that has synced P-Chain blocks `A` and `B` fails verificat
 
 ---
 
-We introduce "acceptance proofs", so that a peer can verify any block accepted by consensus. In the aforementioned use-case if a P-Chain block is unknown by a peer, it can request the block and corresponding proof at the provided height from a peer. If a block's proof is valid, the block can be executed to advance the local P-Chain and verify the proposed subnet block. Peers can request blocks from any peer without requiring consensus locally or communication with a validator. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
+We introduce "acceptance proofs", so that a peer can verify any block accepted by consensus. In the aforementioned use-case, if a P-Chain block is unknown by a peer, it can request the block and proof at the provided height from a peer. If a block's proof is valid, the block can be executed to advance the local P-Chain and verify the proposed subnet block. Peers can request blocks from any peer without requiring consensus locally or communication with a validator. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
 
 ---
 
