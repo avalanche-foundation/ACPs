@@ -53,7 +53,7 @@ Note: The following is pseudocode.
 
 The ProposerVM currently considers a block that references an unknown P-Chain height in its header as invalid.
 
-Following activation of this ACP, upon receiving an unknown P-Chain height greater than the local P-Chain a node will attempt to request the proofs between the locally accepted tip and the referenced P-Chain height from the block producer. The block verification behavior will change to only consider a block with an unknown referenced P-Chain height invalid if we are unable to receive the corresponding block and proof for it.
+Upon receiving an unknown P-Chain height greater than the local P-Chain, a node will now attempt to request the proofs between the locally accepted tip and the referenced P-Chain height from the block producer. Block verification behavior will change to only consider a block with an unknown referenced P-Chain height invalid if we are unable to receive the corresponding block and proof for it.
 
 ### P2P
 
