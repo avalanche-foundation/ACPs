@@ -75,7 +75,7 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 ```diff
 + message GetAcceptanceProofRequest {
 +   bytes chain_id = 1;
-+   bytes block_id = 2;
++   bytes height = 2;
 + }
 ```
 
