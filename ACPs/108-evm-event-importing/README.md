@@ -46,7 +46,7 @@ function importEvent(
 ```
 
 This interface does not require that the Warp precompile is used to authenticate block hashes. Implementations could:
-- Use the Warp precompile to authenticate block hashes provided in the transaction calling `importEvent`.
+- Use the Warp precompile to authenticate block hashes provided directly in the transaction calling `importEvent`.
 - Check previously authenticated block hashes using an external contract. 
     - Allows for a block hash to be authenticated once and used in arbitrarily many transactions afterwards.
     - Allows for alternative authentication mechanisms to be used, such as trusted oracles.
@@ -73,7 +73,7 @@ Applications importing EVM events emitted by other blockchains within Avalanche 
 - Verifying the Merkle `receiptProof` for the given `txIndex` against the receipt root of the provided `blockHeader`.
 - Decoding the event log identified by `logIndex` from the receipt obtained from verifying the `receiptProof`.
 
-As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes, or they could use the `sourceBlockchainID` and `blockHeader` providedin the parameters to check with an external contract that the block has been accepted on the given chain.
+As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes. Alternatively, they could use the `sourceBlockchainID` and `blockHeader` provided in the parameters to check with an external contract that the block has been accepted on the given chain.
 
 Inheriting contracts should only need to define the logic to be executed when an event is imported. This is done by providing an implementation of the following internal function, called by `importEvent`.
 
