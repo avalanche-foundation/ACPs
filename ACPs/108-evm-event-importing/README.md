@@ -2,7 +2,7 @@
 ACP: 108
 Title: EVM Event Importing Standard
 Author(s): Michael Kaplan (https://github.com/mkaplan13)
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/109
+Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
 Status: Proposed
 Track: Best Practices Track
 ```
@@ -13,7 +13,7 @@ Defines a standard smart contract interface and abstract implementation for impo
 
 ## Motivation
 
-The implementation of Avalanche Warp Messaging within `coreth` and `subnet-evm` exposes a [mechanism for getting authenticated hashes of blocks](https://github.com/ava-labs/subnet-evm/blob/master/contracts/contracts/interfaces/IWarpMessenger.sol#L43) that have been accepted on blockchains within Avalanche. There is currently no clear standard for using authenticated block hashes in smart contracts within Avalanche, making it difficult to build applications that leverage this mechanism. In order to make effective use of authenticated block hashes, contracts must be provided encoded block headers that match the authenticated block hashes and also Merkle proofs that are verified against the state or receipts root contained in the block header. 
+The implementation of Avalanche Warp Messaging within `coreth` and `subnet-evm` exposes a [mechanism for getting authenticated hashes of blocks](https://github.com/ava-labs/subnet-evm/blob/master/contracts/contracts/interfaces/IWarpMessenger.sol#L43) that have been accepted on blockchains within Avalanche. Proofs of acceptance of blocks, such as those introduced in [ACP-75](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/75-acceptance-proofs), can be used to prove arbitrary events and state changes that occured in those blocks. However, there is currently no clear standard for using authenticated block hashes in smart contracts within Avalanche, making it difficult to build applications that leverage this mechanism. In order to make effective use of authenticated block hashes, contracts must be provided encoded block headers that match the authenticated block hashes and also Merkle proofs that are verified against the state or receipts root contained in the block header. 
 
 With a standard interface and abstract contract implemetation that handles the authentication of block hashes and verification of Merkle proofs, smart contract developers on Avalanche will be able to much more easily create applications that leverage data from other Avalanche blockchains. These type of cross-chain application do not require any direct interaction on the source chain.
 
@@ -25,7 +25,16 @@ We propose that smart contracts importing EVM events emitted by other blockchain
 
 #### Methods
 
-Imports the EVM event uniquely identified by the source blockchain ID, block header, transaction index, and log index. The event data is provided in the `receiptProof`, which must be a valid Merkle proof of the receipt for the given `txIndex` against the receipt root of the `blockHeader`. Must emit an `EventImported` event upon success. Should validate that the `blockHeader` matches an authenticated block hash from the `sourceBlockchainID`.
+Imports the EVM event uniquely identified by the source blockchain ID, block header, transaction index, and log index.
+
+The `blockHeader` must be validated to match the authenticated block hash from the `sourceBlockchainID`. The specification for EVM block headers can be found [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/block.go#L73).
+
+The `txIndex` identifies the key of receipts trie of the given block header that the `receiptProof` must prove inclusion of. The value obtained by verifying the `receiptProof` for that key is the encoded transaction receipt. The specification for EVM transaction receipts can be found [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/receipt.go#L62).
+
+The `logIndex` identidies which event log from the given transaction receipt is to be imported.
+
+Must emit an `EventImported` event upon success. 
+
 ```solidity
 function importEvent(
     bytes32 sourceBlockchainID,
@@ -37,9 +46,11 @@ function importEvent(
 ```
 
 This interface does not require that the Warp precompile is used to authenticate block hashes. Implementations could:
-- Use an external block hash verification mechanism, such as trusted oracles.
 - Use the Warp precompile to authenticate block hashes provided in the transaction calling `importEvent`.
-- Look up previously authenticated block hashes from another contract, such that multiple events could be imported from the same block hash, which would only need to be authenticated once.
+- Check previously authenticated block hashes using an external contract. 
+    - Allows for a block hash to be authenticated once and used in arbitrarily many transactions afterwards.
+    - Allows for alternative authentication mechanisms to be used, such as trusted oracles.
+
 
 #### Events
 
@@ -56,11 +67,13 @@ event EventImported(
 
 ### Event Importing Abstract Contract
 
-Applications importing EVM events emitted by other blockchains within Avalanche should be able to use a standard abstract implementation of the `importEvent` interface. This abstract implementation should handle:
-- Authenticating block hashes from other chains using Warp precompile.
+Applications importing EVM events emitted by other blockchains within Avalanche should be able to use a standard abstract implementation of the `importEvent` interface. This abstract implementation must handle:
+- Authenticating block hashes from other chains.
 - Verifying that the encoded `blockHeader` matches the imported block hash.
 - Verifying the Merkle `receiptProof` for the given `txIndex` against the receipt root of the provided `blockHeader`.
 - Decoding the event log identified by `logIndex` from the receipt obtained from verifying the `receiptProof`.
+
+As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes, or they could use the `sourceBlockchainID` and `blockHeader` providedin the parameters to check with an external contract that the block has been accepted on the given chain.
 
 Inheriting contracts should only need to define the logic to be executed when an event is imported. This is done by providing an implementation of the following internal function, called by `importEvent`.
 
@@ -100,7 +113,7 @@ See [here](https://github.com/ava-labs/event-importer-poc?tab=readme-ov-file#ope
 
 The correctness of a contract using block hashes to prove that a specific event was emitted within that block depends on the correctness of:
 1. The mechanism for authenticating that a block hash was finalized on another blockchain.
-2. The Merkle proof validation library used to prove that a specific transactoin receipt was included in the given block.
+2. The Merkle proof validation library used to prove that a specific transaction receipt was included in the given block.
 
 For considerations on using Avalanche Warp Messaging to authenticate block hashes, see [here](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/30-avalanche-warp-x-evm#security-considerations).
 
