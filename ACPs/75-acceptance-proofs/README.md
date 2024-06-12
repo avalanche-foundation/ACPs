@@ -51,9 +51,6 @@ Note: The following is pseudocode.
 
 ### P2P
 
-The `Container` message is used to send a container with its corresponding
-acceptance proof.
-
 #### Aggregation
 
 ```diff
