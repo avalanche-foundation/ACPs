@@ -2,7 +2,7 @@
 ACP: 75
 Title: Acceptance Proofs
 Author(s): Joshua Kim
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/82
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/76
 Status: Proposed
 Track: Standards
 ```
@@ -13,11 +13,11 @@ Introduces support for a proof of a block’s acceptance in consensus.
 
 ## Motivation
 
-Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement a soft leader mechanism. The ProposerVM determines the block producer schedule from a randomly shuffled validator set for that subnet at each block height. The ProposerVM wrapper specifies the P-Chain height where it was verified.
+Subnets are currently able to prove arbitrary events using warp messaging but a useful primitive would be to natively support proving block acceptance to other subnets. One example use case is to use acceptance proofs to provide stronger failure isolation guarantees to subnets from the primary network.
 
-If a ProposerVM header specifies a P-Chain height that is not accepted from the node's perspective, then the block is treated as invalid until the P-Chain height advances.
+Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement a soft leader mechanism for block proposal. The ProposerVM determines the block producer schedule from a randomly shuffled validator set at a given P-Chain block height. When verifying a subnet block, validators are therefore required to have heard of any P-Chain block referenced in an accepted block's ProposerVM block header to verify that a valid leader produced the block. If a ProposerVM header specifies a P-Chain height that is not accepted from the node's perspective, then the block is treated as invalid, expecting that the validator will eventually discover the block as the validator's P-Chain height advances.
 
-If many nodes disagree about the current tip of the P-Chain, it can lead to a liveness failure where a subnet is not able to produce any blocks because nodes might have copies of the P-Chain that are out-of-sync with each other. In practice, this almost never happens because nodes produce blocks with a P-Chain height in the past, using a few blocks as a buffer since it’s likely that most nodes would have accepted an old block. This however, relies on an assumption that validators are constantly making progress in consensus to prevent the subnet from potentially stalling. This leaves an open concern where the P-Chain stalling on a node would prevent it from verifying any blocks, leading to a subnet potentially unable to produce blocks if many validators stalled at different heights due to a P-Chain outage.
+If many nodes disagree about the current tip of the P-Chain, this can lead to a liveness failure on the subnet where block production entirely stalls. In practice, this almost never happens because nodes produce blocks with a P-Chain height in the past, using a few blocks as a buffer since it’s likely that most nodes would have accepted an old block. This however, relies on an assumption that validators are constantly making progress in consensus on the P-Chain to prevent the subnet from stalling. This leaves an open concern where the P-Chain stalling on a node would prevent it from verifying any blocks, leading to a subnet unable to produce blocks if many validators stalled at different P-Chain heights.
 
 ---
 
@@ -27,7 +27,7 @@ Figure 1: A Validator that has synced P-Chain blocks `A` and `B` fails verificat
 
 ---
 
-We introduce "acceptance proofs" and add them to the ProposerVM header, so that a peer can verify any correctly produced block by verifying the corresponding P-Chain acceptance proofs. If a block’s proof is valid, the blocks can be executed in-order locally to verify the proposed subnet block. Peers can request blocks without explicitly communicating with a validator and verify them without running consensus locally. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
+We introduce "acceptance proofs", so that a peer can verify any block accepted by consensus. In the aforementioned use-case if a P-Chain block is unknown by a peer, it can request the block at the provided height and its corresponding proof from a peer. If a set of blocks' proofs are valid, the blocks can be executed in-order to advance the local P-Chain and verify the proposed subnet block. Peers can request blocks from any peer without requiring consensus locally or communication with a validator. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
 
 ---
 
@@ -48,20 +48,6 @@ Figure 4: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 ## Specification
 
 Note: The following is pseudocode.
-
-### ProposerVM
-
-The block header will include a proof-of-acceptance of the parent block which is
-a [Warp signature](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/README.md#awm-serialization) of the parent block id.
-
-```diff
-type BlockHeader struct {
-    PChainHeight    uint64
-    Timestamp       time.Time
-    Proposer        ids.NodeID
-+   AcceptanceProof warp.BitSetSignature
-  }
-```
 
 ### P2P
 
@@ -94,7 +80,8 @@ acceptance proof.
 
 ```diff
 + message GetAcceptanceSignatureRequest {
-+   bytes block_id = 1;
++   bytes chain_id = 1;
++   bytes block_id = 2;
 + }
 ```
 
@@ -102,7 +89,8 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 ```diff
 + message GetAcceptanceSignatureResponse {
-+   bytes bls_signature = 1;
++   bytes chain_id = 1;
++   bytes bls_signature = 2;
 + }
 ```
 
@@ -111,7 +99,8 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 #### Gossip
 ```diff
 + message GetAcceptanceProofRequest {
-+   bytes block_id = 1;
++   bytes chain_id = 1;
++   bytes block_id = 2;
 + }
 ```
 
@@ -119,7 +108,8 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 ```diff
 + message GetAcceptanceProofResponse {
-+   bytes acceptance_proof = 1;
++   bytes chain_id = 1;
++   bytes acceptance_proof = 2;
 + }
 ```
 
@@ -127,7 +117,8 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 ```diff
 + message AcceptanceProofGossip {
-+   bytes acceptance_proof = 1;
++   bytes chain_id = 1;
++   bytes acceptance_proof = 2;
 + }
 ```
 
