@@ -51,28 +51,6 @@ Note: The following is pseudocode.
 
 ### P2P
 
-#### Bootstrap
-
-```diff
-message Ancestors {
-    bytes chain_id = 1;
-    uint32 request_id = 2;
--   bytes containers = 3;
-+   reserved bytes containers = 3;
-+   repeated Container containers = 4;
-}
-```
-
-The `Ancestors` message is replaced with the `containers`
-field which will supply a set of containers with their corresponding proofs.
-
-```diff
-+ message Container {
-+   bytes container = 1;
-+   bytes warp_signature = 2;
-+ }
-```
-
 The `Container` message is used to send a container with its corresponding
 acceptance proof.
 
