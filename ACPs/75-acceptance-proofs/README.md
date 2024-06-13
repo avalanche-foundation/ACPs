@@ -49,12 +49,6 @@ Figure 4: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 
 Note: The following is pseudocode.
 
-### ProposerVM
-
-The ProposerVM currently considers a block that references an unknown P-Chain height in its header as invalid.
-
-Upon receiving an unknown P-Chain height greater than the local P-Chain, a node will now attempt to request the proofs between the locally accepted tip and the referenced P-Chain height from the block producer. Block verification behavior will change to only consider a block with an unknown referenced P-Chain height invalid if we are unable to receive the corresponding block and proof for it.
-
 ### P2P
 
 #### Aggregation
@@ -78,36 +72,6 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 ```
 
 `GetAcceptanceSignatureResponse` is sent to a peer as a response for `GetAcceptanceSignatureRequest`. `bls_signature` is the peer’s signature using their registered primary network BLS staking key over the requested `block_id`. An empty `bls_signature` field indicates that the block was not accepted yet.
-
-#### Gossip
-```diff
-+ message GetAcceptanceProofRequest {
-+   bytes chain_id = 1;
-+   bytes height = 2;
-+   uint32 request_id = 3;
-+ }
-```
-
-`GetAcceptanceProofRequest` requests an acceptance proof for `block_id` from a peer.
-
-```diff
-+ message GetAcceptanceProofResponse {
-+   bytes chain_id = 1;
-+   bytes acceptance_proof = 2;
-+   uint32 request_id = 3;
-+ }
-```
-
-`GetAcceptanceProofResponse` is sent in response to a `GetAcceptanceProofRequest` message. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the requested block id. An empty `acceptance_proof` field indicates that the peer does not have the requested acceptance proof.
-
-```diff
-+ message AcceptanceProofGossip {
-+   bytes chain_id = 1;
-+   bytes acceptance_proof = 2;
-+ }
-```
-
-`AcceptanceProofGossip` is sent once an aggregate signature has been generated. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the corresponding block id. `acceptance_proof` must be non-empty.
 
 ## Security Considerations
 
