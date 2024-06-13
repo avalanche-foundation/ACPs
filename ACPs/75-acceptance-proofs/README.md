@@ -63,6 +63,7 @@ Upon receiving an unknown P-Chain height greater than the local P-Chain, a node 
 + message GetAcceptanceSignatureRequest {
 +   bytes chain_id = 1;
 +   bytes block_id = 2;
++   uint32 request_id = 3;
 + }
 ```
 
@@ -72,6 +73,7 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 + message GetAcceptanceSignatureResponse {
 +   bytes chain_id = 1;
 +   bytes bls_signature = 2;
++   uint32 request_id = 3;
 + }
 ```
 
@@ -82,6 +84,7 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 + message GetAcceptanceProofRequest {
 +   bytes chain_id = 1;
 +   bytes height = 2;
++   uint32 request_id = 3;
 + }
 ```
 
@@ -91,6 +94,7 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 + message GetAcceptanceProofResponse {
 +   bytes chain_id = 1;
 +   bytes acceptance_proof = 2;
++   uint32 request_id = 3;
 + }
 ```
 
