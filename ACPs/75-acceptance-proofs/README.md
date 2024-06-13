@@ -109,10 +109,6 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 `AcceptanceProofGossip` is sent once an aggregate signature has been generated. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the corresponding block id. `acceptance_proof` must be non-empty.
 
-### Signature Aggregation
-
-TODO: An aggregation protocol must be included in this ACP prior to being `Implementable`.
-
 ## Security Considerations
 
 Nodes that bootstrap using state sync may not have the entire history of the
@@ -120,10 +116,6 @@ P-Chain and therefore will not be able to provide the entire history for a block
 that is referenced in a block that they propose. This would be needed to unblock a node that is attempting to fast-forward their P-Chain, as they require the entire ancestry between their current accepted tip and the block they are attempting to forward to. It is assumed that nodes will have some minimum amount of recent state so that the requester can eventually be unblocked by retrying, as only one node with the requested ancestry is required to unblock the requester.
 
 An alternative is to make a churn assumption and validate the proposed block's proof with a stale validator set to avoid complexity, but this introduces more security concerns.
-
-## Open Questions
-
-* How frequently should signatures be generated?
 
 ## Copyright
 
