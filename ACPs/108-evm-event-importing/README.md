@@ -31,7 +31,7 @@ The `blockHeader` must be validated to match the authenticated block hash from t
 
 The `txIndex` identifies the key of receipts trie of the given block header that the `receiptProof` must prove inclusion of. The value obtained by verifying the `receiptProof` for that key is the encoded transaction receipt. The specification for EVM transaction receipts can be found [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/receipt.go#L62).
 
-The `logIndex` identidies which event log from the given transaction receipt is to be imported.
+The `logIndex` identifies which event log from the given transaction receipt is to be imported.
 
 Must emit an `EventImported` event upon success. 
 
@@ -98,6 +98,8 @@ struct EVMEventInfo {
     EVMLog log;
 }
 ```
+
+The `EVMLog` tpye is meant to match the `Log` definition in the EVM [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/log.go#L39).
 
 ## Reference Implementation
 
