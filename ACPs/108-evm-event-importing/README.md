@@ -55,6 +55,7 @@ This interface does not require that the Warp precompile is used to authenticate
 #### Events
 
 Must trigger when an EVM event is imported.
+
 ```solidity
 event EventImported(
     bytes32 indexed sourceBlockchainID,
@@ -74,6 +75,7 @@ Applications importing EVM events emitted by other blockchains within Avalanche 
 - Decoding the event log identified by `logIndex` from the receipt obtained from verifying the `receiptProof`.
 
 As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes, as is done in the reference implementation [here](https://github.com/ava-labs/event-importer-poc/blob/main/contracts/src/EventImporter.sol#L51). Alternatively, implementations could use the `sourceBlockchainID` and `blockHeader` provided in the parameters to check with an external contract that the block has been accepted on the given chain. The specifics of such an external contract are outside the scope of this ACP, but for illustrative purposes, this could look along the lines of:
+
 ```solidity
 bool valid = blockHashRegistry.checkAuthenticatedBlockHash(
     sourceBlockchainID,
