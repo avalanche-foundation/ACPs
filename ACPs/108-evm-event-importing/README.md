@@ -73,7 +73,14 @@ Applications importing EVM events emitted by other blockchains within Avalanche 
 - Verifying the Merkle `receiptProof` for the given `txIndex` against the receipt root of the provided `blockHeader`.
 - Decoding the event log identified by `logIndex` from the receipt obtained from verifying the `receiptProof`.
 
-As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes. Alternatively, they could use the `sourceBlockchainID` and `blockHeader` provided in the parameters to check with an external contract that the block has been accepted on the given chain.
+As noted above, implementations could directly use the Warp precompile's `getVerifiedWarpBlockHash` interface method for authenticating block hashes, as is done in the reference implementation [here](https://github.com/ava-labs/event-importer-poc/blob/main/contracts/src/EventImporter.sol#L51). Alternatively, implementations could use the `sourceBlockchainID` and `blockHeader` provided in the parameters to check with an external contract that the block has been accepted on the given chain. The specifics of such an external contract are outside the scope of this ACP, but for illustrative purposes, this could look along the lines of:
+```solidity
+bool valid = blockHashRegistry.checkAuthenticatedBlockHash(
+    sourceBlockchainID,
+    keccack256(blockHeader)
+);
+require(valid, "Invalid block header");
+```
 
 Inheriting contracts should only need to define the logic to be executed when an event is imported. This is done by providing an implementation of the following internal function, called by `importEvent`.
 
@@ -99,7 +106,7 @@ struct EVMEventInfo {
 }
 ```
 
-The `EVMLog` tpye is meant to match the `Log` definition in the EVM [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/log.go#L39).
+The `EVMLog` struct is meant to match the `Log` type definition in the EVM [here](https://github.com/ava-labs/subnet-evm/blob/master/core/types/log.go#L39).
 
 ## Reference Implementation
 
