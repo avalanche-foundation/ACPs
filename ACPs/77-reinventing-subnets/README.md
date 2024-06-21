@@ -157,7 +157,7 @@ The `Message` field in the above transaction must be an Avalanche Warp Message u
                        +----------+
 ```
 
-- `messageID` is the sha256 hash of the warp message in the `RegisterSubnetValidatorTx` that registered the Subnet Validator
+- `messageID` is the sha256 hash of the warp message (subnetID + nodeID + weight + expiry + ed25519 signature, without the BLS multisig part) in the `RegisterSubnetValidatorTx` that registered the Subnet Validator
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction. The P-Chain state will store a `minNonce` associated with `messageID`. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` was set to `0` for `messageID`. `nonce` must satisfy `nonce >= minNonce` for `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a future transaction. When a Subnet Validator is removed from the active set (`weight == 0`), the `minNonce` and `messageID` will be removed from the P-Chain state. This state can be reaped during validator exit since `messageID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`.
 
 #### ExitValidatorSetTx
