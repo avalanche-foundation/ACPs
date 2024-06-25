@@ -18,7 +18,7 @@ To address this, a mechanism is proposed to generate verifiable, non-cryptograph
 
 ## Motivation
 
-Reliable randomness is essential for building exciting applications on Avalanche. Games, lotteries, and decentralized services all rely on unpredictable outcomes to function fairly. Randomness also fuels functionalities like unique identifiers and simulations. Without a secure way to generate random numbers within smart contracts, Avalanche applications become limited.
+Reliable randomness is essential for building exciting applications on Avalanche. Games, participant selection, dynamic content, supply chain managment, and decentralized services all rely on unpredictable outcomes to function fairly. Randomness also fuels functionalities like unique identifiers and simulations. Without a secure way to generate random numbers within smart contracts, Avalanche applications become limited.
 
 Avalanche's traditional reliance on external oracles for randomness creates complexity and bottlenecks. These oracles inflate costs, hinder transaction speed, and are cumbersome to integrate. As Avalanche scales to more Subnets, this dependence on external systems becomes increasingly unsustainable.
 
@@ -30,13 +30,31 @@ A solution for verifiable random number generation within Avalanche solves these
 
 Existing avalanche protocol breaks the block building into two parts : external and internal. The external block is the SnowMan++ block, whereas the internal block is the actual virtual machine block.
 
-To support randomness, a BLS based VRF implementation is used, that would be recursively signing its own signatures as its message. Since the BLS signatures are constant, they provide a great way to construct a reliable VRF.
+To support randomness, a BLS based VRF implementation is used, that would be recursively signing its own signatures as its message. Since the BLS signatures are deterministic, they provide a great way to construct a reliable VRF.
 
 For proposers that do not have a BLS key associated with their node, the hash of the signature from the previous round.
 
 In order to bootstrap the signatures chain, a missing signature would be replaced with a byte slice that is the hash product of a verifiable and trustable seed.
 
-The changes proposed here would affect the way a block is being validated. Therefore, when this change gets implemented, it needs to be deployed as a hard fork.
+The changes proposed here would affect the way a block is being validated. Therefore, when this change gets implemented, it needs to be deployed as a mandatory upgrade.
+
+```
+		+-----------------------+           +-----------------------+
+		|  Block n              | <-------- |  Block n+1            |
+		+-----------------------+           +-----------------------+
+		|  VRF-Sig(n)           |           |  VRF-Sig(n+1)         |
+		|  ...                  |           |  ...                  |
+		+-----------------------+           +-----------------------+
+
+		+-----------------------+           +-----------------------+
+		|  VM n                 |           |  VM n+1               |
+		+-----------------------+           +-----------------------+
+		|  VRF-Out(n)           |           |  VRF-Out(n+1)         |
+		+-----------------------+           +-----------------------+
+
+		VRF-Sig(n+1) = Sign(VRF-Sig(n), Block n+1 proposer's BLS key)
+		VRF-Out(n) = Hash(VRF-Sig(n))
+```
 
 ### Changes Details
 
@@ -45,7 +63,7 @@ The changes proposed here would affect the way a block is being validated. There
 ```golang
 type statelessUnsignedBlock struct {
 	…
-	signedParentBlockSig    []byte `serialize:”true”`
+	vrfSig    []byte `serialize:”true”`
 }
 ```
 
@@ -53,26 +71,26 @@ type statelessUnsignedBlock struct {
 
 When a block proposer attempts to build a new block, it would need to use the parent block as a reference.
 
-Populating the `signedParentBlockSig` would following this logic:
+Populating the `vrfSig` would following this logic:
 
 1. The current proposer has a BLS key
    
-	a. If the parent block has a valid `signedParentBlockSig` signature, that signature would be signed using the proposer’s BLS key.
+	a. If the parent block has an empty `vrfSig` signature, that signature would be signed using the proposer’s BLS key. This is the base case.
 
-	b. If the parent block does not have a valid `signedParentBlockSig` signature, the proposer would sign the bootStrappingBlockSignature with its BLS key ( see below )
+	b. If the parent block does not have an empty `vrfSig` signature, the proposer would sign the bootStrappingBlockSignature with its BLS key. See the bootStrappingBlockSignature details below.
 
 2. The current proposer does not have a BLS key
    
-   a. If the parent block has a valid `signedParentBlockSig` signature, the proposer would set the signedParentBlockSig to the hash result of the following preimage:
+   a. If the parent block has a non empty `vrfSig` signature, the proposer would set the proposed block `vrfSig` to the 48 byte hash result of the following preimage:
 	```
 	+-------------------------+----------+------------+
 	|  prefix :               | [8]byte  | "rng-derv" |
 	+-------------------------+----------+------------+
-	|  signedParentBlockSig : | [48]byte |  48 bytes  |
+	|  vrfSig :               | [48]byte |  48 bytes  |
 	+-------------------------+----------+------------+
 	```
 
-	b. If the parent block does not have a valid `signedParentBlockSig` signature, the proposer would leave the field empty.
+	b. If the parent block has an empty `vrfSig` signature, the proposer would leave the field empty.
 
 The bootStrappingBlockSignature that would be used above is the hash of the following preimage:
 
@@ -90,17 +108,17 @@ The bootStrappingBlockSignature that would be used above is the hash of the foll
 
 This signature verification would perform the exact opposite of what was done in step 2, and would verify the cryptographic correctness of the operation.
 
-Validating the `signedParentBlockSig` would following this logic:
+Validating the `vrfSig` would following this logic:
 1. The proposer has a BLS key
 
-	a. If the parent block had a valid `signedParentBlockSig`, then a BLS signature verification of the proposed block  `signedParentBlockSig` would be made against the proposer’s BLS public key and the parent block  `signedParentBlockSig` as the message.
-	b. If the parent block does not have a valid `signedParentBlockSig`, then a BLS signature verification of the proposed block  `signedParentBlockSig` against the proposer’s BLS public key and bootStrappingBlockSignature would take place.
+	a. If the parent block had a non empty `vrfSig`, then a BLS signature verification of the proposed block  `vrfSig` would be made against the proposer’s BLS public key and the parent's block  `vrfSig` as the message.
+	b. If the parent block does has an empty `vrfSig`, then a BLS signature verification of the proposed block `vrfSig` against the proposer’s BLS public key and bootStrappingBlockSignature would take place.
 
 2. The proposer does not have a BLS key
 
-	a. If the parent block had a valid `signedParentBlockSig`, then the preimage ( as described above ) would be compared against the proposed `signedParentBlockSig`.
+	a. If the parent block had a non empty `vrfSig`, then the hash of the preimage ( as described above ) would be compared against the proposed `vrfSig`.
 
-	b. If the parent block has no valid `signedParentBlockSig` then the proposer `signedParentBlockSig` would be validated to be empty.
+	b. If the parent block has an empty `vrfSig` then the proposer's `vrfSig` would be validated to be empty.
 
 #### Step 4. Extract the VRF Out and pass to block builders
 
@@ -110,15 +128,15 @@ Calculating the VRF Out would be done by hashing the preimage of the following s
 +-----------------------+----------+------------+
 |  prefix :             | [8]byte  | "vrfout  " |
 +-----------------------+----------+------------+
-|  signedParentBlockSig:| [48]byte |  48 bytes  |
+|  vrfout:              | [48]byte |  48 bytes  |
 +-----------------------+----------+------------+
 ```
 
-Before calculating the VRF Out, the method needs to explicitly check the case where the `signedParentBlockSig` is empty. In that case, the output of the VRF Out needs to be empty as well.
+Before calculating the VRF Out, the method needs to explicitly check the case where the `vrfSig` is empty. In that case, the output of the VRF Out needs to be empty as well.
 
 ## Backwards Compatibility
 
-The above design has taken backward compatibility considerations. The chain would keep working as before, and at some point, would have the newly added signedParentBlockSig populated.
+The above design has taken backward compatibility considerations. The chain would keep working as before, and at some point, would have the newly added `vrfSig` populated.
 
 From usage perspective, each VM would need to make its own decision on whether it should use the newly provided random seed. Initially, this random seed would be all zeros - and would get populated once the feature rolled out to a sufficient number of nodes.
 
@@ -130,10 +148,6 @@ Virtual machine random seeds, while appearing to offer a source of randomness wi
 - Predictability Window: The seed value might be accessible to other parties before the smart contract can benefit from its uniqueness. This predictability window creates a vulnerability. An attacker could potentially observe the seed generation process and predict the sequence of "random" numbers it will produce, compromising the entire cryptographic foundation of your smart contract.
 
 Despite these limitations appearing severe, attackers face significant hurdles to exploit them. First, the attacker can't control the random number, limiting the attack's effectiveness to how that number is used. Second, a substantial amount of AVAX is needed. And last, such an attack would likely decrease AVAX's value, hurting the attacker financially.
-
-## Open Questions
-
-Optional section that lists any concerns that should be resolved prior to implementation.
 
 ## Copyright
 
