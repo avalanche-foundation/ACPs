@@ -2,7 +2,7 @@
 ACP: 108
 Title: EVM Event Importing Standard
 Author(s): Michael Kaplan (https://github.com/mkaplan13)
-Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/114
 Status: Proposed
 Track: Best Practices Track
 ```
