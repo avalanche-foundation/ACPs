@@ -13,11 +13,11 @@ Introduces support for a proof of a block’s acceptance in consensus.
 
 ## Motivation
 
-Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement a soft leader mechanism. The ProposerVM determines the block producer schedule from a randomly shuffled validator set for that subnet at each block height. The ProposerVM wrapper specifies the P-Chain height where it was verified.
+Subnets are able to prove arbitrary events using warp messaging, but native support for proving block acceptance at the protocol layer enables more utility. Acceptance proofs are introduced to prove that a block has been accepted by a subnet. One example use case for acceptance proofs is to provide stronger fault isolation guarantees from the primary network to subnets.
 
-If a ProposerVM header specifies a P-Chain height that is not accepted from the node's perspective, then the block is treated as invalid until the P-Chain height advances.
+Subnets use the [ProposerVM](https://github.com/ava-labs/avalanchego/blob/416fbdf1f783c40f21e7009a9f06d192e69ba9b5/vms/proposervm/README.md) to implement soft leader election for block proposal. The ProposerVM determines the block producer schedule from a randomly shuffled validator set at a specified P-Chain block height. Validators are therefore required to have the P-Chain block referenced in a block's header to verify the block producer against the expected block producer schedule. If a block's header specifies a P-Chain height that has not been accepted yet, the block is treated as invalid. If a block referencing an unknown P-Chain height was produced virtuously, it is expected that the validator will eventually discover the block as its P-Chain height advances and accept the block.
 
-If many nodes disagree about the current tip of the P-Chain, it can lead to a liveness failure where a subnet is not able to produce any blocks because nodes might have copies of the P-Chain that are out-of-sync with each other. In practice, this almost never happens because nodes produce blocks with a P-Chain height in the past, using a few blocks as a buffer since it’s likely that most nodes would have accepted an old block. This however, relies on an assumption that validators are constantly making progress in consensus to prevent the subnet from potentially stalling. This leaves an open concern where the P-Chain stalling on a node would prevent it from verifying any blocks, leading to a subnet potentially unable to produce blocks if many validators stalled at different heights due to a P-Chain outage.
+If many validators disagree about the current tip of the P-Chain, it can lead to a liveness concern on the subnet where block production entirely stalls. In practice, this almost never occurs because nodes produce blocks with a lagging P-Chain height because it’s likely that most nodes will have accepted a sufficiently stale block. This however, relies on an assumption that validators are constantly making progress in consensus on the P-Chain to prevent the subnet from stalling. This leaves an open concern where the P-Chain stalling on a node would prevent it from verifying any blocks, leading to a subnet unable to produce blocks if many validators stalled at different P-Chain heights.
 
 ---
 
@@ -27,7 +27,7 @@ Figure 1: A Validator that has synced P-Chain blocks `A` and `B` fails verificat
 
 ---
 
-We introduce "acceptance proofs" and add them to the ProposerVM header, so that a peer can verify any correctly produced block by verifying the corresponding P-Chain acceptance proofs. If a block’s proof is valid, the blocks can be executed in-order locally to verify the proposed subnet block. Peers can request blocks without explicitly communicating with a validator and verify them without running consensus locally. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
+We introduce "acceptance proofs", so that a peer can verify any block accepted by consensus. In the aforementioned use-case, if a P-Chain block is unknown by a peer, it can request the block and proof at the provided height from a peer. If a block's proof is valid, the block can be executed to advance the local P-Chain and verify the proposed subnet block. Peers can request blocks from any peer without requiring consensus locally or communication with a validator. This has the added benefit of reducing the number of required connections and p2p message load served by P-Chain validators.
 
 ---
 
@@ -49,52 +49,15 @@ Figure 4: The Validator accepts the P-Chain blocks and is now able to verify `Z`
 
 Note: The following is pseudocode.
 
-### ProposerVM
-
-The block header will include a proof-of-acceptance of the parent block which is
-a [Warp signature](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/README.md#awm-serialization) of the parent block id.
-
-```diff
-type BlockHeader struct {
-    PChainHeight    uint64
-    Timestamp       time.Time
-    Proposer        ids.NodeID
-+   AcceptanceProof warp.BitSetSignature
-  }
-```
-
 ### P2P
-
-#### Bootstrap
-
-```diff
-message Ancestors {
-    bytes chain_id = 1;
-    uint32 request_id = 2;
--   bytes containers = 3;
-+   reserved bytes containers = 3;
-+   repeated Container containers = 4;
-}
-```
-
-The `Ancestors` message is replaced with the `containers`
-field which will supply a set of containers with their corresponding proofs.
-
-```diff
-+ message Container {
-+   bytes container = 1;
-+   bytes warp_signature = 2;
-+ }
-```
-
-The `Container` message is used to send a container with its corresponding
-acceptance proof.
 
 #### Aggregation
 
 ```diff
 + message GetAcceptanceSignatureRequest {
-+   bytes block_id = 1;
++   bytes chain_id = 1;
++   uint32 request_id = 2;
++   bytes block_id = 3;
 + }
 ```
 
@@ -102,40 +65,13 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 
 ```diff
 + message GetAcceptanceSignatureResponse {
-+   bytes bls_signature = 1;
++   bytes chain_id = 1;
++   uint32 request_id = 2;
++   bytes bls_signature = 3;
 + }
 ```
 
 `GetAcceptanceSignatureResponse` is sent to a peer as a response for `GetAcceptanceSignatureRequest`. `bls_signature` is the peer’s signature using their registered primary network BLS staking key over the requested `block_id`. An empty `bls_signature` field indicates that the block was not accepted yet.
-
-#### Gossip
-```diff
-+ message GetAcceptanceProofRequest {
-+   bytes block_id = 1;
-+ }
-```
-
-`GetAcceptanceProofRequest` requests an acceptance proof for `block_id` from a peer.
-
-```diff
-+ message GetAcceptanceProofResponse {
-+   bytes acceptance_proof = 1;
-+ }
-```
-
-`GetAcceptanceProofResponse` is sent in response to a `GetAcceptanceProofRequest` message. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the requested block id. An empty `acceptance_proof` field indicates that the peer does not have the requested acceptance proof.
-
-```diff
-+ message AcceptanceProofGossip {
-+   bytes acceptance_proof = 1;
-+ }
-```
-
-`AcceptanceProofGossip` is sent once an aggregate signature has been generated. `acceptance_proof` is a Warp Message with Hash payload that contains a hash field of the corresponding block id. `acceptance_proof` must be non-empty.
-
-### Signature Aggregation
-
-TODO: An aggregation protocol must be included in this ACP prior to being `Implementable`.
 
 ## Security Considerations
 
@@ -144,10 +80,6 @@ P-Chain and therefore will not be able to provide the entire history for a block
 that is referenced in a block that they propose. This would be needed to unblock a node that is attempting to fast-forward their P-Chain, as they require the entire ancestry between their current accepted tip and the block they are attempting to forward to. It is assumed that nodes will have some minimum amount of recent state so that the requester can eventually be unblocked by retrying, as only one node with the requested ancestry is required to unblock the requester.
 
 An alternative is to make a churn assumption and validate the proposed block's proof with a stale validator set to avoid complexity, but this introduces more security concerns.
-
-## Open Questions
-
-* How frequently should signatures be generated?
 
 ## Copyright
 
