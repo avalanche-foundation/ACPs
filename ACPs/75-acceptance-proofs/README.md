@@ -56,8 +56,8 @@ Note: The following is pseudocode.
 ```diff
 + message GetAcceptanceSignatureRequest {
 +   bytes chain_id = 1;
-+   bytes block_id = 2;
-+   uint32 request_id = 3;
++   uint32 request_id = 2;
++   bytes block_id = 3;
 + }
 ```
 
@@ -66,8 +66,8 @@ The `GetAcceptanceSignatureRequest` message is sent to a peer to request their s
 ```diff
 + message GetAcceptanceSignatureResponse {
 +   bytes chain_id = 1;
-+   bytes bls_signature = 2;
-+   uint32 request_id = 3;
++   uint32 request_id = 2;
++   bytes bls_signature = 3;
 + }
 ```
 
