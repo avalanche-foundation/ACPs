@@ -71,6 +71,8 @@ type statelessUnsignedBlock struct {
 
 When a block proposer attempts to build a new block, it would need to use the parent block as a reference.
 
+The `vrfSig` field within each block is going to be daisy-chained to the `vrfSig` field from it's parent block.
+
 Populating the `vrfSig` would following this logic:
 
 1. The current proposer has a BLS key
@@ -81,12 +83,12 @@ Populating the `vrfSig` would following this logic:
 
 2. The current proposer does not have a BLS key
    
-   a. If the parent block has a non empty `vrfSig` signature, the proposer would set the proposed block `vrfSig` to the 48 byte hash result of the following preimage:
+   a. If the parent block has a non empty `vrfSig` signature, the proposer would set the proposed block `vrfSig` to the 96 byte hash result of the following preimage:
 	```
 	+-------------------------+----------+------------+
 	|  prefix :               | [8]byte  | "rng-derv" |
 	+-------------------------+----------+------------+
-	|  vrfSig :               | [48]byte |  48 bytes  |
+	|  vrfSig :               | [96]byte |  96 bytes  |
 	+-------------------------+----------+------------+
 	```
 
@@ -128,7 +130,7 @@ Calculating the VRF Out would be done by hashing the preimage of the following s
 +-----------------------+----------+------------+
 |  prefix :             | [8]byte  | "vrfout  " |
 +-----------------------+----------+------------+
-|  vrfout:              | [48]byte |  48 bytes  |
+|  vrfout:              | [96]byte |  96 bytes  |
 +-----------------------+----------+------------+
 ```
 
