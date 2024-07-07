@@ -106,7 +106,7 @@ Now, let's use an exponential adjustment function:
 
 $$b_{n+1} = b_n \cdot e^x$$
 
-Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 \cdot e^1 \approx 271.828$, an increase of `171%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 \cdot e^1 \approx 27,182.8$, an increase of `171%` again. The fee is _equally_ reactive as the fee increases. This is because the rate of change scales _with_ $x$.
+Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 \cdot e^1 \approx 271.828$, an increase of `171%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 \cdot e^1 \approx 27,182.8$, an increase of `171%` again. The fee is _equally_ reactive as the fee increases. This is because the rate of change _scales_ with $x$.
 
 ### Block Building Procedure
 
