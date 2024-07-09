@@ -245,7 +245,7 @@ Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parame
 
 ### Continuous Fee Mechanism
 
-Every additional Subnet Validator on the P-Chain adds persistent load to the Avalanche Network. When a validator transaction is issued on the P-Chain, it is charged for the computational cost of the transaction itself but does not account for the cost of an active Subnet Validator over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains, spawning many state rent proposals in the broader blockchain space to address it. The following fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of computation and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
+Every additional Subnet Validator on the P-Chain adds persistent load to the Avalanche Network. When a validator transaction is issued on the P-Chain, it is charged for the computational cost of the transaction itself but is not charged for the cost of an active Subnet Validator over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains, spawning many state rent proposals in the broader blockchain space to address it. The following fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of computation and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
 
 To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterSubnetValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseBalanceTx`. When this `Balance` reaches `0`, the Subnet Validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseBalanceTx`. Once a Subnet Validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetSubnetValidatorWeightTx` (`Weight` = 0).
 
@@ -319,7 +319,7 @@ Where:
 - $\exp\left(x\right)$ is an approximation of $e^x$
 - $K$ is a constant to control the rate of change for the Subnet validator price
 
-Whenever $x$ increases by $K$, the price per active Subnet validator increases by a factor of `~2.7`. If the price per active Subnet validator gets too expensive, some active Subnet validators will exit from the active validator set, decreasing $x$, dropping the price. The price per active Subnet validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet validators.
+Whenever $x$ increases by $K$, the price per active Subnet validator increases by a factor of `~2.7`. If the price per active Subnet validator gets too expensive, some active Subnet validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet validators.
 
 The parameters at activation are:
 
@@ -338,11 +338,11 @@ A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modif
 
 The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. However, this isn't always true.
 
-Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ multiple Subnet Validators get removed within those `5` seconds. If `100` Subnet Validators are removed `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increase by `1000` + `4 * 900` = `4500`, not `5000`.
+Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ multiple Subnet Validators get removed within those `5` seconds. If `100` Subnet Validators are removed `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increased by `1000` + `4 * 900` = `4500`, not `5000`.
 
-To ensure that the correct fee is always charged per unit of time, blocks are considered valid if their timestamps are no greater than the time at which the first Subnet Validator gets removed from a lack of funds.
+To ensure that the correct fee is always charged per unit of time, blocks are considered valid if their timestamps are no greater than the time at which the first Subnet Validator gets removed from a lack of funds. This upholds the invariant that the number of Subnet Validators remains constant between blocks.
 
-The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If it does not, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
+The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If the wall clock time does remove any Subnet Validators, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
 
 #### User Experience
 
