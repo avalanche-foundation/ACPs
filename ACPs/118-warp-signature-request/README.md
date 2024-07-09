@@ -21,9 +21,7 @@ Another example is ACP-75, which aims to implement acceptance proofs using Warp.
 
 Standardizing the Warp Signature Request format by implementing it as an AppRequest type in AvlanahceGo would simplify the implementation of ACP-75, and streamline signature aggregation for out-of-protocol services such as Warp message relayers.
 
-## Specification
-
-### Signature Requests
+## Background
 Subnet EVM and Coreth currently handle Warp message signature requests from peers by decoding the `AppRequest` bytes (forwarded from Avalanchego via the `AppHandler` interface) using a types registered with their message codec:
 
 ```
@@ -34,25 +32,11 @@ type MessageSignatureRequest struct {
 and
 ```
 type BlockSignatureRequest struct {
-	blockID ids.ID
+	BlockID ids.ID
 }
 ```
 
-`MessageID` represents the VM-agnostic Warp message ID, and could be ported as-is to AvalancheGo. `BlockID` will instead be generalized to represent a 32-byte hash over some data. Interpreting that hash is left to VMs. For example, `Hash` could represent a transaction hash that a node only signs on receiving a `HashSignatureRequest`. 
-```
-type MessageSignatureRequest struct {
-	MessageID ids.ID
-}
-```
-and
-```
-type HashSignatureRequest struct {
-	Hash ids.ID
-}
-```
-
-### Signature Responses
-Similarly, Subnet EVM and Coreth reply to signature requets with `AppResponse` messages of the form:
+Signatures are provided via the following `AppResponse` message type:
 
 ```
 type SignatureResponse struct {
@@ -60,11 +44,33 @@ type SignatureResponse struct {
 }
 ```
 
-This type can be ported directly to AvalancheGo, as BLS signatures are the same length across all VMs.
+`MessageID` represents the VM-agnostic Warp message ID, while `BlockID` represents a block hash that nodes are willing to attest to via Warp signature. and could be ported as-is to AvalancheGo. `BlockID` can instead be generalized to represent a 32-byte hash over some data. Interpreting that hash is left to VMs. For example, `Hash` could represent a transaction hash that a node only signs on receiving a `HashSignatureRequest`. 
 
-### Implementation
+## Specificaiton
 
-These types should be implemented in AvalancheGo and exported for VMs and arbitrary aggregators to consume. A possible extension to encourage proper use would be to initialize a `WarpCodec` with these types, and export it such that VMs can extend it with additional `AppRequest` message tyeps.
+We take the types currently defined in Subnet EVM and Coreth, modify them to not be EVM specific, and implement them as `AppRequest` message types will be defined as Protobuf specs. Corresponding `AppRequest` handlers will need to be implemented.
+
+```
+message MessageSignatureRequest {
+	bytes message_id = 1;
+}
+```
+
+```
+message HashSignatureRequest struct {
+	bytes hash = 1;
+}
+```
+
+With the corresponding `AppResponse` type defined as:
+
+```
+message SignatureResponse {
+    bytes signature = 1;
+}
+```
+
+By way of example, this approach is currently used to [implement](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/sdk/sdk.proto#7) and [parse](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/gossip/message.go#22) gossip `AppRequest` types.
 
 ## Security Considerations
 TODO
