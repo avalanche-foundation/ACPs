@@ -4,12 +4,12 @@ Title: Warp Signature Interface Standard
 Author(s): Cam Schultz (https://github.com/cam-schultz)
 Discussions-To: 
 Status: Proposed
-Track: Standards Track
+Track: Best Practices Track
 ```
 
 ## Abstract
 
-Proposes handling Warp signature requests from peers at the protocol level, rather than leaving it to VMs to implement. This will standardize the signature request interface, allowing for more flexible, VM-agnostic signature aggregation implementations.
+Proposes a standard Warp signature request AppRequest types so that Warp signatures may be requested in a VM-agnostic manner. To make this concrete, this standard type should be defined in AvalancheGo such that VMs can import it at the source code level. This will also simplify external signature aggregator implementations by allowing them to depend only on AvalancheGo for message construction, rather than individual VM codecs.
 
 ## Motivation
 
@@ -19,55 +19,44 @@ This creates friction in applications that are intended to operate across many V
 
 Another example is ACP-75, which aims to implement acceptance proofs using Warp. The signature aggregation mechanism is not [specified](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/75-acceptance-proofs/README.md#signature-aggregation), which is a blocker for that ACP to be marked implementable.
 
-Standardizing the Warp Signature Request format by implementing it as a protocol-level (AvalancheGo) AppRequest type would simplify the implementation of ACP-75, and streamline signature aggregation for out-of-protocol services such as Warp message relayers.
+Standardizing the Warp Signature Request format by implementing it as an AppRequest type in AvlanahceGo would simplify the implementation of ACP-75, and streamline signature aggregation for out-of-protocol services such as Warp message relayers.
 
 ## Specification
 
-Subnet EVM and Coreth currently handle Warp message signature requests from peers by decoding the `AppRequest` bytes (forwarded from Avalanchego via the `AppHandler` interface) using a type registered with the message codec:
+Subnet EVM and Coreth currently handle Warp message signature requests from peers by decoding the `AppRequest` bytes (forwarded from Avalanchego via the `AppHandler` interface) using a types registered with their message codec:
 
 ```
 type MessageSignatureRequest struct {
 	MessageID ids.ID `serialize:"true"`
 }
 ```
-
-`MessageID` represents the VM-agnostic Warp message ID, and could be ported as-is to the protocol. To do so, we would [define](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/p2p/p2p.proto) a new P2P `Message` type:
-
-```diff
-message Message {
-    ...
-    // App messages:
-    AppRequest app_request = 30;
-    AppResponse app_response = 31;
-    AppGossip app_gossip = 32;
-    AppError app_error = 34;
-    
-+   // Warp signature messages:
-+   MessageSignatureRequest = 35;
+and
+```
+type BlockSignatureRequest struct {
+	blockID ids.ID `serialize:"true"`
 }
 ```
 
-Where `MessageSignatureRequest` is defined identically to Subnet EVM/Coreth:
+`MessageID` represents the VM-agnostic Warp message ID, and could be ported as-is to AvalancheGo. `BlockID` will instead be generalized to represent a 32-byte hash over some data. Interpreting that hash is left to VMs. For example, `Hash` could represent a transaction hash that a node only signs on receiving a `HashSignatureRequest`. 
 ```
-message MessageSignature {
-    bytes message_id = 1;
+type MessageSignatureRequest struct {
+	MessageID ids.ID `serialize:"true"`
+}
+```
+and
+```
+type HashSignatureRequest struct {
+	Hash ids.ID `serialize:"true"`
 }
 ```
 
-From there, the `MessageSignatureRequest` would be forwarded to the VM to retreive the signature.
-
-## Open Questions
-
-How should signature requests be forwarded to the VM? Here are a couple of candidates:
-- RPC Chain VM and Platform VM use the `Signer` [service](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/warp/message.proto) to issue and response to signature requests. Subnet EVM and Coreth could be modified to use this service.
-- Subnet EVM and Coreth currently [implement](https://github.com/ava-labs/subnet-evm/blob/v0.6.6/peer/network.go) `AppHandler` to directly receive other p2p messages. A `SignatureHandler` interface could be provided for VMs to implement.
-
-In addition to generic Warp message signature request handling, Subnet EVM and Coreth also implement handling for Warp messages whose payload consists solely of a block hash. This is provides first class support for state verification via Warp in the VM. The proposed `MessageSignatureRequest` p2p message type does not distinguish between Warp message payload types, so it would be left to the VM to make that distinction.
+These types should be implemented in AvalancheGo and exported for VMs and arbitrary aggregators to consume. A possible extension to encourage proper use would be to initialize a `WarpCodec` with these types, and export it such that VMs can extend it with additional `AppRequest` message tyeps.
 
 ## Security Considerations
+TODO
 
 ## Backwards Compatibility
-This change is backwards compatible, though nodes that do not implement `MessageSignatureRequest` as described will drop incoming requests. 
+This change is backwards compatible for VMs, as nodes running older versions that do not support the new message types will simply drop incoming messages.
 
 ## Reference Implementation
 
