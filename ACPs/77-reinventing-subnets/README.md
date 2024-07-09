@@ -297,16 +297,16 @@ class ValidatorQueue:
 
 #### Fee Algorithm
 
-[ACP-103](../103-dynamic-fees/README.md) proposes a dynamic fee mechanism for transactions on the P-Chain. This mechanism is repurposed with minor modifications for the active Subnet validator continuous fee.
+[ACP-103](../103-dynamic-fees/README.md) proposes a dynamic fee mechanism for transactions on the P-Chain. This mechanism is repurposed with minor modifications for the active Subnet Validator continuous fee.
 
-At the start of building/executing block $b$, the number of excess active Subnet validators $x$ is updated:
+At the start of building/executing block $b$, the number of excess active Subnet Validators $x$ is updated:
 
 $$x = \max(x + (V - T) \cdot \Delta t, 0)$$
 
 Where:
 
-- $V$ is the number of active Subnet validators prior to the execution of block $b$
-- $T$ is the target number of active Subnet validators
+- $V$ is the number of active Subnet Validators prior to the execution of block $b$
+- $T$ is the target number of active Subnet Validators
 - $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
 
 The fee per Subnet Validator from $b$'s parent's block timestamp to $b$'s block timestamp is:
@@ -315,11 +315,11 @@ $$M \cdot \exp\left(\frac{x}{K}\right)$$
 
 Where:
 
-- $M$ is the minimum price for an active Subnet validator
+- $M$ is the minimum price for an active Subnet Validator
 - $\exp\left(x\right)$ is an approximation of $e^x$
-- $K$ is a constant to control the rate of change for the Subnet validator price
+- $K$ is a constant to control the rate of change for the Subnet Validator price
 
-Whenever $x$ increases by $K$, the price per active Subnet validator increases by a factor of `~2.7`. If the price per active Subnet validator gets too expensive, some active Subnet validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet validators.
+Whenever $x$ increases by $K$, the price per active Subnet Validator increases by a factor of `~2.7`. If the price per active Subnet Validator gets too expensive, some active Subnet Validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet Validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet Validators.
 
 The parameters at activation are:
 
