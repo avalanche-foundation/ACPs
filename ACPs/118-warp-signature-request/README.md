@@ -23,32 +23,46 @@ Standardizing the Warp Signature Request format by implementing it as an AppRequ
 
 ## Specification
 
+### Signature Requests
 Subnet EVM and Coreth currently handle Warp message signature requests from peers by decoding the `AppRequest` bytes (forwarded from Avalanchego via the `AppHandler` interface) using a types registered with their message codec:
 
 ```
 type MessageSignatureRequest struct {
-	MessageID ids.ID `serialize:"true"`
+	MessageID ids.ID
 }
 ```
 and
 ```
 type BlockSignatureRequest struct {
-	blockID ids.ID `serialize:"true"`
+	blockID ids.ID
 }
 ```
 
 `MessageID` represents the VM-agnostic Warp message ID, and could be ported as-is to AvalancheGo. `BlockID` will instead be generalized to represent a 32-byte hash over some data. Interpreting that hash is left to VMs. For example, `Hash` could represent a transaction hash that a node only signs on receiving a `HashSignatureRequest`. 
 ```
 type MessageSignatureRequest struct {
-	MessageID ids.ID `serialize:"true"`
+	MessageID ids.ID
 }
 ```
 and
 ```
 type HashSignatureRequest struct {
-	Hash ids.ID `serialize:"true"`
+	Hash ids.ID
 }
 ```
+
+### Signature Responses
+Similarly, Subnet EVM and Coreth reply to signature requets with `AppResponse` messages of the form:
+
+```
+type SignatureResponse struct {
+	Signature [bls.SignatureLen]byte
+}
+```
+
+This type can be ported directly to AvalancheGo, as BLS signatures are the same length across all VMs.
+
+### Implementation
 
 These types should be implemented in AvalancheGo and exported for VMs and arbitrary aggregators to consume. A possible extension to encourage proper use would be to initialize a `WarpCodec` with these types, and export it such that VMs can extend it with additional `AppRequest` message tyeps.
 
