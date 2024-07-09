@@ -245,9 +245,7 @@ Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parame
 
 ### Continuous Fee Mechanism
 
-Currently, the P-Chain operates under a fixed fee mechanism for each transaction type. There are discussions to introduce a [dynamic multi-dimensional fee](https://github.com/avalanche-foundation/ACPs/discussions/69) to the P-Chain. The total number of Subnet Validators on the P-Chain should be considered in that dynamic fee mechanism. Through these dimensions, a standard charge that all Subnet Validators will pay will be calculated by the network based on network activity, commonly referred to as a "base fee". This base fee will move up when the total number of Subnet Validators is above target utilization and move down when the total number of Subnet Validators is below target utilization.
-
-Each additional Subnet Validator on the P-Chain adds load to the network. The discussions for the dynamic multi-dimensional fee charge when a transaction is instantiated but there isn't a solution for charging Subnet Validators for the space they are using over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains and there have been many state rent proposals in the broader blockchain space to address it. This fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of state and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
+Every additional Subnet Validator on the P-Chain adds persistent load to the Avalanche Network. When a validator transaction is issued on the P-Chain, it is charged for the computational cost of the transaction itself but does not account for the cost of an active Subnet Validator over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains, spawning many state rent proposals in the broader blockchain space to address it. The following fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of computation and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
 
 To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterSubnetValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseBalanceTx`. When this `Balance` reaches `0`, the Subnet Validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseBalanceTx`. Once a Subnet Validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetSubnetValidatorWeightTx` (`Weight` = 0).
 
@@ -296,6 +294,55 @@ class ValidatorQueue:
         vdr.balance = vdr.balance + balance
         self.queue.add(vdr)
 ```
+
+#### Fee Algorithm
+
+[ACP-103](../103-dynamic-fees/README.md) proposes a dynamic fee mechanism for transactions on the P-Chain. This mechanism is repurposed with minor modifications for the active Subnet validator continuous fee.
+
+At the start of building/executing block $b$, the number of excess active Subnet validators $x$ is updated:
+
+$$x = \max(x + (V - T) \cdot \Delta t, 0)$$
+
+Where:
+
+- $V$ is the number of active Subnet validators prior to the execution of block $b$
+- $T$ is the target number of active Subnet validators
+- $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
+
+The fee per Subnet Validator from $b$'s parent's block timestamp to $b$'s block timestamp is:
+
+$$M \cdot \exp\left(\frac{x}{K}\right)$$
+
+Where:
+
+- $M$ is the minimum price for an active Subnet validator
+- $\exp\left(x\right)$ is an approximation of $e^x$
+- $K$ is a constant to control the rate of change for the Subnet validator price
+
+Whenever $x$ increases by $K$, the price per active Subnet validator increases by a factor of `~2.7`. If the price per active Subnet validator gets too expensive, some active Subnet validators will exit from the active validator set, decreasing $x$, dropping the price. The price per active Subnet validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet validators.
+
+The parameters at activation are:
+
+| Parameter | Value |
+| - | - |
+| $T$ | `10000` Subnet Validators |
+| $C$ | `20000` Subnet Validators |
+| $M$ | `2048` nAVAX/s (`0.1769472` AVAX/day) |
+| $K$ | `60_480_000_000` |
+
+These parameters air on the conservative side as a precautionary measure to ensure network stability during activation. `60_480_000_000` was chosen for $K$ to have the validator fee increase by a factor of `~2.7` after a full week of being at $C$ or `20000` Subnet Validators. At activation, this should strike a good balance between preventing squatting and spikiness of the continuous fee.
+
+A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modify $K$.
+
+#### Block Timestamp Validity Change
+
+The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. However, this isn't always true.
+
+Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ multiple Subnet Validators get removed within those `5` seconds. If `100` Subnet Validators are removed `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increase by `1000` + `4 * 900` = `4500`, not `5000`.
+
+To ensure that the correct fee is always charged per unit of time, blocks are considered valid if their timestamps are no greater than the time at which the first Subnet Validator gets removed from a lack of funds.
+
+The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If it does not, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
 
 #### User Experience
 
