@@ -34,27 +34,6 @@ With no Elastic Subnets live on Mainnet, it is clear that Permissionless Subnets
 
 ## Specification
 
-- [Separate Subnet Validators from Primary Network Validators](#separate-subnet-validators-from-primary-network-validators)
-  - [Bootstrapping Subnet Nodes](#bootstrapping-subnet-nodes)
-- [Setting a Subnet Manager](#setting-a-subnet-manager)
-  - [SetSubnetManagerTx](#setsubnetmanagertx)
-- [Recovering a Subnet](#recovering-a-subnet)
-  - [RecoverSubnetTx](#recoversubnettx)
-- [Adding Subnet Validators](#adding-subnet-validators)
-  - [RegisterSubnetValidatorTx](#registersubnetvalidatortx)
-- [Modifying Subnet Validators](#modifying-subnet-validators)
-  - [SetSubnetValidatorWeightTx](#setsubnetvalidatorweighttx)
-- [Removing Subnet Validators](#removing-subnet-validators)
-  - [SetSubnetValidatorWeightTx (Weight = 0)](#setsubnetvalidatorweighttx-weight--0)
-  - [ExitValidatorSetTx](#exitvalidatorsettx)
-- [Managing Subnet Validator Balance](#managing-subnet-validator-balance)
-  - [IncreaseBalanceTx](#increasebalancetx)
-- [Sidebar: Subnet Sovereignty](#sidebar-subnet-sovereignty)
-- [Continuous Fee Mechanism](#continuous-fee-mechanism)
-  - [Fee Algorithm](#fee-algorithm)
-  - [Block Timestamp Validity Change](#block-timestamp-validity-change)
-  - [User Experience](#user-experience)
-
 ### Separate Subnet Validators from Primary Network Validators
 
 Subnet Validators will only be required to sync the P-chain (not X/C-Chain) to track any validator set changes in their Subnet and to support Cross-Subnet communication via Avalanche Warp Messaging (see "Primary Network Partial Sync" mode introduced in [Cortina 8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)). The lower resource requirement in this "minimal mode" will provide Subnets with greater flexibility of validation hardware requirements as operators are not required to reserve any resources for C-Chain/X-Chain operation. Since Subnet Validators are no longer required to validate or sync the Primary Network, the 2000 $AVAX requirement can be removed. To meter the number of Subnet Validators on the network, a significantly lower, continuous fee is introduced later in this ACP.
