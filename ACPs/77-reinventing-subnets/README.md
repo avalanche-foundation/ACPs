@@ -418,7 +418,7 @@ Suppose the network currently has `11000` Subnet Validators. With $T$ being `100
 
 To ensure that the correct fee is always charged per unit of time, blocks are considered valid if their timestamps are no greater than the time at which the first Subnet Validator gets removed from a lack of funds. This upholds the invariant that the number of Subnet Validators remains constant between blocks.
 
-The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If the wall clock time does remove any Subnet Validators, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
+The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If the wall clock time does not remove any Subnet Validators, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
 
 #### User Experience
 
