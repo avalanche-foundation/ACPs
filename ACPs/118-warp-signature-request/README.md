@@ -44,21 +44,25 @@ type SignatureResponse struct {
 }
 ```
 
-`MessageID` represents the VM-agnostic Warp message ID, while `BlockID` represents a block hash that nodes are willing to attest to via Warp signature. and could be ported as-is to AvalancheGo. `BlockID` can instead be generalized to represent a 32-byte hash over some data. Interpreting that hash is left to VMs. For example, `Hash` could represent a transaction hash that a node only signs on receiving a `HashSignatureRequest`. 
+`MessageID` represents the VM-agnostic Warp message ID, while `BlockID` represents a block hash that nodes are willing to attest to via Warp signature.
 
-## Specificaiton
+## Specification
 
-We take the types currently defined in Subnet EVM and Coreth, modify them to not be EVM specific, and implement them as `AppRequest` message types will be defined as Protobuf specs. Corresponding `AppRequest` handlers will need to be implemented.
+Taking the types currently defined in Subnet EVM and Coreth as a starting point, we observe that `MessageSignatureRequest` represents a request for a signature over an existing (unsigned) Warp message, that the requested node is already aware of, and whose Warp message ID the requester knows ahead of time. On the other hand, `BlockSignatureRequest` represents a request for a signature over data that may not be represented as a Warp message by the requested node at request time, but rather would be used to construct a Warp message on the fly.
+
+`MessageSignatureRequest` accepts a Warp message ID, which is derived from an existing Warp message. We assume that the requested node is able to map the Warp message ID to the full Warp message, and return the signature.
 
 ```
 message MessageSignatureRequest {
-	bytes message_id = 1;
+	bytes warp_message_id = 1;
 }
 ```
 
+`SignatureRequest` accepts arbitrary bytes that the requested node signs directly, if it is willing to do so. The bytes effectively represent a serialized unsigned Warp message that the requested node may not already be aware of a priori. For instance, if the requester wishes to construct a Warp message attesting to an arbitrary on-chain event, the node will not generally already have a corresponding Warp message constructed. In such cases, the `SignatureRequest` message type may be used to construct Warp messages, starting with gathering signatures.
+
 ```
-message HashSignatureRequest struct {
-	bytes hash = 1;
+message SignatureRequest struct {
+	bytes data = 1;
 }
 ```
 
