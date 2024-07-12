@@ -9,7 +9,7 @@ Track: Best Practices Track
 
 ## Abstract
 
-Proposes a standard Warp signature request AppRequest types so that Warp signatures may be requested in a VM-agnostic manner. To make this concrete, this standard type should be defined in AvalancheGo such that VMs can import it at the source code level. This will also simplify external signature aggregator implementations by allowing them to depend only on AvalancheGo for message construction, rather than individual VM codecs.
+Proposes standard [AppRequest](https://github.com/ava-labs/avalanchego/blob/master/proto/p2p/p2p.proto#L385) payload format types for requesting Warp signatures by Warp message ID and over the provided bytes, such that signatures may be requested in a VM-agnostic manner. To make this concrete, this standard type should be defined in AvalancheGo such that VMs can import it at the source code level. This will also simplify external signature aggregator implementations by allowing them to depend only on AvalancheGo for message construction, rather than individual VM codecs.
 
 ## Motivation
 
@@ -19,7 +19,7 @@ This creates friction in applications that are intended to operate across many V
 
 Another example is ACP-75, which aims to implement acceptance proofs using Warp. The signature aggregation mechanism is not [specified](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/75-acceptance-proofs/README.md#signature-aggregation), which is a blocker for that ACP to be marked implementable.
 
-Standardizing the Warp Signature Request format by implementing it as an AppRequest type in AvlanahceGo would simplify the implementation of ACP-75, and streamline signature aggregation for out-of-protocol services such as Warp message relayers.
+Standardizing the Warp Signature Request interface by defining it as a format for `AppRequest` message payloads in AvalancheGo would simplify the implementation of ACP-75, and streamline signature aggregation for out-of-protocol services such as Warp message relayers.
 
 ## Background
 Subnet EVM and Coreth currently handle Warp message signature requests from peers by decoding the `AppRequest` bytes (forwarded from Avalanchego via the `AppHandler` interface) using a types registered with their message codec:
@@ -48,33 +48,35 @@ type SignatureResponse struct {
 
 ## Specification
 
-Taking the types currently defined in Subnet EVM and Coreth as a starting point, we observe that `MessageSignatureRequest` represents a request for a signature over an existing (unsigned) Warp message, that the requested node is already aware of, and whose Warp message ID the requester knows ahead of time. On the other hand, `BlockSignatureRequest` represents a request for a signature over data that may not be represented as a Warp message by the requested node at request time, but rather would be used to construct a Warp message on the fly.
+Taking the types currently defined in Subnet EVM and Coreth as a starting point, we observe that `MessageSignatureRequest` represents a request for a signature over an existing (unsigned) Warp message that the requested node is already aware of, and whose Warp message ID the requester knows ahead of time. On the other hand, `BlockSignatureRequest` represents a request for a signature over data that may not be represented as a Warp message by the requested node at request time, but rather would be used to construct a Warp message on the fly.
 
-`MessageSignatureRequest` accepts a Warp message ID, which is derived from an existing Warp message. We assume that the requested node is able to map the Warp message ID to the full Warp message, and return the signature.
+We propose the following types, implemented as Protobuf types that may be decoded from the `AppRequest`/`AppResponse` `app_bytes` field. By way of example, this approach is currently used to [implement](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/sdk/sdk.proto#7) and [parse](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/gossip/message.go#22) gossip `AppRequest` types.
 
-```
-message MessageSignatureRequest {
-	bytes warp_message_id = 1;
-}
-```
+- `MessageSignatureRequest` accepts a Warp message ID, which is derived from an existing Warp message. We assume that the requested node is able to map the Warp message ID to the full Warp message, and return the signature.
 
-`SignatureRequest` accepts arbitrary bytes that the requested node signs directly, if it is willing to do so. The bytes effectively represent a serialized unsigned Warp message that the requested node may not already be aware of a priori. For instance, if the requester wishes to construct a Warp message attesting to an arbitrary on-chain event, the node will not generally already have a corresponding Warp message constructed. In such cases, the `SignatureRequest` message type may be used to construct Warp messages, starting with gathering signatures.
+    ```
+    message MessageSignatureRequest {
+        bytes warp_message_id = 1;
+    }
+    ```
 
-```
-message SignatureRequest struct {
-	bytes data = 1;
-}
-```
+- `SignatureRequest` accepts arbitrary bytes that the requested node signs directly, if it is willing to do so. The bytes effectively represent a serialized unsigned Warp message that the requested node may not already be aware of a priori. For instance, if the requester wishes to construct a Warp message attesting to an arbitrary on-chain event, the node will not generally already have a corresponding Warp message constructed. In such cases, the `SignatureRequest` message type may be used to construct Warp messages, starting with gathering signatures.
 
-With the corresponding `AppResponse` type defined as:
+    ```
+    message SignatureRequest struct {
+        bytes data = 1;
+    }
+    ```
 
-```
-message SignatureResponse {
-    bytes signature = 1;
-}
-```
+- `SignatureResponse` is the corresponding `AppResponse` type that returns the requested signature. This type is used to respond to both `MessageSignatureRequests` and `SignatureRequests`.
 
-By way of example, this approach is currently used to [implement](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/sdk/sdk.proto#7) and [parse](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/gossip/message.go#22) gossip `AppRequest` types.
+    ```
+    message SignatureResponse {
+        bytes signature = 1;
+    }
+    ```
+
+For each of these type, VMs must implement corresponding `AppRequest` and `AppResponse` handlers to adhere to the interface. 
 
 ## Security Considerations
 TODO
@@ -87,7 +89,7 @@ This change is backwards compatible for VMs, as nodes running older versions tha
 A full reference implementation has not been provided yet. It must be provided prior to this ACP being considered "Implementable".
 
 ## Acknowledgements
-Thanks to @joshua-kim and @iansuvak for discussion and feedback on this ACP.
+Thanks to @joshua-kim, @iansuvak, @aaronbuchwald, and @michaelkaplan13 for discussion and feedback on this ACP.
 
 ## Copyright
 
