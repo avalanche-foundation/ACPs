@@ -371,13 +371,14 @@ Where:
 
 The fee per Subnet Validator from $b$'s parent's block timestamp to $b$'s block timestamp is:
 
-$$M \cdot \exp\left(\frac{x}{K}\right)$$
+$$M \cdot \exp\left(\frac{x}{K}\right) \cdot \Delta t$$
 
 Where:
 
 - $M$ is the minimum price for an active Subnet Validator
 - $\exp\left(x\right)$ is an approximation of $e^x$
 - $K$ is a constant to control the rate of change for the Subnet Validator price
+- $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
 
 Whenever $x$ increases by $K$, the price per active Subnet Validator increases by a factor of `~2.7`. If the price per active Subnet Validator gets too expensive, some active Subnet Validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet Validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet Validators.
 
@@ -396,13 +397,13 @@ A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modif
 
 #### Block Timestamp Validity Change
 
-The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. However, this isn't always true.
+The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. Therefore, it must be ensured that the block timestamp does not advance past the time that the first Subnet Validator removal can occur.
 
-Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ multiple Subnet Validators get removed within those `5` seconds. If `100` Subnet Validators are removed `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increased by `1000` + `4 * 900` = `4500`, not `5000`.
+Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ Subnet Validators should have been removed within those `5` seconds. If `100` Subnet Validators would exhaust their balance `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increased by `1000` + `4 * 900` = `4500`, not `5000`.
 
 To ensure that the correct fee is always charged per unit of time, blocks are considered valid if their timestamps are no greater than the time at which the first Subnet Validator gets removed from a lack of funds. This upholds the invariant that the number of Subnet Validators remains constant between blocks.
 
-The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If the wall clock time does not remove any Subnet Validators, the wall clock time is used to build the block. If it does, a binary search is conducted between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
+The block building protocol is modified to account for this change by first checking if the wall clock time removes any Subnet Validator due to a lack of funds. If the wall clock time does not remove any Subnet Validators, the wall clock time is used to build the block. If it does, a binary search may be performed between the parent block's timestamp and the wall clock time to find the time at which the first Subnet Validator gets removed.
 
 #### User Experience
 
