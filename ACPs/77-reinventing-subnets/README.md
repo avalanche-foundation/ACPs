@@ -336,7 +336,7 @@ A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modif
 
 #### Block Timestamp Validity Change
 
-The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. However, this isn't always true.
+The above algorithm assumes that the difference between $V$ and $T$ is constant in the $\Delta T$ between blocks. Therefore, it must be ensured that the block timestamp does not advance past the time that the first Subnet Validator removal can occur.
 
 Suppose the network currently has `11000` Subnet Validators. With $T$ being `10000`, $x$ will increase by $V-T$ or `1000` every second. If the next block's timestamp is `5` seconds after the current block's timestamp. $x$ will increase by `5000`. This is expected behavior _unless_ Subnet Validators should have been removed within those `5` seconds. If `100` Subnet Validators would exhaust their balance `1` second after the current block timestamp, $x$ should only increase by `900` every second after the first second elapses. $x$ should have increased by `1000` + `4 * 900` = `4500`, not `5000`.
 
