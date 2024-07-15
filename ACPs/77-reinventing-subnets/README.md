@@ -169,7 +169,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000001` for this transaction
+- `typeID` is the payload type identifier and is `0x00000000` for this transaction
 - `subnetID`, `nodeID`, and `weight` are for the Subnet Validator being added
 - `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`.
 
@@ -238,7 +238,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000002` for this transaction
+- `typeID` is the payload type identifier and is `0x00000001` for this transaction
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction
 
