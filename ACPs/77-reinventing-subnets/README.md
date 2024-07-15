@@ -311,13 +311,14 @@ Where:
 
 The fee per Subnet Validator from $b$'s parent's block timestamp to $b$'s block timestamp is:
 
-$$M \cdot \exp\left(\frac{x}{K}\right)$$
+$$M \cdot \exp\left(\frac{x}{K}\right) \cdot \Delta t$$
 
 Where:
 
 - $M$ is the minimum price for an active Subnet Validator
 - $\exp\left(x\right)$ is an approximation of $e^x$
 - $K$ is a constant to control the rate of change for the Subnet Validator price
+- $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
 
 Whenever $x$ increases by $K$, the price per active Subnet Validator increases by a factor of `~2.7`. If the price per active Subnet Validator gets too expensive, some active Subnet Validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet Validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet Validators.
 
