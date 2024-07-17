@@ -25,7 +25,7 @@ Standardizing the Warp Signature Request interface by defining it as a format fo
 
 We propose the following types, implemented as Protobuf types that may be decoded from the `AppRequest`/`AppResponse` `app_bytes` field. By way of example, this approach is currently used to [implement](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/sdk/sdk.proto#7) and [parse](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/gossip/message.go#22) gossip `AppRequest` types.
 
-- `SignatureRequest` includes two fields, both of which are optional. `data` specifies the payload that the returned signature should correspond to. In other words, `data` should be a serialized unsigned Warp message for which the requester is requesting a signature. `justification` specifies arbitrary data that the requested node may use to decide whether or not `data` is a payload it is willing to sign.
+- `SignatureRequest` includes two fields. `data` specifies the payload that the returned signature should correspond to, namely a serialized unsigned Warp message. `justification` is an optional field that specifies arbitrary data that the requested node may use to decide whether or not it is willing to sign `data`.
 
     ```protobuf
     message SignatureRequest struct {
@@ -46,23 +46,11 @@ For each of these types, VMs must implement corresponding `AppRequest` and `AppR
 
 ## Use Cases
 
-### Sign a Warp Message
+Generally speaking, `SignatureRequest` can be used to request a signature over a Warp message by serializing the unsigned Warp message into `data`, and populating `justification` as needed.
 
-`SignatureRequest` can be used to request a signature over a Warp message by serializing the unsigned Warp message into the `data` field, and omitting the `justification` field.
+### Sign a known Warp Message
 
-### Sign a known Warp Message given its ID
-
-Subnet EVM and Coreth currently handle signature requests for known Warp messages by implementing the following `AppRequest` message type:
-
-```
-type MessageSignatureRequest struct {
-	MessageID ids.ID
-}
-```
-
-For all Warp messages that the node has seen, (i.e. on-chain message sent through the [Warp Precompile](https://github.com/ava-labs/subnet-evm/tree/v0.6.7/precompile/contracts/warp) and [off-chain](https://github.com/ava-labs/subnet-evm/blob/v0.6.7/plugin/evm/config.go#L226) Warp messages) there exists a mapping of Warp message ID to the full unsigned message bytes. Subnet EVM and Coreth nodes are therefore able to retreive and sign the full Warp message given its message ID.
-
-`SignatureRequest` could be used for this case by specifying the Warp message ID as the `justification` field, and omitting the `data` field.
+Subnet EVM and Coreth store messages that have been seen (i.e. on-chain message sent through the [Warp Precompile](https://github.com/ava-labs/subnet-evm/tree/v0.6.7/precompile/contracts/warp) and [off-chain](https://github.com/ava-labs/subnet-evm/blob/v0.6.7/plugin/evm/config.go#L226) Warp messages) such that a signature over that message can be provided on request. `SignatureRequest` can be used for this case by specifying the Warp message in `data`. The queried node may then look up the Warp message in its database and return the signature. In this case, `justification` is unneeded.
 
 ### Attest to an on-chain event
 
@@ -74,13 +62,13 @@ type BlockSignatureRequest struct {
 }
 ```
 
-`SignatureRequest` could achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into the `data` field. `justification` could optionally be used to provide additional context, such as a lookback window.
+`SignatureRequest` can achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into `data`. `justification` may optionally be used to provide additional context, such as a lookback window.
 
 ### Confirm that an event did not occur
 
 With [ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets), Subnets will have the ability to manage their own validator sets. The Warp message payload contained in a `RegisterSubnetValidatorTx` includes an `expiry`, after which the specified validation ID becomes invalid. The Subnet needs to know that this validation ID is expired so that it can keep its locally tracked validator set in sync with the P-Chain. We also assume that the P-Chain will not persist expired or invalid validation IDs. 
 
-We can use `SignatureRequest` to construct a Warp message attesting that the validation ID expired. We do so by serializing an unsigned Warp message containing the validation ID into the `data` field, and providing additional metadata in the `justification` field for the P-Chain to reconstruct the expired validation ID.
+We can use `SignatureRequest` to construct a Warp message attesting that the validation ID expired. We do so by serializing an unsigned Warp message containing the validation ID into `data`, and providing additional metadata in `justification` for the P-Chain to reconstruct the expired validation ID.
 
 ## Security Considerations
 TODO
