@@ -62,7 +62,7 @@ type BlockSignatureRequest struct {
 }
 ```
 
-`SignatureRequest` can achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into `data`. `justification` may optionally be used to provide additional context, such as a lookback window.
+`SignatureRequest` can achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into `data`. `justification` may optionally be used to provide additional context, such as a the block height of the given block ID.
 
 ### Confirm that an event did not occur
 
