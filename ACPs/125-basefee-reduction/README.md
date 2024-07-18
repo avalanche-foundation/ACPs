@@ -13,8 +13,8 @@ This ACP proposes reducing the base fee on the Avalanche C-Chain from 225 Gwei t
 ## Motivation
 
 With dynamic fees, the gas price is supposed to be a result of a continuous auction such that the consumed gas per second converges to the target gas usage per second.
-When dynamic fees were first introduced safeguards were introduced to ensure that the mechanism worked as intended. Such as a relatively high min gas price and a max gas price.
-The max gas price has since been entirely removed. The min gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
+When dynamic fees were first introduced safeguards were introduced to ensure that the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
+The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
 
 
 ## Specification
