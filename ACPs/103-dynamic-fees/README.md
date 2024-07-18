@@ -57,7 +57,7 @@ $$M \cdot \exp\left(\frac{x}{K}\right)$$
 Where:
 
 - $M$ is the minimum gas price
-- $\exp\left(x\right)$ is an approximation of $e^x$
+- $\exp\left(x\right)$ is an approximation of $e^x$ following the EIP-4844 specification
 
   ```python
   # Approximates factor * e ** (numerator / denominator) using Taylor expansion
