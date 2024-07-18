@@ -8,7 +8,7 @@ Track: Standards
 
 ## Abstract
 
-This ACP proposes reducing the base fee on the Avalanche C-Chain from 225 Gwei to 1 Gwei.
+This ACP proposes reducing the base fee on the Avalanche C-Chain from 25 Gwei to 1 Gwei.
 
 ## Motivation
 
@@ -18,7 +18,7 @@ The maximum gas price has since been entirely removed. The minimum gas price has
 
 ## Specification
 
-The dynamic fee calculation currently must enforce a minimum base fee of 225 Gwei.
+The dynamic fee calculation currently must enforce a minimum base fee of 25 Gwei.
 This ACP proposes reducing the minimum base fee to 1 Gwei upon the next network upgrade activation.
 
 ## Backwards Compatibility
