@@ -58,6 +58,20 @@ Where:
 
 - $M$ is the minimum gas price
 - $\exp\left(x\right)$ is an approximation of $e^x$
+
+  ```python
+  # Approximates factor * e ** (numerator / denominator) using Taylor expansion
+  def fake_exponential(factor: int, numerator: int, denominator: int) -> int:
+    i = 1
+    output = 0
+    numerator_accum = factor * denominator
+    while numerator_accum > 0:
+        output += numerator_accum
+        numerator_accum = (numerator_accum * numerator) // (denominator * i)
+        i += 1
+    return output // denominator
+  ```
+
 - $K$ is a constant to control the rate of change of the gas price
 
 After processing block $b$, $x$ is updated with the total gas consumed in the block $G$:
