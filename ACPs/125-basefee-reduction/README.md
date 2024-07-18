@@ -16,7 +16,6 @@ With dynamic fees, the gas price is supposed to be a result of a continuous auct
 When dynamic fees were first introduced safeguards were introduced to ensure that the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
 The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
 
-
 ## Specification
 
 The dynamic fee calculation currently must enforce a minimum base fee of 225 Gwei.
