@@ -2,7 +2,7 @@
 ACP: 118
 Title: Warp Signature Interface Standard
 Author(s): Cam Schultz (https://github.com/cam-schultz)
-Discussions-To: 
+Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/123
 Status: Proposed
 Track: Best Practices Track
 ```
