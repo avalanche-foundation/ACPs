@@ -331,7 +331,7 @@ $$x = \max(x + (V - T), 0)$$
 
 Where:
 
-- $V$ is the number of active Subnet Validators prior to the execution of block $b$
+- $V$ is the number of active Subnet Validators
 - $T$ is the target number of active Subnet Validators
 
 Whenever $x$ increases by $K$, the price per active Subnet Validator increases by a factor of `~2.7`. If the price per active Subnet Validator gets too expensive, some active Subnet Validators will exit the active validator set, decreasing $x$, dropping the price. The price per active Subnet Validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet Validators.
@@ -366,9 +366,15 @@ $$S = \frac{M \cdot \exp(a) \cdot \exp(b)}{\exp(b) - 1} \cdot (\exp(b \cdot \Del
 
 However, this formula does not hold when $V-T < 0$ since the update function for $x$ after each second guarantees it is nonnegative: $x = \max(x + (V - T), 0)$. When $V-T <0$, the formula can be used for the time period when $x > 0$: $(T-V) \cdot \min\left(\Delta t, \left\lfloor{\frac{x}{T-V}}\right\rfloor\right)$. For the $\Delta t$ past that point, the fee is $M \cdot \max\left(\left(\Delta t - \left\lfloor{\frac{x}{T-V}}\right\rfloor\right), 0\right)$.
 
-At the start of processing a valid block, $x$ can then be updated:
+With the above formula, $x$ only needs to be updated at the end of processing a valid block:
 
-$$x = \max(x + \Delta t \cdot (V - T), 0)$$
+$$x = \max(x + (V - T) \cdot  \Delta t, 0)$$
+
+Where:
+
+- $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
+- $V$ is the number of active Subnet Validators after execution block $b$
+- $T$ is the target number of active Subnet Validators
 
 #### Parameters
 
