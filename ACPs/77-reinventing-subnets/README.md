@@ -364,17 +364,17 @@ $$S \cdot (\exp(b) - 1) = M \cdot \exp(a + b) \cdot (\exp(b \cdot \Delta t) - 1)
 
 $$S = \frac{M \cdot \exp(a) \cdot \exp(b)}{\exp(b) - 1} \cdot (\exp(b \cdot \Delta t) - 1)$$
 
-However, this formula does not hold when $V-T < 0$ since the update function for $x$ after each second guarantees it is nonnegative: $x = \max(x + (V - T), 0)$. When $V-T <0$, the formula can be used for the time period when $x > 0$: $(T-V) \cdot \min\left(\Delta t, \left\lfloor{\frac{x}{T-V}}\right\rfloor\right)$. For the $\Delta t$ past that point, the fee is $M \cdot \max\left(\left(\Delta t - \left\lfloor{\frac{x}{T-V}}\right\rfloor\right), 0\right)$.
+However, this formula does not hold when $V-T < 0$ and $x < \Delta t \cdot (V-T)$. This is because the $x$ is nonnegative according to its update function $x = \max(x + \Delta t \cdot (V - T), 0)$. The above formula can be used during the time period where $x$ is decreasing by $T-V$ and is not floored to $0$:
 
-With the above formula, $x$ only needs to be updated at the end of processing a valid block:
+$$(T-V) \cdot \min\left(\Delta t, \left\lfloor{\frac{x}{T-V}}\right\rfloor\right)$$
 
-$$x = \max(x + (V - T) \cdot  \Delta t, 0)$$
+For the remaining time period where $x$ would be floored to $0$, the fee is:
 
-Where:
+$$M \cdot \max\left(\Delta t - \left\lfloor{\frac{x}{T-V}}\right\rfloor, 0\right)$$
 
-- $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp
-- $V$ is the number of active Subnet Validators after execution block $b$
-- $T$ is the target number of active Subnet Validators
+After the Subnet Validator fee is calculated, $x$ can be updated:
+
+$$x = \max(x + \Delta t \cdot (V - T), 0)$$
 
 #### Parameters
 
