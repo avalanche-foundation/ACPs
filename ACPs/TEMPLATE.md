@@ -1,13 +1,11 @@
-```text
-ACP: <PR Number>
-Title: <ACP title>
-Author(s): <a list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com>>
-Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
-Status: <Proposed, Implementable, Activated, Stale>
-Track: <Standards, Best Practices, Meta, Subnet>
-Replaces (*optional): <ACP number>
-Superseded-By (*optional): <ACP number>
-```
+| ACP                            | PR Number                                                                                                                                           |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**                      | ACP title                                                                                                                                           |
+| **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@address.com](./README.md)) |
+| **Status**                     | Proposed, Implementable, Activated, Stale ([Discussion](./README.md))                                                                               |
+| **Track**                      | Standards, Best Practices, Meta, Subnet                                                                                                             |
+| **Replaces (\*optional)**      | [ACP-XX](./README.md)                                                                                                                               |
+| **Superseded-By (\*optional)** | [ACP-XX](./README.md)                                                                                                                               |
 
 This is the suggested template for new ACPs.
 
