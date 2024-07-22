@@ -14,7 +14,7 @@ Reduce the min base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
 
 With dynamic fees, the gas price is supposed to be a result of a continuous auction such that the consumed gas per second converges to the target gas usage per second.
 
-When dynamic fees were first introduced safeguards were introduced to ensure that the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
+When dynamic fees were first introduced safeguards were added to ensure the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
 
 The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
 
