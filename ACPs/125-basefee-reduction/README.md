@@ -16,7 +16,7 @@ With dynamic fees, the gas price is supposed to be a result of a continuous auct
 
 When dynamic fees were first introduced safeguards were added to ensure the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
 
-The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
+The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, the base fee is often observed pinned to this minimum. This shows that it is higher than what the market demands, and therefore it is artificially reducing network usage.
 
 ## Specification
 
