@@ -1,6 +1,6 @@
 ```text
 ACP: 125
-Title: Reduce C-Chain base fee to 1 Gwei.
+Title: Reduce C-Chain min base fee from 25 nAVAX to 1 nAVAX
 Author(s): Stephen Buttolph <https://github.com/StephenButtolph>, Darioush Jalali <https://github.com/darioush>
 Status: Proposed
 Track: Standards
@@ -8,7 +8,7 @@ Track: Standards
 
 ## Abstract
 
-This ACP proposes reducing the base fee on the Avalanche C-Chain from 25 Gwei to 1 Gwei.
+This ACP proposes reducing the base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
 
 ## Motivation
 
@@ -18,8 +18,8 @@ The maximum gas price has since been entirely removed. The minimum gas price has
 
 ## Specification
 
-The dynamic fee calculation currently must enforce a minimum base fee of 25 Gwei.
-This ACP proposes reducing the minimum base fee to 1 Gwei upon the next network upgrade activation.
+The dynamic fee calculation currently must enforce a minimum base fee of 25 nAVAX.
+This ACP proposes reducing the minimum base fee to 1 nAVAX upon the next network upgrade activation.
 
 ## Backwards Compatibility
 
