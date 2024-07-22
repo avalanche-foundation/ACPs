@@ -8,22 +8,24 @@ Track: Standards
 
 ## Abstract
 
-This ACP proposes reducing the base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
+Reduce the min base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
 
 ## Motivation
 
 With dynamic fees, the gas price is supposed to be a result of a continuous auction such that the consumed gas per second converges to the target gas usage per second.
+
 When dynamic fees were first introduced safeguards were introduced to ensure that the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
+
 The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, it is still too high, and is therefore reducing usage of the network.
 
 ## Specification
 
 The dynamic fee calculation currently must enforce a minimum base fee of 25 nAVAX.
-This ACP proposes reducing the minimum base fee to 1 nAVAX upon the next network upgrade activation.
+This change proposes reducing the minimum base fee to 1 nAVAX upon the next network upgrade activation.
 
 ## Backwards Compatibility
 
-This ACP modifies the consensus rules for the C-Chain, therefore it requires a network upgrade.
+Modifies the consensus rules for the C-Chain, therefore it requires a network upgrade.
 
 ## Reference Implementation
 
@@ -31,7 +33,9 @@ A draft implementation of this ACP for the coreth VM can be found [here](https:/
 
 ## Security Considerations
 
-N/A
+This makes gas cheaper, therefore may increase state bloat.
+
+We note the dynamic fee algorithm responded appropriately during the periods of high use (such as Dec. 2023), which gives reasonable confidence that enforcing a 25nAVAX minimum fee is no longer necessary.
 
 ## Open Questions
 
