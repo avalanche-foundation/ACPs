@@ -116,6 +116,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)|Standards|
 |[108](./ACPs/108-evm-event-importing/README.md)|EVM Event Importing|Michael Kaplan (https://github.com/mkaplan13)|Best Practices|
 |[118](./ACPs/118-warp-signature-request/README.md)|Standardized P2P Warp Signature Request Interface|Cam Schultz (https://github.com/cam-schultz)|Best Practices|
+|[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph (https://github.com/StephenButtolph), Darioush Jalali (https://github.com/darioush)|Standards|
 
 ## Contributing
 
