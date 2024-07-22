@@ -350,23 +350,11 @@ The block building protocol is modified to account for this change by first chec
 
 Since $V-T$ is guaranteed to be constant between blocks, a simple formula can be derived. Prior to processing the next block, the total Subnet Validator fee assessed in the $\Delta t$ between the current block and the next block is::
 
-$$S = \sum_{n=1}^{\Delta t} M \cdot \exp \left(\frac{x+n\cdot(V-T)}{K}\right)$$
-
-For readability, define $a = \frac{x}{K}$ and $b = \frac{V-T}{K}$.
-
-$$S = M \cdot \sum_{n=1}^{\Delta t} \exp(a + bn)$$
-
-$$S \cdot \exp(b) = M \cdot \sum_{n=1}^{\Delta t} \exp(a + b \cdot (n+1))$$
-
-$$S \cdot \exp(b) - S = M \cdot \exp(a + b\cdot (\Delta t + 1)) - M \cdot \exp(a + b)$$
-
-$$S \cdot (\exp(b) - 1) = M \cdot \exp(a + b) \cdot (\exp(b \cdot \Delta t) - 1)$$
-
-$$S = \frac{M \cdot \exp(a) \cdot \exp(b)}{\exp(b) - 1} \cdot (\exp(b \cdot \Delta t) - 1)$$
+$$\sum_{n=1}^{\Delta t} M \cdot \exp \left(\frac{x+n\cdot(V-T)}{K}\right)$$
 
 However, this formula does not hold when $V-T < 0$ and $x < \Delta t \cdot (V-T)$. This is because the $x$ is nonnegative according to its update function $x = \max(x + \Delta t \cdot (V - T), 0)$. The above formula can be used during the time period where $x$ is decreasing by $T-V$ and is not floored to $0$:
 
-$$(T-V) \cdot \min\left(\Delta t, \left\lfloor{\frac{x}{T-V}}\right\rfloor\right)$$
+$$\min\left(\Delta t, \left\lfloor{\frac{x}{T-V}}\right\rfloor\right)$$
 
 For the remaining time period where $x$ would be floored to $0$, the fee is:
 
