@@ -1,6 +1,6 @@
 ```text
 ACP: 125
-Title: Reduce C-Chain min base fee from 25 nAVAX to 1 nAVAX
+Title: Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX
 Author(s): Stephen Buttolph <https://github.com/StephenButtolph>, Darioush Jalali <https://github.com/darioush>
 Status: Proposed
 Track: Standards
@@ -8,19 +8,20 @@ Track: Standards
 
 ## Abstract
 
-Reduce the min base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
+Reduce the minimum base fee on the Avalanche C-Chain from 25 nAVAX to 1 nAVAX.
 
 ## Motivation
 
 With dynamic fees, the gas price is supposed to be a result of a continuous auction such that the consumed gas per second converges to the target gas usage per second.
 
-When dynamic fees were first introduced safeguards were added to ensure the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
+When dynamic fees were first introduced, safeguards were added to ensure the mechanism worked as intended, such as a relatively high minimum gas price and a maximum gas price.
 
 The maximum gas price has since been entirely removed. The minimum gas price has been reduced significantly. However, the base fee is often observed pinned to this minimum. This shows that it is higher than what the market demands, and therefore it is artificially reducing network usage.
 
 ## Specification
 
 The dynamic fee calculation currently must enforce a minimum base fee of 25 nAVAX.
+
 This change proposes reducing the minimum base fee to 1 nAVAX upon the next network upgrade activation.
 
 ## Backwards Compatibility
@@ -33,9 +34,7 @@ A draft implementation of this ACP for the coreth VM can be found [here](https:/
 
 ## Security Considerations
 
-This makes gas cheaper, therefore may increase state bloat.
-
-We note the dynamic fee algorithm responded appropriately during the periods of high use (such as Dec. 2023), which gives reasonable confidence that enforcing a 25nAVAX minimum fee is no longer necessary.
+Lower gas costs may increase state bloat. However, we note that the dynamic fee algorithm responded appropriately during periods of high use (such as Dec. 2023), which gives reasonable confidence that enforcing a 25 nAVAX minimum fee is no longer necessary.
 
 ## Open Questions
 
