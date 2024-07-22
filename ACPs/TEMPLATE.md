@@ -1,5 +1,5 @@
 | ACP                            | PR Number                                                                                                                                           |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :--- | :--- |
 | **Title**                      | ACP title                                                                                                                                           |
 | **Author(s)**                  | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@address.com](./README.md)) |
 | **Status**                     | Proposed, Implementable, Activated, Stale ([Discussion](./README.md))                                                                               |
