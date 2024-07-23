@@ -42,7 +42,9 @@ We propose the following types, implemented as Protobuf types that may be decode
     }
     ```
 
-For each of these types, VMs must implement corresponding `AppRequest` and `AppResponse` handlers to adhere to the interface.
+### Handlers
+
+For each of the above types, VMs must implement corresponding `AppRequest` and `AppResponse` handlers. The `AppRequest` handler should be [registered](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/network.go#L173) using the canonical handler ID, defined as `1`.
 
 ## Use Cases
 
