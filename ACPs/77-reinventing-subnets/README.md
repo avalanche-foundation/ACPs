@@ -52,11 +52,11 @@ By separating Subnet Validators from Primary Network Validators, a list of valid
 
 To create a Subnet, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that must be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`).
 
-To be a Permissionless Subnet, this `Owner` key must no longer have the ability to modify the Subnet's validator set. A `ConvertSubnetTx` must first be issued to explicitly convert a Subnet from Permissioned to Permissionless. This transaction will set the `(blockchainID, address)` pair that will manage the Subnet going forward. After `ConvertSubnetTx` is issued, the `Owner` from the `CreateSubnetTx` that created the Subnet will no longer have the ability to modify the Subnet's validator set.
+To be a Permissionless Subnet, this `Owner` key must no longer have the ability to modify the Subnet's validator set. A `ConvertSubnetTx` must first be issued to explicitly convert a Subnet from Permissioned to Permissionless. This transaction will set the `(chainID, address)` pair that will manage the Subnet going forward. After `ConvertSubnetTx` is issued, the `Owner` from the `CreateSubnetTx` that created the Subnet will no longer have the ability to modify the Subnet's validator set.
 
-To provide maximal flexibility for Permissionless Subnets, the BLS multisignature approach in Avalanche Warp Messaging (AWM) is re-used to approve modifications to the Subnet's validator set. Using the `(blockchainID, address)` pair defined in the `ConvertSubnetTx`, a Warp Message with an [`AddressedCall`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm/warp/payload#addressedcall) payload can be constructed.
+To provide maximal flexibility for Permissionless Subnets, the BLS multisignature approach in Avalanche Warp Messaging (AWM) is re-used to approve modifications to the Subnet's validator set. Using the `(chainID, address)` pair defined in the `ConvertSubnetTx`, a Warp Message with an [`AddressedCall`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm/warp/payload#addressedcall) payload can be constructed.
 
-To validate an `AddressedCall` payload in Avalanche Warp Messaging, the `(blockchainID, address)` pair is used to lookup the validators of `blockchainID` and verify that the BLS multi-sig includes a quorum (set to 67%) of the Subnet's validator set. The P-Chain will use Warp Messages with `AddressedCall` payloads to support modifications of the Subnet's validator set using this `(blockchainID, address)` pair (using the `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` defined later in the specification).
+To validate an `AddressedCall` payload in Avalanche Warp Messaging, the `(chainID, address)` pair is used to lookup the validators of `chainID` and verify that the BLS multi-sig includes a quorum (set to 67%) of the Subnet's validator set. The P-Chain will use Warp Messages with `AddressedCall` payloads to support modifications of the Subnet's validator set using this `(chainID, address)` pair (using the `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` defined later in the specification).
 
 #### ConvertSubnetTx
 
@@ -69,7 +69,7 @@ type ConvertSubnetTx struct {
     // - Must not be the Primary Network ID
     Subnet ids.ID `json:"subnetID"`
     // Chain where the Subnet manager lives
-    BlockchainID ids.ID `json:"blockchainID"`
+    ChainID ids.ID `json:"chainID"`
     // Address of the Subnet manager
     Address []byte `json:"address"`
     // Authorizes this conversion
