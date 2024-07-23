@@ -273,6 +273,59 @@ type ExitValidatorSetTx struct {
 }
 ```
 
+### Proof of Subnet Validator Set Change
+
+To track whether a Subnet Validator addition/modification/removal occured on the P-Chain, Subnet Validators must be willing to sign an `AddressedCall` attesting to the validator set change. Since all Subnet Validators sync the P-Chain, only the Subnet Validators need to sign the `AddressedCall`, not all Primary Network Validators.
+
+Two `AddressedCall`s are defined with the below payloads. For each of them, the `sourceChainID` must be set to the P-Chain ID and the `sourceAddress` must be set to an empty byte array.
+
+The method of requesting is left unspecified as it can be more generic. A viable option for supporting this functionality is laid out in ACP-118 with the `SignatureRequest` message.
+
+#### SubnetValidatorRegistrationMessage
+
+```text
++--------------+----------+----------+
+|      codecID :   uint16 |  2 bytes |
++--------------+----------+----------+
+|       typeID :   uint32 |  4 bytes |
++--------------+----------+----------+
+| validationID : [32]byte | 32 bytes |
++--------------+----------+----------+
+|        valid :     bool |  1 byte  | 
++--------------+----------+----------+
+                          | 39 bytes |
+                          +----------+
+```
+
+- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
+- `typeID` is the payload type identifier and is `0x00000002` for this message
+- `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
+- `valid` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload
+
+#### SetSubnetValidatorWeightMessage
+
+```text
++--------------+----------+----------+
+|      codecID :   uint16 |  2 bytes |
++--------------+----------+----------+
+|       typeID :   uint32 |  4 bytes |
++--------------+----------+----------+
+| validationID : [32]byte | 32 bytes |
++--------------+----------+----------+
+|        nonce :   uint64 |  8 bytes |
++--------------+----------+----------+
+|       weight :   uint64 |  8 bytes |
++--------------+----------+----------+
+                          | 54 bytes |
+                          +----------+
+```
+
+- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
+- `typeID` is the payload type identifier and is `0x00000003` for this message
+- `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
+- `nonce` is the latest nonce stored with the `validationID` on the P-Chain
+- `weight` is the current weight of the Subnet Validator with `validationID`
+
 ### Managing Subnet Validator Balance
 
 #### IncreaseBalanceTx
