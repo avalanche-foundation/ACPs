@@ -28,7 +28,7 @@ We propose the following types, implemented as Protobuf types that may be decode
 - `SignatureRequest` includes two fields. `data` specifies the payload that the returned signature should correspond to, namely a serialized unsigned Warp message. `justification` specifies arbitrary data that the requested node may use to decide whether or not it is willing to sign `data`. `justification` may not be required by every VM implementation, but `data` should always contain the bytes to be signed. It is up to the VM to define the validity requirements for the `data` and `justification` payloads.
 
     ```protobuf
-    message SignatureRequest struct {
+    message SignatureRequest {
         bytes data = 1;
         bytes justification = 2;
     }
