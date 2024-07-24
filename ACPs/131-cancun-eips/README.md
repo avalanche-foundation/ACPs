@@ -27,7 +27,7 @@ The opcodes (EVM exceution modifications) and block header modifications should 
 - [Activation of new opcodes](https://github.com/ava-labs/coreth/blob/7b875dc21772c1bb9e9de5bc2b31e88c53055e26/core/vm/jump_table.go#L93)
 - Activation of Cancun in next Avalanche upgrade:
   - [C-Chain](https://github.com/ava-labs/coreth/pull/610)
-  - [Subnet-EVM chains](https://github.com/ava-labs/subnet-evm/blob/master/params/config_extra.go#L186)
+  - [Subnet-EVM chains](https://github.com/ava-labs/subnet-evm/blob/fa909031ed148484c5072d949c5ed73d915ce1ed/params/config_extra.go#L186)
 - `ParentBeaconRoot` is enforced to be included and the zero value [here](https://github.com/ava-labs/coreth/blob/7b875dc21772c1bb9e9de5bc2b31e88c53055e26/plugin/evm/block_verification.go#L287-L288). This field is retained for future use and compatibility with upstream tooling.
 
 _Note:_ Subnets are sovereign in regards to their validator set and state transition rules, and can choose to opt out of this proposal by making a code change in their respective Subnet-EVM client.
