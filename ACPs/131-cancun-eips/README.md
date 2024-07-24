@@ -1,5 +1,5 @@
 ```text
-ACP: 130 
+ACP: 131 
 Title: Activate Cancun EIPs on C-Chain and Subnet-EVM chains
 Author(s): Darioush Jalali <https://github.com/darioush>, Ceyhun Onur <https://github.com/ceyonur>
 Discussions-To: [TBD]
