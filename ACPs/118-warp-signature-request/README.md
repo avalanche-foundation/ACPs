@@ -28,7 +28,7 @@ We propose the following types, implemented as Protobuf types that may be decode
 - `SignatureRequest` includes two fields. `data` specifies the payload that the returned signature should correspond to, namely a serialized unsigned Warp message. `justification` specifies arbitrary data that the requested node may use to decide whether or not it is willing to sign `data`. `justification` may not be required by every VM implementation, but `data` should always contain the bytes to be signed. It is up to the VM to define the validity requirements for the `data` and `justification` payloads.
 
     ```protobuf
-    message SignatureRequest struct {
+    message SignatureRequest {
         bytes data = 1;
         bytes justification = 2;
     }
@@ -42,7 +42,9 @@ We propose the following types, implemented as Protobuf types that may be decode
     }
     ```
 
-For each of these types, VMs must implement corresponding `AppRequest` and `AppResponse` handlers to adhere to the interface.
+### Handlers
+
+For each of the above types, VMs must implement corresponding `AppRequest` and `AppResponse` handlers. The `AppRequest` handler should be [registered](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/network.go#L173) using the canonical handler ID, defined as `1`.
 
 ## Use Cases
 
