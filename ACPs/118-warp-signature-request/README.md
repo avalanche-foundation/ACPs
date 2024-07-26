@@ -25,11 +25,11 @@ Standardizing the Warp Signature Request interface by defining it as a format fo
 
 We propose the following types, implemented as Protobuf types that may be decoded from the `AppRequest`/`AppResponse` `app_bytes` field. By way of example, this approach is currently used to [implement](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/proto/sdk/sdk.proto#7) and [parse](https://github.com/ava-labs/avalanchego/blob/v1.11.10-status-removal/network/p2p/gossip/message.go#22) gossip `AppRequest` types.
 
-- `SignatureRequest` includes two fields. `data` specifies the payload that the returned signature should correspond to, namely a serialized unsigned Warp message. `justification` specifies arbitrary data that the requested node may use to decide whether or not it is willing to sign `data`. `justification` may not be required by every VM implementation, but `data` should always contain the bytes to be signed. It is up to the VM to define the validity requirements for the `data` and `justification` payloads.
+- `SignatureRequest` includes two fields. `message` specifies the payload that the returned signature should correspond to, namely a serialized unsigned Warp message. `justification` specifies arbitrary data that the requested node may use to decide whether or not it is willing to sign `message`. `justification` may not be required by every VM implementation, but `message` should always contain the bytes to be signed. It is up to the VM to define the validity requirements for the `message` and `justification` payloads.
 
     ```protobuf
     message SignatureRequest {
-        bytes data = 1;
+        bytes message = 1;
         bytes justification = 2;
     }
     ```
@@ -48,11 +48,11 @@ For each of the above types, VMs must implement corresponding `AppRequest` and `
 
 ## Use Cases
 
-Generally speaking, `SignatureRequest` can be used to request a signature over a Warp message by serializing the unsigned Warp message into `data`, and populating `justification` as needed.
+Generally speaking, `SignatureRequest` can be used to request a signature over a Warp message by serializing the unsigned Warp message into `message`, and populating `justification` as needed.
 
 ### Sign a known Warp Message
 
-Subnet EVM and Coreth store messages that have been seen (i.e. on-chain message sent through the [Warp Precompile](https://github.com/ava-labs/subnet-evm/tree/v0.6.7/precompile/contracts/warp) and [off-chain](https://github.com/ava-labs/subnet-evm/blob/v0.6.7/plugin/evm/config.go#L226) Warp messages) such that a signature over that message can be provided on request. `SignatureRequest` can be used for this case by specifying the Warp message in `data`. The queried node may then look up the Warp message in its database and return the signature. In this case, `justification` is not needed.
+Subnet EVM and Coreth store messages that have been seen (i.e. on-chain message sent through the [Warp Precompile](https://github.com/ava-labs/subnet-evm/tree/v0.6.7/precompile/contracts/warp) and [off-chain](https://github.com/ava-labs/subnet-evm/blob/v0.6.7/plugin/evm/config.go#L226) Warp messages) such that a signature over that message can be provided on request. `SignatureRequest` can be used for this case by specifying the Warp message in `message`. The queried node may then look up the Warp message in its database and return the signature. In this case, `justification` is not needed.
 
 ### Attest to an on-chain event
 
@@ -64,20 +64,20 @@ type BlockSignatureRequest struct {
 }
 ```
 
-`SignatureRequest` can achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into `data`. `justification` may optionally be used to provide additional context, such as a the block height of the given block ID.
+`SignatureRequest` can achieve this by specifying an unsigned Warp message with the `BlockID` as the payload, and serializing that message into `message`. `justification` may optionally be used to provide additional context, such as a the block height of the given block ID.
 
 ### Confirm that an event did not occur
 
 With [ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets), Subnets will have the ability to manage their own validator sets. The Warp message payload contained in a `RegisterSubnetValidatorTx` includes an `expiry`, after which the specified validation ID (i.e. a unique hash over the Subnet ID, node ID, stake weight, and expiry) becomes invalid. The Subnet needs to know that this validation ID is expired so that it can keep its locally tracked validator set in sync with the P-Chain. We also assume that the P-Chain will not persist expired or invalid validation IDs. 
 
-We can use `SignatureRequest` to construct a Warp message attesting that the validation ID expired. We do so by serializing an unsigned Warp message containing the validation ID into `data`, and providing the validation ID hash preimage in `justification` for the P-Chain to reconstruct the expired validation ID.
+We can use `SignatureRequest` to construct a Warp message attesting that the validation ID expired. We do so by serializing an unsigned Warp message containing the validation ID into `message`, and providing the validation ID hash preimage in `justification` for the P-Chain to reconstruct the expired validation ID.
 
 ## Security Considerations
 
-VMs have full latitude when implementing `SignatureRequest` handlers, and should take careful consideration of what `data` payloads their implementation should be willing to sign, given a `justification`. Some considerations include, but are not limited to:
-- Input validation. Handlers should validate `data` and `justification` payloads to ensure that they decode to coherent types, and that they contain only expected data.
-- Signature DoS. AvalancheGo's peer-to-peer networking stack implements message rate limiting to mitigate the risk of DoS, but VMs should also consider the cost of parsing and signing a `data` payload.
-- Payload collision. `data` payloads should be implemented as distinct types that do not overlap with one another within the context of signed Warp messages from the VM. For instance, a `data` payload specifying 32-byte hash may be interpreted as a transaction hash, a block hash, or a blockchain ID.
+VMs have full latitude when implementing `SignatureRequest` handlers, and should take careful consideration of what `message` payloads their implementation should be willing to sign, given a `justification`. Some considerations include, but are not limited to:
+- Input validation. Handlers should validate `message` and `justification` payloads to ensure that they decode to coherent types, and that they contain only expected data.
+- Signature DoS. AvalancheGo's peer-to-peer networking stack implements message rate limiting to mitigate the risk of DoS, but VMs should also consider the cost of parsing and signing a `message` payload.
+- Payload collision. `message` payloads should be implemented as distinct types that do not overlap with one another within the context of signed Warp messages from the VM. For instance, a `message` payload specifying 32-byte hash may be interpreted as a transaction hash, a block hash, or a blockchain ID.
 
 ## Backwards Compatibility
 
