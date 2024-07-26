@@ -1,11 +1,11 @@
 | ACP | PR Number |
 | :--- | :--- |
 | **Title** | ACP title |
-| **Author(s)** | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](./README.md) or [email@address.com](./README.md)) |
-| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](./README.md)) |
+| **Author(s)** | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](https://github.com/Username) or [email@address.com](mailto:email@address.com)) |
+| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/XXX)) |
 | **Track** | Standards, Best Practices, Meta, Subnet |
-| **Replaces (\*optional)** | [ACP-XX](./README.md) |
-| **Superseded-By (\*optional)** | [ACP-XX](./README.md) |
+| **Replaces (\*optional)** | [ACP-XX](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/XXX/README.md) |
+| **Superseded-By (\*optional)** | [ACP-XX](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/XXX/README.md) |
 
 This is the suggested template for new ACPs.
 
