@@ -3,7 +3,7 @@ ACP: 118
 Title: Warp Signature Interface Standard
 Author(s): Cam Schultz (https://github.com/cam-schultz)
 Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/123
-Status: Proposed
+Status: Implementable
 Track: Best Practices Track
 ```
 
@@ -86,6 +86,8 @@ This change is backwards compatible for VMs, as nodes running older versions tha
 ## Reference Implementation
 
 A full reference implementation has not been provided yet. It must be provided prior to this ACP being considered "Implementable".
+
+A reference implementation containing the Protobuf types and the canonical handler ID can be found [here](https://github.com/ava-labs/avalanchego/pull/3218).
 
 ## Acknowledgements
 
