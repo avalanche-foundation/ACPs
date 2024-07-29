@@ -210,9 +210,9 @@ type SetSubnetValidatorWeightTx struct {
     // Metadata, inputs and outputs
     BaseTx
     // AddressedCall with Payload:
-    //   - MessageID (SHA256 of the AddressedCall Payload of the RegisterSubnetValidatorTx adding the validator)
-    //   - Weight
+    //   - ValidationID (SHA256 of the AddressedCall Payload of the RegisterSubnetValidatorTx adding the validator)
     //   - Nonce
+    //   - Weight
     Message warp.Message `json:"message"`
 }
 ```
@@ -227,9 +227,9 @@ The `Message` field must be an `AddressedCall` with the payload:
 +-----------+----------+----------+
 | validationID : [32]byte | 32 bytes |
 +--------------+----------+----------+
-|       weight :   uint64 |  8 bytes |
-+--------------+----------+----------+
 |        nonce :   uint64 |  8 bytes |
++--------------+----------+----------+
+|       weight :   uint64 |  8 bytes |
 +--------------+----------+----------+
                           | 54 bytes |
                           +----------+
@@ -241,6 +241,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction
 
     The P-Chain state will store a `minNonce` associated with the `validationID`. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` will be set to `0` for `validationID`. `nonce` must satisfy `nonce >= minNonce` for the `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator exit since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`
+- `weight` is the new `weight` of the validator
 
 ### Removing Subnet Validators
 
