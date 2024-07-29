@@ -1,11 +1,9 @@
-```text
-ACP: 20
-Title: Ed25519 p2p
-Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/21
-Status: Proposed
-Track: Standards
-```
+| ACP | 20 |
+| :--- | :--- |
+| **Title** | Ed25519 p2p |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/21))|
+| **Track** | Standards |
 
 ## Abstract
 

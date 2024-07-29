@@ -1,11 +1,9 @@
-```text
-ACP: 84
-Title: Table Preamble for ACPs
-Author(s): Gauthier Leonard <https://github.com/Nuttymoon>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/86
-Status: Implementable
-Track: Meta
-```
+| ACP | 84 |
+| :--- | :--- |
+| **Title** | Table Preamble for ACPs |
+| **Author(s)** | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon)) |
+| **Status** | Activated |
+| **Track** | Meta |
 
 ## Abstract
 

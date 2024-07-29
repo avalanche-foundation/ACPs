@@ -1,12 +1,10 @@
-```text
-ACP: 77
-Title: Reinventing Subnets
-Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/78
-Status: Proposed
-Track: Standards
-Replaces: 13
-```
+| ACP | 77 |
+| :--- | :--- |
+| **Title** | Reinventing Subnets |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
+| **Track** | Standards |
+| **Replaces** | [ACP-13](../13-subnet-only-validators/README.md) |
 
 ## Abstract
 
@@ -182,11 +180,11 @@ An EVM Subnet may choose to implement this step like so:
 
 - Use the number of tokens the user has staked into a smart contract on the Subnet to determine the weight of their validator
 - Require the user to submit an on-chain transaction with their validator information
-- Generate the warp message
+- Generate the Warp message
 
 After the `RegisterSubnetValidatorTx` is accepted on the P-Chain, the Subnet Validator is added to the Subnet's validator set. A `minNonce` field (initially set to `0`) corresponding to the `validationID` will be stored on addition to the validator set. This field will be used when validating the `SetSubnetValidatorWeightTx` defined below.
 
-When any validator is removed from the set (whether forcefully or per the validator's request), the P-Chain will also send a warp message to the Subnet notifying it of the validator set removal. It is up to the Subnet on how to handle such a message, especially if unexpected. A validator's stake could continue to remain locked for an extended period of time after this point, for example.
+When any validator is removed from the set (whether forcefully or per the validator's request), the P-Chain will also send a Warp message to the Subnet notifying it of the validator set removal. It is up to the Subnet on how to handle such a message, especially if unexpected. A validator's stake could continue to remain locked for an extended period of time after this point, for example.
 
 This transaction is, by design, not required to be submitted by the validator themselves. With the Ed25519 signature, the validator guarantees that they can only be added to the validator set if `Signer` corresponds to the `blsPublicKey` and `sum($AVAX inputs) - sum($AVAX outputs) - TxFee` >= `balance`. The `RegisterSubnetValidatorTx` is considered invalid if those two properties are not satisfied.
 
@@ -198,7 +196,7 @@ Note: There is no `EndTime` specified in this transaction. Subnet Validators are
 
 #### SetSubnetValidatorWeightTx
 
-`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. For this transaction to be valid, 67% of the current Subnet Validator weight must sign the warp message included in `Message`. Applications of this transaction could include:
+`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. For this transaction to be valid, 67% of the current Subnet Validator weight must sign the Warp message included in `Message`. Applications of this transaction could include:
 
 - Increase the voting weight of a Subnet Validator if a delegation is made on the Subnet
 - Increase the voting weight of a Subnet Validator if the stake amount is increased (by staking rewards for example)
@@ -352,7 +350,7 @@ After this ACP is activated, the P-Chain will no longer support staking of any a
 
 By moving ownership of the Subnet's validator set from the P-Chain to the Subnet, Subnet creators have no restrictions on what requirements they have to join their Subnet as a validator. Any stake that is required to join the Subnet Validator set is locked on the Subnet. If a validator is removed from the Subnet Validator set via a `SetSubnetValidatorWeightTx` with weight `0` or an `ExitValidatorSetTx` on the P-Chain, the stake on the Subnet will continue to be locked. How each Subnet handles stake associated with the Subnet Validator is entirely left up to the Subnet and can be treated independently to what happens on the P-Chain.
 
-This new relationship between the P-Chain and Subnets provides a dynamic where Subnets can use the P-Chain as an impartial judge to modify parameters (in addition to its existing role of helping to validate incoming Avalanche Warp Messages). If a Validator is misbehaving, the Subnet Validators can collectively generate a BLS multisig to reduce the voting weight of a misbehaving validator. This operation is fully secured by the Avalanche Primary Network (225M AVAX or $8.325B at the time of writing).
+This new relationship between the P-Chain and Subnets provides a dynamic where Subnets can use the P-Chain as an impartial judge to modify parameters (in addition to its existing role of helping to validate incoming Avalanche Warp Messages). If a Validator is misbehaving, the Subnet Validators can collectively generate a BLS multisig to reduce the voting weight of a misbehaving validator. This operation is fully secured by the Avalanche Primary Network (225M $AVAX or $8.325B at the time of writing).
 
 Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parametrization of the 67% threshold to enable Subnets to choose a different threshold based on their security model (e.g. a simple majority of 51%).
 
@@ -535,7 +533,7 @@ This ACP significantly reduces the cost of becoming a Subnet Validator. This can
 
 With the additional sovereignty Subnets gain from the P-Chain, Subnet staking tokens are no longer locked on the P-Chain for Permissionless Subnets. This poses a new security consideration for Subnet Validators: Malicious Subnets can choose to remove validators at will and take any funds that the Subnet Validator has on the Subnet. The P-Chain only provides the guarantee that Subnet Validators can retrieve the remaining $AVAX Balance for their Validator via an `ExitValidatorSetTx`. Any assets on the Subnet is entirely under the purview of the Subnet. The onus is now on Subnet Validators to vet the Subnet's security.
 
-With a long window of expiry (48 hours) for the warp message in `RegisterSubnetValidatorTx`, spam of Subnet Validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
+With a long window of expiry (48 hours) for the Warp message in `RegisterSubnetValidatorTx`, spam of Subnet Validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
 
 The continuous fee mechanism outlined above does not apply to inactive Subnet Validators since they are not stored in memory. However, inactive Subnet Validators are persisted on disk which can lead to persistent P-Chain state growth. The initial balance requirement (the greater of 5 $AVAX or two weeks of the current fee) should be a sufficient deterrent as it must be fully burned for the Subnet Validator to become inactive. A future ACP can increase the initial balance to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
 

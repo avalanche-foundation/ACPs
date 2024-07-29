@@ -1,13 +1,13 @@
-```text
-ACP: <PR Number>
-Title: <ACP title>
-Author(s): <a list of the author's name(s) and optionally contact info: FirstName LastName <foo@bar.com>>
-Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
-Status: <Proposed, Implementable, Activated, Stale>
-Track: <Standards, Best Practices, Meta, Subnet>
-Replaces (*optional): <ACP number>
-Superseded-By (*optional): <ACP number>
-```
+| ACP | PR Number |
+| :--- | :--- |
+| **Title** | ACP title |
+| **Author(s)** | A list of the author's name(s) and optionally contact info: FirstName LastName ([@GitHubUsername](https://github.com/Username) or [email@address.com](mailto:email@address.com)) |
+| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
+| **Track** | Standards, Best Practices, Meta, Subnet |
+| **Replaces (\*optional)** | [ACP-XX](../XXX/README.md) |
+| **Superseded-By (\*optional)** | [ACP-XX](../XXX/README.md) |
+
+**Note on the preamble:** The `Discussion` link is only needed for ACPs in `Proposed` and `Implementable` status.
 
 This is the suggested template for new ACPs.
 
