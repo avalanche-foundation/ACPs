@@ -52,6 +52,10 @@ Once an ACP is considered complete by the author(s), it should be marked as `Imp
 
 An ACP can be superseded by a different ACP, rendering the original obsolete. If this occurs, the original ACP will be marked as `Stale`. ACPs may also be marked as `Stale` if the author(s) abandon work on it for a prolonged period of time (12+ months). ACPs may be reopened and moved back to `Proposed` if the author(s) restart work.
 
+### Maintenance
+
+ACP maintainers will only merge PRs updating an ACP if it is created or approved by at least one of the author(s). ACP maintainers are not responsible for ensuring ACP author(s) approve the PR. ACP author(s) are expected to review PRs that target their unlocked ACP (`Proposed` or `Implementable`). Any PRs opened against a locked ACP (`Activated` or `Stale`) will not be merged by ACP maintainers.
+
 ## What belongs in a successful ACP?
 
 Each ACP must have the following parts:
