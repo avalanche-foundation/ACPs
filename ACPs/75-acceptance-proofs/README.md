@@ -1,11 +1,9 @@
-```text
-ACP: 75
-Title: Acceptance Proofs
-Author(s): Joshua Kim
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/82
-Status: Proposed
-Track: Standards
-```
+| ACP | 75 |
+| :--- | :--- |
+| **Title** | Acceptance Proofs |
+| **Author(s)** | Joshua Kim |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/82)) |
+| **Track** | Standards |
 
 ## Abstract
 

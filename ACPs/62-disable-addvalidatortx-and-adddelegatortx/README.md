@@ -1,11 +1,9 @@
-```text
-ACP: 62
-Title: Disable `AddValidatorTx` and `AddDelegatorTx`
-Author(s): Jacob Everly <https://twitter.com/JacobEv3rly>, Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/63
-Status: Activated
-Track: Standards
-```
+| ACP | 62 |
+| :--- | :--- |
+| **Title** | Disable `AddValidatorTx` and `AddDelegatorTx` |
+| **Author(s)** | Jacob Everly ([@JacobEv3rly](https://twitter.com/JacobEv3rly)), Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
+| **Status** | Activated |
+| **Track** | Standards |
 
 ## Abstract
 

@@ -1,11 +1,9 @@
-```text
-ACP: 41
-Title: Remove Pending Stakers
-Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/42
-Status: Activated
-Track: Standards
-```
+| ACP | 41 |
+| :--- | :--- |
+| **Title** | Remove Pending Stakers |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
+| **Status** | Activated |
+| **Track** | Standards |
 
 ## Abstract
 

@@ -1,12 +1,10 @@
-```text
-ACP: 77
-Title: Reinventing Subnets
-Author(s): Dhruba Basu <https://github.com/dhrubabasu>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/78
-Status: Proposed
-Track: Standards
-Replaces: 13
-```
+| ACP | 77 |
+| :--- | :--- |
+| **Title** | Reinventing Subnets |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
+| **Track** | Standards |
+| **Replaces** | [ACP-13](../13-subnet-only-validators/README.md) |
 
 ## Abstract
 
