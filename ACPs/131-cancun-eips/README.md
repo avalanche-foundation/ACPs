@@ -22,13 +22,14 @@ The listed EIPs were activated on Ethereum mainnet as part of the [Cancun upgrad
 
 ## Specification & Reference Implementation
 
-The opcodes (EVM exceution modifications) and block header modifications should be adopted as specified in the EIPs themselves. Other changes such as enabling new types or mempool modifications are not in scope (specifically blob transactions from EIP-4844 are excluded and will not be enabled with this proposal). ANCs (Avalanche Network Clients) can adopt the implementation as specified in the [coreth](https://github.com/ava-labs/coreth) repository, which was adopted from the [go-ethereum v1.13.8](https://github.com/ethereum/go-ethereum/releases/tag/v1.13.8) release in this [PR](https://github.com/ava-labs/coreth/pull/550). In particular, note the following code:
+The opcodes (EVM exceution modifications) and block header modifications should be adopted as specified in the EIPs themselves. Other changes such as enabling new transaction types or mempool modifications are not in scope (specifically blob transactions from EIP-4844 are excluded and blocks containing them are considered invalid). ANCs (Avalanche Network Clients) can adopt the implementation as specified in the [coreth](https://github.com/ava-labs/coreth) repository, which was adopted from the [go-ethereum v1.13.8](https://github.com/ethereum/go-ethereum/releases/tag/v1.13.8) release in this [PR](https://github.com/ava-labs/coreth/pull/550). In particular, note the following code:
 
 - [Activation of new opcodes](https://github.com/ava-labs/coreth/blob/7b875dc21772c1bb9e9de5bc2b31e88c53055e26/core/vm/jump_table.go#L93)
 - Activation of Cancun in next Avalanche upgrade:
   - [C-Chain](https://github.com/ava-labs/coreth/pull/610)
   - [Subnet-EVM chains](https://github.com/ava-labs/subnet-evm/blob/fa909031ed148484c5072d949c5ed73d915ce1ed/params/config_extra.go#L186)
 - `ParentBeaconRoot` is enforced to be included and the zero value [here](https://github.com/ava-labs/coreth/blob/7b875dc21772c1bb9e9de5bc2b31e88c53055e26/plugin/evm/block_verification.go#L287-L288). This field is retained for future use and compatibility with upstream tooling.
+- Forbids blob transactions by enforcing `BlobGasUsed` to be 0 [here](https://github.com/ava-labs/coreth/pull/611/files#diff-532a2c6a5365d863807de5b435d8d6475552904679fd611b1b4b10d3bf4f5010R267).
 
 _Note:_ Subnets are sovereign in regards to their validator set and state transition rules, and can choose to opt out of this proposal by making a code change in their respective Subnet-EVM client.
 
