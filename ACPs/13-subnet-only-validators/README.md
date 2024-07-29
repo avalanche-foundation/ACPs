@@ -4,7 +4,7 @@
 | **Author(s)** | Patrick O'Grady ([contact@patrickogrady.xyz](mailto:contact@patrickogrady.xyz)) |
 | **Status** | Stale |
 | **Track** | Standards |
-| **Superseded-By** | 77 |
+| **Superseded-By** | [ACP-77](../77-reinventing-subnets/README.md) |
 
 ## Abstract
 
