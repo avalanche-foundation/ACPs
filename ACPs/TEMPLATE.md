@@ -7,6 +7,8 @@
 | **Replaces (\*optional)** | [ACP-XX](../XXX/README.md) |
 | **Superseded-By (\*optional)** | [ACP-XX](../XXX/README.md) |
 
+**Note on the preamble:** The `Discussion` link is only needed for ACPs in `Proposed` and `Implementable` status.
+
 This is the suggested template for new ACPs.
 
 ## Abstract
