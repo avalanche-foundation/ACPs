@@ -56,7 +56,7 @@ An ACP can be superseded by a different ACP, rendering the original obsolete. If
 
 Each ACP must have the following parts:
 
-* `Preamble`: RFC 822 style headers containing metadata about the ACP, including the ACP number, a short descriptive title, the author(s), and optionally the contact info for each author, etc.
+* `Preamble`: Markdown table containing metadata about the ACP, including the ACP number, a short descriptive title, the author(s), and optionally the contact info for each author, etc.
 * `Abstract`: Concise (~200 word) description of the ACP
 * `Motivation`: Rationale for adopting the ACP and the specific issue/challenge/opportunity it addresses
 * `Specification`: Complete description of the semantics of any change should allow any ANC/Avalanche Community member to implement the ACP

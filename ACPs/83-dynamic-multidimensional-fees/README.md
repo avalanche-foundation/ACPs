@@ -1,11 +1,9 @@
-```text
-ACP: 83
-Title: Dynamic multidimensional fees for P-chain and X-chain
-Author(s): Alberto Benegiamo <https://github.com/abi87>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/89
-Status: Proposed
-Track: Standards
-```
+| ACP | 83 |
+| :--- | :--- |
+| **Title** | Dynamic multidimensional fees for P-chain and X-chain |
+| **Author(s)** | Alberto Benegiamo ([@abi87](https://github.com/abi87)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/89)) |
+| **Track** | Standards |
 
 ## Abstract
 

@@ -1,11 +1,9 @@
-```text
-ACP: 103
-Title: Add Dynamic Fees to the X-Chain and P-Chain
-Author(s): Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/104
-Status: Proposed
-Track: Standards
-```
+| ACP | 103 |
+| :--- | :--- |
+| **Title** | Add Dynamic Fees to the X-Chain and P-Chain |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
+| **Track** | Standards |
 
 ## Abstract
 

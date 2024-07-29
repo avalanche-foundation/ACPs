@@ -1,11 +1,9 @@
-```text
-ACP: 25
-Title: Virtual Machine Application Errors
-Author(s): Joshua Kim <https://github.com/joshua-kim>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/39
-Status: Activated
-Track: Standards
-```
+| ACP | 25 |
+| :--- | :--- |
+| **Title** | Virtual Machine Application Errors |
+| **Author(s)** | Joshua Kim ([@joshua-kim](https://github.com/joshua-kim)) |
+| **Status** | Activated |
+| **Track** | Standards |
 
 ## Abstract
 

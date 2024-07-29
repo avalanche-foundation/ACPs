@@ -1,11 +1,9 @@
-```text
-ACP: 24
-Title: Activate Shanghai EIPs on C-Chain
-Author(s): Darioush Jalali <https://github.com/darioush>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/27
-Status: Activated
-Track: Standards
-```
+| ACP | 24 |
+| :--- | :--- |
+| **Title** | Activate Shanghai EIPs on C-Chain |
+| **Author(s)** | Darioush Jalali ([@darioush](https://github.com/darioush)) |
+| **Status** | Activated |
+| **Track** | Standards |
 
 ## Abstract
 

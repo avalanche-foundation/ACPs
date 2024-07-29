@@ -1,11 +1,9 @@
-```text
-ACP: 118
-Title: Warp Signature Interface Standard
-Author(s): Cam Schultz (https://github.com/cam-schultz)
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/123
-Status: Implementable
-Track: Best Practices Track
-```
+| ACP | 118 |
+| :--- | :--- |
+| **Title** | Warp Signature Interface Standard |
+| **Author(s)** | Cam Schultz ([@cam-schultz](https://github.com/cam-schultz)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/123)) |
+| **Track** | Best Practices Track |
 
 ## Abstract
 
