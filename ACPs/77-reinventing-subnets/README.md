@@ -83,6 +83,8 @@ In the event that a Subnet has no validators, a valid BLS multi-signature cannot
 
 A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the `Owner` key defined in `CreateSubnetTx`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued.
 
+Each Subnet Validator will be instantiated with a Balance of `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` rounded down. For a `RecoverSubnetTx` to be valid, `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+
 #### RecoverSubnetTx
 
 ```golang
@@ -96,8 +98,6 @@ type SubnetValidator struct {
     //       This means that validators can share a key if they so choose.
     //       However, a NodeID + Subnet does uniquely map to a BLS key
     Signer signer.Signer `json:"signer"`
-    // Balance of the validator
-    Balance uint64 `json:"balance"`
     // Leftover $AVAX from the [Balance] will be issued to this
     // owner once it is removed from the validator set.
     ChangeOwner fx.Owner `json:"changeOwner"`
