@@ -83,7 +83,7 @@ Populating the `vrfSig` would following this logic:
 
 2. The current proposer does not have a BLS key
    
-   a. If the parent block has a non empty `vrfSig` signature, the proposer would set the proposed block `vrfSig` to the 96 byte hash result of the following preimage:
+   a. If the parent block has a non empty `vrfSig` signature, the proposer would set the proposed block `vrfSig` to the 32 byte hash result of the following preimage:
 	```
 	+-------------------------+----------+------------+
 	|  prefix :               | [8]byte  | "rng-derv" |
