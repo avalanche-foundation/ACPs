@@ -18,7 +18,7 @@ To address this, a mechanism is proposed to generate verifiable, non-cryptograph
 
 ## Motivation
 
-Reliable randomness is essential for building exciting applications on Avalanche. Games, participant selection, dynamic content, supply chain managment, and decentralized services all rely on unpredictable outcomes to function fairly. Randomness also fuels functionalities like unique identifiers and simulations. Without a secure way to generate random numbers within smart contracts, Avalanche applications become limited.
+Reliable randomness is essential for building exciting applications on Avalanche. Games, participant selection, dynamic content, supply chain management, and decentralized services all rely on unpredictable outcomes to function fairly. Randomness also fuels functionalities like unique identifiers and simulations. Without a secure way to generate random numbers within smart contracts, Avalanche applications become limited.
 
 Avalanche's traditional reliance on external oracles for randomness creates complexity and bottlenecks. These oracles inflate costs, hinder transaction speed, and are cumbersome to integrate. As Avalanche scales to more Subnets, this dependence on external systems becomes increasingly unsustainable.
 
