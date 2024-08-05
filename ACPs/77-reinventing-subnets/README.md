@@ -301,7 +301,7 @@ The method of requesting is left unspecified as it can be more generic. A viable
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload is in the past.
 
-#### SetSubnetValidatorWeightMessage
+#### SubnetValidatorWeightUpdateMessage
 
 ```text
 +--------------+----------+----------+
