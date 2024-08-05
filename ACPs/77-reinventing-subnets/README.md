@@ -123,7 +123,6 @@ A `RegisterSubnetValidatorTx` can be used to add a Subnet Validator.
 type RegisterSubnetValidatorTx struct {
     // Metadata, inputs and outputs
     BaseTx
-    // Balance must be equal to the balance uint64 in the [Message].
     // Balance <= sum($AVAX inputs) - sum($AVAX outputs) - TxFee.
     Balance uint64 `json:"balance"`
     // [Signer] is the BLS key for this validator.
@@ -138,8 +137,8 @@ type RegisterSubnetValidatorTx struct {
     //   - SubnetID
     //   - NodeID (must be Ed25519 NodeID)
     //   - Weight
+    //   - BLS public key
     //   - Expiry
-    //   - Ed25519 Signature over "[subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]"
     Message warp.Message `json:"message"`
 }
 ```
@@ -147,32 +146,31 @@ type RegisterSubnetValidatorTx struct {
 The `Message` field must be an `AddressedCall` with the payload:
 
 ```text
-+-----------+----------+-----------+
-|   codecID :   uint16 |   2 bytes |
-+-----------+----------+-----------+
-|    typeID :   uint32 |   4 bytes |
-+-----------+----------+-----------+
-|  subnetID : [32]byte |  32 bytes |
-+-----------+----------+-----------+
-|    nodeID : [32]byte |  32 bytes |
-+-----------+----------+-----------+
-|    weight :   uint64 |   8 bytes |
-+-----------+----------+-----------+
-|    expiry :   uint64 |   8 bytes |
-+-----------+----------+-----------+
-| signature : [64]byte |  64 bytes |
-+-----------+----------+-----------+
-                       | 150 bytes |
-                       +-----------+
++--------------+----------+-----------+
+|      codecID :   uint16 |   2 bytes |
++--------------+----------+-----------+
+|       typeID :   uint32 |   4 bytes |
++--------------+----------+-----------+
+|     subnetID : [32]byte |  32 bytes |
++--------------+----------+-----------+
+|       nodeID : [32]byte |  32 bytes |
++--------------+----------+-----------+
+|       weight :   uint64 |   8 bytes |
++--------------+----------+-----------+
+| blsPublicKey : [48]byte |  48 bytes |
++--------------+----------+-----------+
+|       expiry :   uint64 |   8 bytes |
++--------------+----------+-----------+
+                          | 134 bytes |
+                          +-----------+
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000000` for this transaction
-- `subnetID`, `nodeID`, and `weight` are for the Subnet Validator being added
+- `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the Subnet Validator being added
 - `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`.
 
     `validationID` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` is required to be no longer than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` with `expiry` more than 48 hours in the past can be flushed from the P-Chain's state.
-- `signature` is the raw bytes of the Ed25519 signature over the concatenated bytes of `[subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]`. This signature must correspond to the Ed25519 public key that is used for the `nodeID`. This approach prevents NodeIDs from being unwillingly added to Subnets. `balance` is the minimum initial $nAVAX balance that must be attached to the validator serialized as a uint64. A Subnet may choose to validate that the `signature` field is well-formed but it is not required.
 
 Subnets are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
@@ -182,13 +180,15 @@ An EVM Subnet may choose to implement this step like so:
 - Require the user to submit an on-chain transaction with their validator information
 - Generate the Warp message
 
-After the `RegisterSubnetValidatorTx` is accepted on the P-Chain, the Subnet Validator is added to the Subnet's validator set. A `minNonce` field (initially set to `0`) corresponding to the `validationID` will be stored on addition to the validator set. This field will be used when validating the `SetSubnetValidatorWeightTx` defined below.
+After the `RegisterSubnetValidatorTx` is accepted on the P-Chain, the Subnet Validator is added to the Subnet's validator set. A `minNonce` field corresponding to the `validationID` will be stored on addition to the validator set (initially set to `0`). This field will be used when validating the `SetSubnetValidatorWeightTx` defined below.
 
-When any validator is removed from the set (whether forcefully or per the validator's request), the P-Chain will also send a Warp message to the Subnet notifying it of the validator set removal. It is up to the Subnet on how to handle such a message, especially if unexpected. A validator's stake could continue to remain locked for an extended period of time after this point, for example.
+For a `RegisterSubnetValidatorTx` to be valid:
 
-This transaction is, by design, not required to be submitted by the validator themselves. With the Ed25519 signature, the validator guarantees that they can only be added to the validator set if `Signer` corresponds to the `blsPublicKey` and `sum($AVAX inputs) - sum($AVAX outputs) - TxFee` >= `balance`. The `RegisterSubnetValidatorTx` is considered invalid if those two properties are not satisfied.
+- `Balance` must be >= the greater of 5 $AVAX or two weeks of the current fee
 
-For a `RegisterSubnetValidatorTx` to be valid, `sum($AVAX inputs) - sum($AVAX outputs) - TxFee` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+    This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+
+- `Signer` must correspond to the `blsPublicKey` defined in the warp message
 
 Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0` or `ExitValidatorSetTx` is issued.
 
