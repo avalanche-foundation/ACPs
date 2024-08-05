@@ -42,6 +42,10 @@ A future ACP could remove the merging of these dimensions to granularly meter us
 
 This mechanism aims to maintain a target gas consumption $T$ per second and adjusts the fee based on the excess gas consumption $x$, defined as the difference between the current gas consumption and $T$.
 
+Prior to the activation of this mechanism, $x$ is initialized:
+
+$$x = 0$$
+
 At the start of building/executing block $b$, $x$ is updated:
 
 $$x = \max(x - (T \cdot \Delta t), 0)$$
@@ -78,7 +82,13 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average gas consumption drops, and $x$ starts decreasing, dropping the price. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
-A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing. At the beginning of processing block $b$, $r$ is set:
+A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing.
+
+Prior to the activation of this mechanism, $r$ is initialized:
+
+$$r = 0$$
+
+At the beginning of processing block $b$, $r$ is set:
 
 $$r = \min\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
