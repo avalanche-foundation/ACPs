@@ -83,7 +83,7 @@ In the event that a Subnet has no validators, a valid BLS multi-signature cannot
 
 A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the Subnet's current `Owner`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued. The only exception is for `Owner` rotation via the `TransferSubnetOwnershipTx`.
 
-Each Subnet Validator will be instantiated with a Balance of `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` rounded down. For a `RecoverSubnetTx` to be valid, `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+Each Subnet Validator will be instantiated with a Balance of `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` rounded down. For a `RecoverSubnetTx` to be valid, `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continuous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
 
 #### RecoverSubnetTx
 
@@ -186,7 +186,7 @@ For a `RegisterSubnetValidatorTx` to be valid:
 
 - `Balance` must be >= the greater of 5 $AVAX or two weeks of the current fee
 
-    This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+    This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continuous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
 
 - `Signer` must correspond to the `blsPublicKey` defined in the warp message
 
