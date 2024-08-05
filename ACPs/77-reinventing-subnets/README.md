@@ -290,7 +290,7 @@ The method of requesting is left unspecified as it can be more generic. A viable
 +--------------+----------+----------+
 | validationID : [32]byte | 32 bytes |
 +--------------+----------+----------+
-|        valid :     bool |  1 byte  | 
+|   registered :     bool |  1 byte  | 
 +--------------+----------+----------+
                           | 39 bytes |
                           +----------+
@@ -299,7 +299,7 @@ The method of requesting is left unspecified as it can be more generic. A viable
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000002` for this message
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
-- `valid` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload
+- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload is in the past.
 
 #### SetSubnetValidatorWeightMessage
 
