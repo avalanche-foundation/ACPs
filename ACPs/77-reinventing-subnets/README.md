@@ -81,7 +81,7 @@ Once this transaction is accepted, `AddSubnetValidatorTx` and `RemoveSubnetValid
 
 In the event that a Subnet has no validators, a valid BLS multi-signature cannot be produced. This situation can arise immediately after a Subnet is created or if all the Subnet's validators were removed from the validator set via `SetSubnetValidatorWeightTx` with `Weight = 0`.
 
-A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the `Owner` key defined in `CreateSubnetTx`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued.
+A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the Subnet's current `Owner`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued. The only exception is for `Owner` rotation via the `TransferSubnetOwnershipTx`.
 
 Each Subnet Validator will be instantiated with a Balance of `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` rounded down. For a `RecoverSubnetTx` to be valid, `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
 
