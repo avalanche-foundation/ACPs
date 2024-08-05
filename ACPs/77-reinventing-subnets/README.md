@@ -79,7 +79,7 @@ Once this transaction is accepted, `AddSubnetValidatorTx` and `RemoveSubnetValid
 
 ### Recovering a Subnet
 
-In the event that a Subnet has no validators, a valid BLS multi-signature cannot be produced. This situation can arise immediately after a Subnet is created or if all the Subnet's validators were removed from the validator set via `SetSubnetValidatorWeightTx` with `Weight = 0`.
+In the event that a Subnet has no validators, a valid BLS multi-signature cannot be produced. This is the case immediately after a Subnet is created, and can arise later if all the Subnet's validators are removed from the validator set.
 
 A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the Subnet's current `Owner`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued. The only exception is for `Owner` rotation via the `TransferSubnetOwnershipTx`.
 
