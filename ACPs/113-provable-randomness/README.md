@@ -151,6 +151,14 @@ Virtual machine random seeds, while appearing to offer a source of randomness wi
 
 Despite these limitations appearing severe, attackers face significant hurdles to exploit them. First, the attacker can't control the random number, limiting the attack's effectiveness to how that number is used. Second, a substantial amount of AVAX is needed. And last, such an attack would likely decrease AVAX's value, hurting the attacker financially.
 
+One potential attack vector involves collusion among multiple proposers to manipulate the random number selection. These attackers could strategically choose to propose or abstain from proposing blocks, effectively introducing a bias into the system. By working together, they could potentially increase their chances of generating a random number favorable to their goals.
+
+However, the effectiveness of this attack is significantly limited for the following reasons:
+- Limited options: While colluding attackers expand their potential random number choices, the overall pool remains immense (2^32 possibilities). This drastically reduces their ability to target a specific value.
+- Protocol's countermeasure: The protocol automatically eliminates any bias introduced by previous proposals once an honest proposer submits their block.
+
+In essence, while this attack is theoretically possible, its practical impact is negligible due to the vast number of potential outcomes and the protocol's inherent safeguards.
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
