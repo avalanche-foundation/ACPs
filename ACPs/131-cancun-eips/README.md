@@ -1,11 +1,9 @@
-```text
-ACP: 131 
-Title: Activate Cancun EIPs on C-Chain and Subnet-EVM chains
-Author(s): Darioush Jalali <https://github.com/darioush>, Ceyhun Onur <https://github.com/ceyonur>
-Discussions-To: [TBD]
-Status: Proposed
-Track: Standards, Subnets
-```
+| ACP | 131 |
+| :--- | :--- |
+| **Title** | Activate Cancun EIPs on C-Chain and Subnet-EVM chains |
+| **Author(s)** | Darioush Jalali ([@darioush](https://github.com/darioush)), Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)) |
+| **Status** | Proposed ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
+| **Track** | Standards, Subnet |
 
 ## Abstract
 
