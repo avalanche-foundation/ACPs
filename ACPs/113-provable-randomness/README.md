@@ -164,7 +164,7 @@ However, the effectiveness of this attack is significantly limited for the follo
 - Protocol's countermeasure: The protocol automatically eliminates any bias introduced by previous proposals once an honest proposer submits their block.
 - Detectability: Exploitation of this attack vector is readily identifiable. A successful attack necessitates coordinated collusion among multiple nodes to synchronize their proposer slots for a specific block height ( the proposer slot order are known in advance ). Subsequent to this alignment, a designated node constructs the block proposal. The network maintains a record of the proposer slot utilized for each block. A value of zero for the proposer slot unequivocally indicates the absence of an exploit. Increasing values correlate with a heightened risk of exploitation. It is important to note that non-zero slot numbers may also arise from transient network disturbances.
 
-In essence, while this attack is theoretically possible, its practical impact is negligible due to the vast number of potential outcomes and the protocol's inherent safeguards.
+While this attack is theoretically possible, its practical impact is negligible due to the vast number of potential outcomes and the protocol's inherent safeguards.
 
 ## Open Questions
 
