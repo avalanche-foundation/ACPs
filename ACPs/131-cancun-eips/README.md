@@ -14,6 +14,8 @@ Enable new EVM opcodes and opcode changes in accordance with the following EIPs 
 - [EIP-5656: MCOPY opcode](https://eips.ethereum.org/EIPS/eip-5656)
 - [EIP-6780: SELFDESTRUCT only in same transaction](https://eips.ethereum.org/EIPS/eip-6780)
 
+Note blob transactions from EIP-4844 are excluded and blocks containing them will still be considered invalid.
+
 ## Motivation
 
 The listed EIPs were activated on Ethereum mainnet as part of the [Cancun upgrade](https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md#included-eips). This proposal is to activate them on the Avalanche C-Chain in the next network upgrade, to maintain compatibility with upstream EVM tooling, infrastructure, and developer experience (e.g., Solidity compiler defaults >= [0.8.25](https://github.com/ethereum/solidity/releases/tag/v0.8.25)). Additionally, it recommends the activation of the same EIPs on Subnet-EVM chains.
