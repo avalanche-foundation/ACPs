@@ -1,13 +1,10 @@
-```text
-ACP: 113
-Title: Provable Virtual Machine Randomness
-Author(s): Tsachi Herman <http://github.com/tsachiherman>
-Discussions-To: <GitHub Discussion URL (POPULATED BY MAINTAINER, DO NOT SET)>
-Status: Proposed
-Track: Standards
-Replaces (*optional): n/a
-Superseded-By (*optional): n/a
-```
+| ACP           | 113                                                                                   |
+| :------------ | :------------------------------------------------------------------------------------ |
+| **Title**     | Provable Virtual Machine Randomness                                                   |
+| **Author(s)** | Tsachi Herman <http://github.com/tsachiherman>                                        |
+| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/112)) |
+| **Track**     | Standards                                                                             |
+
 
 ## Abstract
 
