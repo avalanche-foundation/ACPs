@@ -1,9 +1,9 @@
-| ACP           | 113                                                                                   |
-| :------------ | :------------------------------------------------------------------------------------ |
-| **Title**     | Provable Virtual Machine Randomness                                                   |
-| **Author(s)** | Tsachi Herman <http://github.com/tsachiherman>                                        |
-| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/112)) |
-| **Track**     | Standards                                                                             |
+| ACP           | 113                                            |
+| :------------ | :--------------------------------------------- |
+| **Title**     | Provable Virtual Machine Randomness            |
+| **Author(s)** | Tsachi Herman <http://github.com/tsachiherman> |
+| **Status**    | Proposed                                       |
+| **Track**     | Standards                                      |
 
 
 ## Abstract
