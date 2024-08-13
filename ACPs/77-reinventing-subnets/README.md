@@ -83,7 +83,9 @@ In the event that a Subnet has no validators, a valid BLS multi-signature cannot
 
 A `RecoverSubnetTx` can be used in this situation to instantiate the Subnet's validator set using the Subnet's current `Owner`. In all other situations, the `Owner` key is powerless after a `ConvertSubnetTx` is issued. The only exception is for `Owner` rotation via the `TransferSubnetOwnershipTx`.
 
-Each Subnet Validator will be instantiated with a Balance of `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` rounded down. For a `RecoverSubnetTx` to be valid, `(sum($AVAX inputs) - sum($AVAX outputs) - TxFee) / len(Validators)` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continuous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+Each Subnet Validator will be instantiated with a balance specified in the `Balance` field in each Subnet Validator. For a `RecoverSubnetTx` to be valid, each `Balance` must be >= the greater of 5 $AVAX or two weeks of the current fee. This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continuous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
+
+Note: An `EndTime` is specified for each Subnet Validator in the `RecoverSubnetTx` to enable a smooth transition to the Subnet Manager contract. The contract is not expected to manage the Validators defined in the `RecoverSubnetTx`.
 
 #### RecoverSubnetTx
 
@@ -93,6 +95,10 @@ type SubnetValidator struct {
     NodeID ids.NodeID `json:"nodeID"`
     // Weight of this validator used when sampling
     Weight uint64 `json:"weight"`
+    // When this validator will stop validating the Subnet
+    EndTime uint64 `json:"endTime"`
+    // Initial balance for this validator
+    Balance uint64 `json:"balance"`
     // [Signer] is the BLS key for this validator.
     // Note: We do not enforce that the BLS key is unique across all validators.
     //       This means that validators can share a key if they so choose.
@@ -265,8 +271,8 @@ Subnet creators should be aware that there is no notion of `MinStakeDuration` th
 type ExitValidatorSetTx struct {
     // Metadata, inputs and outputs
     BaseTx
-    // ID of the tx that created the validator being removed
-    TxID ids.ID `json:"txID"`
+    // ID corresponding to the validator
+    ValidationID ids.ID `json:"validationID"`
     // Ed25519 Signature on [TxID]
     Signature []byte `json:"signature"`
 }
@@ -339,11 +345,10 @@ Note: The $AVAX added to `Balance` can be claimed by the Subnet Validator using 
 type IncreaseBalanceTx struct {
     // Metadata, inputs and outputs
     BaseTx
+    // ID corresponding to the validator
+    ValidationID ids.ID `json:"validationID"`
     // Balance <= sum($AVAX inputs) - sum($AVAX outputs) - TxFee
     Balance uint64 `json:"balance"`
-    // Must be Ed25519 NodeID
-    NodeID ids.NodeID `json:"nodeID"`
-    Subnet ids.ID     `json:"subnetID"`
 }
 ```
 
