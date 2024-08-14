@@ -52,11 +52,15 @@ Once an ACP is considered complete by the author(s), it should be marked as `Imp
 
 An ACP can be superseded by a different ACP, rendering the original obsolete. If this occurs, the original ACP will be marked as `Stale`. ACPs may also be marked as `Stale` if the author(s) abandon work on it for a prolonged period of time (12+ months). ACPs may be reopened and moved back to `Proposed` if the author(s) restart work.
 
+### Maintenance
+
+ACP maintainers will only merge PRs updating an ACP if it is created or approved by at least one of the author(s). ACP maintainers are not responsible for ensuring ACP author(s) approve the PR. ACP author(s) are expected to review PRs that target their unlocked ACP (`Proposed` or `Implementable`). Any PRs opened against a locked ACP (`Activated` or `Stale`) will not be merged by ACP maintainers.
+
 ## What belongs in a successful ACP?
 
 Each ACP must have the following parts:
 
-* `Preamble`: RFC 822 style headers containing metadata about the ACP, including the ACP number, a short descriptive title, the author(s), and optionally the contact info for each author, etc.
+* `Preamble`: Markdown table containing metadata about the ACP, including the ACP number, a short descriptive title, the author(s), and optionally the contact info for each author, etc.
 * `Abstract`: Concise (~200 word) description of the ACP
 * `Motivation`: Rationale for adopting the ACP and the specific issue/challenge/opportunity it addresses
 * `Specification`: Complete description of the semantics of any change should allow any ANC/Avalanche Community member to implement the ACP
@@ -111,10 +115,13 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
 |[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim (https://github.com/joshua-kim)|Standards|
 |[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo|Standards|
+|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo (https://github.com/abi87)|Standards|
 |[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard (https://github.com/Nuttymoon)|Meta|
 |[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)|Standards|
 |[108](./ACPs/108-evm-event-importing/README.md)|EVM Event Importing|Michael Kaplan (https://github.com/mkaplan13)|Best Practices|
+|[118](./ACPs/118-warp-signature-request/README.md)|Standardized P2P Warp Signature Request Interface|Cam Schultz (https://github.com/cam-schultz)|Best Practices|
+|[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph (https://github.com/StephenButtolph), Darioush Jalali (https://github.com/darioush)|Standards|
+|[131](./ACPs/131-cancun-eips/README.md)|Activate Cancun EIPs on C-Chain and Subnet-EVM chains|Darioush Jalali (https://github.com/darioush), Ceyhun Onur (https://github.com/ceyonur)|Standards|
 
 ## Contributing
 

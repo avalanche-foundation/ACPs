@@ -1,11 +1,9 @@
-```text
-ACP: 103
-Title: Add Dynamic Fees to the X-Chain and P-Chain
-Author(s): Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/104
-Status: Proposed
-Track: Standards
-```
+| ACP | 103 |
+| :--- | :--- |
+| **Title** | Add Dynamic Fees to the X-Chain and P-Chain |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
+| **Track** | Standards |
 
 ## Abstract
 
@@ -44,6 +42,10 @@ A future ACP could remove the merging of these dimensions to granularly meter us
 
 This mechanism aims to maintain a target gas consumption $T$ per second and adjusts the fee based on the excess gas consumption $x$, defined as the difference between the current gas consumption and $T$.
 
+Prior to the activation of this mechanism, $x$ is initialized:
+
+$$x = 0$$
+
 At the start of building/executing block $b$, $x$ is updated:
 
 $$x = \max(x - (T \cdot \Delta t), 0)$$
@@ -57,7 +59,21 @@ $$M \cdot \exp\left(\frac{x}{K}\right)$$
 Where:
 
 - $M$ is the minimum gas price
-- $\exp\left(x\right)$ is an approximation of $e^x$
+- $\exp\left(x\right)$ is an approximation of $e^x$ following the EIP-4844 specification
+
+  ```python
+  # Approximates factor * e ** (numerator / denominator) using Taylor expansion
+  def fake_exponential(factor: int, numerator: int, denominator: int) -> int:
+    i = 1
+    output = 0
+    numerator_accum = factor * denominator
+    while numerator_accum > 0:
+        output += numerator_accum
+        numerator_accum = (numerator_accum * numerator) // (denominator * i)
+        i += 1
+    return output // denominator
+  ```
+
 - $K$ is a constant to control the rate of change of the gas price
 
 After processing block $b$, $x$ is updated with the total gas consumed in the block $G$:
@@ -66,7 +82,13 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average gas consumption drops, and $x$ starts decreasing, dropping the price. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
-A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing. At the beginning of processing block $b$, $r$ is set:
+A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing.
+
+Prior to the activation of this mechanism, $r$ is initialized:
+
+$$r = 0$$
+
+At the beginning of processing block $b$, $r$ is set:
 
 $$r = \min\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
 
@@ -100,13 +122,13 @@ Let's use a linear adjustment function:
 
 $$b_{n+1} = b_n + 10x$$
 
-Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 + 10 \cdot 1 = 110$, an increase of `10%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 + 10 \cdot 1 = 10,010$, an increase of `0.00001%`. The fee is _less_ reactive as the fee increases. This is because the rate of change is constant: $\frac{d}{dx}10x = 10$.
+Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 + 10 \cdot 1 = 110$, an increase of `10%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 + 10 \cdot 1 = 10,010$, an increase of `0.1%`. The fee is _less_ reactive as the fee increases. This is because the rate of change _does not scale_ with $x$.
 
 Now, let's use an exponential adjustment function:
 
 $$b_{n+1} = b_n \cdot e^x$$
 
-Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 \cdot e^1 \approx 271.828$, an increase of `171%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 \cdot e^1 \approx 27,182.8$, an increase of `171%` again. The fee is _equally_ reactive as the fee increases. This is because the rate of change scales with $x$: $\frac{d}{dx}e^x = e^x$.
+Assume $b_n = 100$ and the current block is 1 unit above target utilization, or $x = 1$. Then, $b_{n+1} = 100 \cdot e^1 \approx 271.828$, an increase of `171%`. If instead $b_n = 10,000$, $b_{n+1} = 10,000 \cdot e^1 \approx 27,182.8$, an increase of `171%` again. The fee is _equally_ reactive as the fee increases. This is because the rate of change _scales_ with $x$.
 
 ### Block Building Procedure
 
