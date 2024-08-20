@@ -179,9 +179,9 @@ struct SingleHopSendMessage {
 
 ## Reference Implementation
 
-See reference implementation on [Github here]([## Teleporter integration](https://github.com/ava-labs/avalanche-interchain-token-transfer)).
+See reference implementation on [Github here](https://github.com/ava-labs/avalanche-interchain-token-transfer).
 
-In addition to implementing the interface and design described above, the reference implementation includes audited contracts demonstrating any combination of erc20 and native token token transfers.
+In addition to implementing the interface and design described above, the reference implementation includes audited contracts demonstrating any combination of erc20 and native token transfers.
 
 ## Security Considerations
 
