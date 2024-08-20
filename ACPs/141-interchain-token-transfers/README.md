@@ -37,7 +37,7 @@ At a minimum, when sending tokens cross chain to a different L1, the token trans
 - Fee token address
 - Required gas limit for executing the transfer on destination chain, part of Teleporter's message input. See [here](https://github.com/ava-labs/teleporter/tree/main/contracts/teleporter#message-delivery-and-execution)
 
-The token address will be set in the `constructor` for the token transferrer contract, and the sender address will be set by `msg.sender` when calling for a token transfer. Amount is specified differently for ERC20 and native tokens. For native tokens, the token transfer call will be `payable` and the `msg.value` specifies the transfer amount. For ERC20 tokens, a separate `amount` input will be needed. Rest of the inputs can be defined in a struct:
+The token address will be set in the `constructor` for the token transferrer contract, and the sender address will be set by `msg.sender` when calling for a token transfer. Amount is specified differently for ERC20 and native tokens. For native tokens, the token transfer call will be `payable` and the `msg.value` specifies the transfer amount. For ERC20 tokens, a separate `amount` input will be needed. The remaining inputs can be defined in a struct:
 
 ```solidity
 struct SendTokensInput {
