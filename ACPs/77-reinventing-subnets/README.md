@@ -257,6 +257,8 @@ Issuing a `SetSubnetValidatorWeightTx` with `Weight` of `0` will remove the Subn
 
 All state related to the Subnet Validator being removed will be removed from the P-Chain's active state (BLS key, NodeID etc). This validator can be newly added to the Subnet's validator set using the `RegisterSubnetValidatorTx` flow.
 
+### Disabling Subnet Validators
+
 #### DisableValidatorTx
 
 Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. Notably, there is no requirement of any interaction on the Subnet to issue this transaction. The only requirement is an Ed25519 Signature (signed with the Subnet Validator's Ed25519 private key) for this transaction to be valid. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `ChangeOwner` defined when this validator was added to the validator set.
