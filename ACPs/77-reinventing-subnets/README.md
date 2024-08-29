@@ -246,7 +246,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction
 
-    The P-Chain state will store a `minNonce` associated with the `validationID`. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` will be set to `0` for `validationID`. `nonce` must satisfy `nonce >= minNonce` for the `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator exit since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`
+    The P-Chain state will store a `minNonce` associated with the `validationID`. When accepting the `RegisterSubnetValidatorTx`, the `minNonce` will be set to `0` for `validationID`. `nonce` must satisfy `nonce >= minNonce` for the `SetSubnetValidatorWeightTx` to be valid. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator removal since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`
 - `weight` is the new `weight` of the validator
 
 ### Removing Subnet Validators
@@ -261,7 +261,7 @@ All state related to the Subnet Validator being removed will be removed from the
 
 Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. Notably, there is no requirement of any interaction on the Subnet to issue this transaction. The only requirement is an Ed25519 Signature (signed with the Subnet Validator's Ed25519 private key) for this transaction to be valid. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `ChangeOwner` defined when this validator was added to the validator set.
 
-The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to exit a Subnet Validator set is critical for censorship-resistance and/or failed Subnets. If a Subnet Validator wishes to stop participating in its Subnet's consensus, they can do so through this transaction. This is enabled on the P-Chain to prevent Subnets from locking Subnet Validators into participating in consensus indefinitely.
+The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to stop participating in Subnet validation is critical for censorship-resistance and/or failed Subnets. If a Subnet Validator wishes to stop participating in its Subnet's consensus, they can do so through this transaction. This is enabled on the P-Chain to prevent Subnets from locking Subnet Validators into participating in consensus indefinitely.
 
 Note that this does not modify a Subnet's total staking weight, this transaction marks the Subnet Validator as inactive. Inactive Subnet Validators who issue this transaction can re-activate at any time by increasing their balance through an `IncreaseBalanceTx`.
 
@@ -403,7 +403,7 @@ class ValidatorQueue:
         self.queue.add(vdr)
 
     # Validator was removed
-    def validator_exit(self, vdrNodeID):
+    def validator_remove(self, vdrNodeID):
         vdr = find_and_remove(self.queue, vdrNodeID)
         vdr.balance = vdr.balance - self.acc
         vdr.refund() # Refund [vdr.balance] to [ChangeOwner]
