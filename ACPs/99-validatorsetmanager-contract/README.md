@@ -1,245 +1,325 @@
-```text
-ACP: 99
-Title: ValidatorSetManager Solidity Contract
-Author(s): Gauthier Leonard <https://github.com/Nuttymoon>
-Discussions-To: https://github.com/avalanche-foundation/ACPs/discussions/98
-Status: Proposed
-Track: Best Practices
-Dependencies: 77
-```
+| ACP          | 99                                                                                   |
+| :----------- | :----------------------------------------------------------------------------------- |
+| Title        | Subnet Manager Solidity Standard                                                     |
+| Author(s)    | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))                        |
+| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/98)) |
+| Track        | Best Practices                                                                       |
+| Dependencies | [ACP-77](../77-reinventing-subnets/README.md)                                        |
 
 ## Abstract
 
-Define (i) a reference implementation for a minimal Solidity smart contract to manage a Subnet’s validator set from an Avalanche EVM chain, as well as (ii) a reference architecture to easily plug in custom “security modules” on top of this contract (e.g. to implement a PoS Subnet).
-
-The proposed name for this contract is `ValidatorSetManager`.
-
-This proposal should also help define the payload of the P-Chain notifications sent to the Subnet upon validator addition, weight change and removal.
+Define (i) a reference interface for a minimal Subnet Manager Solidity smart contract to be deployed on any Avalanche EVM chain, as well as (ii) a modular architecture to easily plug in custom “security modules” on top of this contract (e.g. to implement a PoS Subnet).
 
 This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on it to be marked as `Implementable`.
 
 ## Motivation
 
-[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a Warp Derived Address as the validator set manager. The `(blockchainID, address)` pair specified by the Warp Derived Address is responsible for sending Warp `AddressedCall` payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program add, modify the weight of, and remove validators.
+[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a "Subnet manager". The `(blockchainID, address)` pair specified by the Warp Derived Address is responsible for sending Warp `AddressedCall` payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program to add, modify the weight of, and remove validators.
 
-On each validator set change, the P-Chain generates a Warp message to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. These notification messages have not been specified to date.
+On each validator set change, the P-Chain is willing to sign an `AddressedCall` to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. The 2 kinds of `AddressedCall`s [defined in ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#proof-of-subnet-validator-set-change) are `SubnetValidatorRegistrationMessage` and `SubnetValidatorWeightUpdateMessage`.
 
 Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose defining a reference implementation for a Solidity smart contract that can:
 
 1. Hold relevant information about the current Subnet validator set, as well as historical information
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
-4. Be easily extended with custom “security modules” to implement any security model
+4. Be easily extended with custom “security modules” to implement any security model (e.g. PoS). Those modules have to implement the `IACP99SecurityModule` interface and will be called by the `ACP99Manager` contract upon validator set updates.
 
 Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching Subnets on Avalanche.
 
-Once deployed, this contract will be used as the `address` in the `SetSubnetValidatorManagerTx`.
+Once deployed, the `ACP99Manager` contract will be used as the `Address` in the [`ConvertSubnetTx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettx).
 
 ## Specification
 
-### Storage
+**Note:** The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
 
-The `ValidatorSetManager` needs to store all this data to operate correctly.
+### IACP99Manager
 
-**Note:** This is pseudo-code that might not be 100% syntactically correct.
-
-```solidity
-// The ID of the Subnet that uses this contract to manage its validator set
-bytes32 subnetID;
-
-// The current Subnet validator set (list of NodeIDs)
-bytes32[] subnetCurrentValidatorSet;
-
-// Subnet validator
-struct SubnetValidator {
-    // The Warp message ID corresponding to the RegisterSubnetValidatorTx that added the validator.
-    // The message ID is needed to submit subsequent SetSubnetValidatorWeightTx.
-    bytes32 messageID,
-    // The nonce of the latest validator weight update
-    uint64 nonce,
-    // The validator weight
-    uint64 weight,
-    // The timestamp the validator was added
-    uint64 addTimestamp
-}
-
-// The Subnet current validators
-// NodeID => SubnetValidator
-mapping(bytes32 => SubnetValidator) subnetCurrentValidators;
-
-// The total weight of the current Subnet validator set
-uint64 subnetTotalWeight;
-
-// Subnet validator pending registration
-struct SubnetRegisteringValidator {
-    // The validator weight
-    uint64 weight,
-    // The timestamp after which the signature is invalid
-    uint64 expiry,
-    // The Ed25519 signature over the concatenated bytes of [subnetID]+[nodeID]+[blsPublicKey]+[weight]+[balance]+[expiry]
-    bytes signature
-}
-
-// The Subnet validators that are pending registration (= waiting for addition notification from the P-Chain)
-// NodeID => registering validator
-mapping(bytes32 => SubnetRegisteringValidator) subnetRegisteringValidators;
-
-// Subnet validation status
-enum SubnetValidationStatus {
-    Registering,
-    Active,
-    Removing,
-    Over
-}
-
-// Subnet validation
-struct SubnetValidation {
-    // The validation status
-    SubnetValidationStatus status,
-    // The list of validation periods
-    // The index is the nonce associated with the weight update.
-    SubnetValidationPeriod[] periods,
-    // The nonce of the current validation period
-    uint64 currentValidationPeriod
-}
-
-// Subnet validation period
-struct SubnetValidationPeriod {
-    // The weight of the validator during the period
-    uint64 weight,
-    // The start time of the validation period
-    uint64 startTime,
-    // The end time of the validation period (only ≠ 0 when the period is over)
-    uint64 endTime,
-    // The uptime of the validator during this validation period (only ≠ 0 once the validation period is over)
-    uint64 uptime
-}
-
-/**
- * The list of message IDs associated with a validator of the Subnet
- * Each message ID corresponds to a RegisterSubnetValidatorTx
- * NodeID => messageID[]
- */
-mapping(bytes32 => bytes32[]) subnetValidatorMessages;
-// The validation corresponding to each message ID (= RegisterSubnetValidatorTx)
-// messageID => SubnetValidation
-mapping(bytes32 => SubnetValidation) subnetValidations;
-```
-
-#### About `validation`s
-
-A `validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
-
-Each validation is identified by the `MessageID` corresponding to the Warp message in the `RegisterSubnetValidatorTx` that added the validator.
-
-`subnetValidations` will allow custom “security modules” (e.g. a PoS module) to take appropriate action upon node operator interactions (e.g. rewarding the node operator upon unstake). The `SubnetValidationPeriod` list will enable proper reconstruction of the validation timeline for each validator.
-
-### External functions
-
-The `ValidatorSetManager` contract should implement the following `external` functions.
-
-**Note:** This is pseudo-code that might not be 100% syntactically correct.
+Here is the proposed interface for the `IACP99Manager` contract:
 
 ```solidity
-// Returns the ID of the Subnet tied to this contract
-function getSubnetID() external view returns (bytes32);
+interface IACP99Manager {
+    /// @notice Subnet validation status
+    enum ValidationStatus {
+        Registering,
+        Active,
+        Updating,
+        Removing,
+        Completed,
+        Expired
+    }
 
-// Returns a Subnet validator information by its NodeID
-function getSubnetValidator(bytes32 nodeID) external view returns (SubnetValidator);
+    /**
+     * @notice Subnet validation
+     * @param status The validation status
+     * @param nodeID The NodeID of the validator
+     * @param startTime The start time of the validation
+     * @param endTime The end time of the validation
+     * @param periods The list of validation periods.
+     * The index is the nonce associated with the weight update.
+     * @param activeSeconds The time during which the validator was active during this validation
+     * @param uptimeSeconds The uptime of the validator for this validation
+     */
+    struct Validation {
+        ValidationStatus status;
+        bytes32 nodeID;
+        uint64 startTime;
+        uint64 endTime;
+        ValidationPeriod[] periods;
+        uint64 activeSeconds;
+        uint64 uptimeSeconds;
+    }
 
-/**
- * Used to issue a RegisterSubnetValidatorTx
- * @param nodeID The ID of the node to add to the Subnet
- * @param weight The weight of the node on the Subnet
- * @param expiry The time after which this message is invalid
- * @param signature The Ed25519 signature of [subnetID]+[nodeID]+[blsPublicKey]+[weight]+[timestamp]
- */
-function registerSubnetValidator(
-    bytes32 nodeID,
-    uint64 weight,
-    uint64 expiry,
-    bytes signature
-) external onlyOwner;
+    /**
+     * @notice Subnet validation period
+     * @param weight The weight of the validator during the period
+     * @param startTime The start time of the validation period
+     * @param endTime The end time of the validation period (only ≠ 0 when the period is over)
+     */
+    struct ValidationPeriod {
+        uint64 weight;
+        uint64 startTime;
+        uint64 endTime;
+    }
 
-/**
- * Used to issue a SetSubnetValidatorWeightTx
- * @param nodeID The ID of the node to modify
- * @param weight The new weight of the node on the Subnet
- */
-function setSubnetValidatorWeight(
-    bytes32 nodeID,
-    uint64 weight
-) external onlyOwner;
+    /// @notice Emitted when the security module address is set
+    event SetSecurityModule(address indexed securityModule);
+    /// @notice Emitted when a validator registration to the Subnet is initiated
+    event InitiateValidatorRegistration(
+        bytes32 indexed nodeID,
+        bytes32 indexed validationID,
+        bytes32 registrationMessageID,
+        uint64 weight,
+        uint64 registrationExpiry
+    );
+    /// @notice Emitted when a validator registration to the Subnet is completed
+    event CompleteValidatorRegistration(
+        bytes32 indexed nodeID,
+        bytes32 indexed validationID,
+        uint64 weight,
+        uint64 validationStartTime
+    );
+    /// @notice Emitted when a validator weight update is initiated
+    event InitiateValidatorWeightUpdate(
+        bytes32 indexed nodeID,
+        bytes32 indexed validationID,
+        bytes32 weightUpdateMessageID,
+        uint64 weight
+    );
+    /// @notice Emitted when a validator weight update is completed
+    event CompleteValidatorWeightUpdate(
+        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
+    );
 
-/**
- * Called to update the Subnet validator set upon receiving a notification Warp message from the P-Chain
- * (after the successful addition or removal of a validator)
- * @param messageIndex The index of the Warp message from the P-Chain
- */
-function updateSubnetValidatorSet(
-    uint32 messageIndex
-) external;
+    error ACP99Manager__ZeroAddressSecurityModule();
+    error ACP99Manager__OnlySecurityModule(address sender, address securityModule);
+    error ACP99Manager__InvalidExpiry(uint64 expiry, uint256 timestamp);
+    error ACP99Manager__ZeroNodeID();
+    error ACP99Manager__NodeIDAlreadyValidator(bytes32 nodeID);
+    error ACP99Manager__InvalidSignatureLength(uint256 length);
+    error ACP99Manager__InvalidValidationID(bytes32 validationID);
+    error ACP99Manager__InvalidWarpMessage();
+    error ACP99Manager__InvalidSourceChainID(bytes32 sourceChainID);
+    error ACP99Manager__InvalidOriginSenderAddress(address originSenderAddress);
+    error ACP99Manager__InvalidRegistration();
+    error ACP99Manager__NodeIDNotActiveValidator(bytes32 nodeID);
+    error ACP99Manager__InvalidUptimeValidationID(bytes32 validationID);
+    error ACP99Manager__InvalidSetSubnetValidatorWeightNonce(uint64 nonce, uint64 currentNonce);
+
+    /// @notice Get the ID of the Subnet tied to this manager
+    function subnetID() external view returns (bytes32);
+
+    /// @notice Get the address of the security module attached to this manager
+    function getSecurityModule() external view returns (address);
+
+    /// @notice Get the validation details for a given validation ID
+    function getValidation(bytes32 validationID) external view returns (Validation memory);
+
+    /// @notice Get a Subnet validator's active validation ID
+    function getValidatorActiveValidation(bytes32 nodeID) external view returns (bytes32);
+
+    /// @notice Get the current Subnet validator set (list of NodeIDs)
+    function getActiveValidatorSet() external view returns (bytes32[] memory);
+
+    /// @notice Get the total weight of the current Subnet validator set
+    function subnetTotalWeight() external view returns (uint64);
+
+    /// @notice Get the list of message IDs associated with a validator of the Subnet
+    function getValidatorValidations(bytes32 nodeID) external view returns (bytes32[] memory);
+
+    /**
+     * @notice Initiate a validator registration by issuing a RegisterSubnetValidatorTx Warp message
+     * @param nodeID The ID of the node to add to the Subnet
+     * @param weight The weight of the node on the Subnet
+     * @param expiry The time after which this message is invalid
+     * @param signature The Ed25519 signature of [subnetID]+[nodeID]+[blsPublicKey]+[weight]+[timestamp]
+     */
+    function initiateValidatorRegistration(
+        bytes32 nodeID,
+        uint64 weight,
+        uint64 expiry,
+        bytes memory signature
+    ) external returns (bytes32);
+
+    /**
+     * @notice Resubmits a validator registration message to be sent to P-Chain.
+     * Only necessary if the original message can't be delivered due to validator churn.
+     * @param validationID The validationID attached to the registration message
+     */
+    function resendValidatorRegistrationMessage(bytes32 validationID) external returns (bytes32);
+
+    /**
+     * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
+     * validationID from the P-Chain.
+     * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     */
+    function completeValidatorRegistration(uint32 messageIndex) external;
+
+    /**
+     * @notice Initiate a validator weight update by issuing a SetSubnetValidatorWeightTx Warp message.
+     * If the weight is 0, this initiates the removal of the validator from the Subnet. An uptime proof can be
+     * included. This proof might be required to claim validator rewards (handled by the security module).
+     * @param nodeID The ID of the node to modify
+     * @param weight The new weight of the node on the Subnet
+     * @param includesUptimeProof Whether the uptime proof is included in the message
+     * @param messageIndex The index of the Warp message containing the uptime proof
+     */
+    function initiateValidatorWeightUpdate(
+        bytes32 nodeID,
+        uint64 weight,
+        bool includesUptimeProof,
+        uint32 messageIndex
+    ) external;
+
+    /**
+     * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
+     * validationID from the P-Chain.
+     * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     */
+    function completeValidatorWeightUpdate(uint32 messageIndex) external;
+}
 ```
+
+#### About `Validation`s
+
+A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
+
+Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set, as defined in ACP-77.
 
 #### About `ExitValidatorSetTx`
 
-This transaction allows a validator to exit a Subnet validator set directly from the P-Chain to prevent the Subnet from locking validators into participating in consensus indefinitely. Therefore it is not meant to be called in the `ValidatorSetManager` contract.
+This transaction allows a validator to exit a Subnet validator set directly from the P-Chain to prevent the Subnet from locking validators into participating in consensus indefinitely. Therefore it is not meant to be called in the `Manager` contract.
 
-### Information Needed from the P-Chain
+### IACP99SecurityModule
 
-Upon successful addition, weight update, and removal of a validator from the Subnet, the P-Chain will send a notification in the form of a Warp message. The `updateSubnetValidatorSet` function is responsible for deserializing this message and updating the contract state accordingly.
+Here is the proposed interface for the `IACP99SecurityModule` contract:
 
-To update the validator set, the P-Chain needs to send a notification with the following payload:
+```solidity
+interface IACP99SecurityModule {
+    /**
+     * @notice Information about a validator registration
+     * @param nodeID The NodeID of the validator node
+     * @param validationID The ValidationID of the validation
+     * @param weight The initial weight assigned to the validator
+     * @param startTime The timestamp when the validation started
+     */
+    struct ValidatiorRegistrationInfo {
+        bytes32 nodeID;
+        bytes32 validationID;
+        uint64 weight;
+        uint64 startTime;
+    }
 
+    /**
+     * @notice Information about a validator's uptime
+     * @param activeSeconds The total number of seconds the validator was active
+     * @param uptimeSeconds The total number of seconds the validator was online
+     * @param averageWeight The average weight of the validator during the period
+     */
+    struct ValidatorUptimeInfo {
+        uint64 activeSeconds;
+        uint64 uptimeSeconds;
+        uint64 averageWeight;
+    }
+
+    /**
+     * @notice Information about a change in a validator's weight
+     * @param nodeID The NodeID of the validator node
+     * @param validationID The ValidationID of the validation
+     * @param nonce A sequential number to order weight changes
+     * @param newWeight The new weight assigned to the validator
+     * @param uptime The uptime information for the validator
+     */
+    struct ValidatorWeightChangeInfo {
+        bytes32 nodeID;
+        bytes32 validationID;
+        uint64 nonce;
+        uint64 newWeight;
+        ValidatorUptimeInfo uptimeInfo;
+    }
+
+    error ACP99SecurityModule__ZeroAddressManager();
+    error ACP99SecurityModule__OnlyManager(address sender, address manager);
+
+    /// @notice Get the address of the ACP99Manager contract secured by this module
+    function getManagerAddress() external view returns (address);
+
+    /**
+     * @notice Handle a validator registration
+     * @param validatorInfo The information about the validator
+     */
+    function handleValidatorRegistration(ValidatiorRegistrationInfo memory validatorInfo)
+        external;
+
+    /**
+     * @notice Handle a validator weight change
+     * @param weightChangeInfo The information about the validator weight change
+     */
+    function handleValidatorWeightChange(ValidatorWeightChangeInfo memory weightChangeInfo)
+        external;
+}
 ```
-+-----------+----------+-----------+
-|  subnetID : [32]byte |  32 bytes |
-+-----------+----------+-----------+
-|    nodeID : [32]byte |  32 bytes |
-+-----------+----------+-----------+
-| messageID : [32]byte |  32 bytes |
-+-----------+----------+-----------+
-|     nonce :   uint64 |   8 bytes |
-+-----------+----------+-----------+
-|    weight :   uint64 |   8 bytes |
-+-----------+----------+-----------+
-| timestamp :   uint64 |   8 bytes |
-+-----------+----------+-----------+
-|    uptime : [64]byte |  64 bytes |
-+-----------+----------+-----------+
-                       | 184 bytes |
-                       +-----------+
+
+### Reference Architecture
+
+Each `ACP99Manager` contract will be associated with one "security module" that must implement the `IACP99SecurityModule` interface and is the only contract allowed to call the `ACP99Manager` functions related to validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Everytime a validator is added/removed or a weight change is initiated, the `ACP99Manager` will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommand that the "security module" reference an immutable `ACP99Manager` contract address for security reasons.
+
+It is up to the "security module" to decide what action to take when a validator is added/removed or a weight change is confirmed by the P-Chain. Such actions could be starting the withdrawal period and allocating rewards in a PoS Subnet.
+
+```mermaid
+---
+title: ACP-99 Architecture with a PoA Security Module
+---
+graph LR
+  Safe(Safe multisig)
+  SecurityModule(ACP99PoAModule)
+  Manager(ACP99Manager)
+  P(P-Chain)
+
+  subgraph "Manager chain"
+    Safe
+    SecurityModule
+    Manager
+  end
+  Safe -.->|Own| SecurityModule
+  Safe -.->|Own| Manager
+  SecurityModule <-.->|Reference| Manager
+  Safe -->|addValidator| SecurityModule
+  SecurityModule -->|initiateValidatorRegistration| Manager
+  Manager -->|sendWarpMessage| P
+  P -->|completeValidatorRegistration| Manager
+  Manager -->|handleValidatorRegistration| SecurityModule
 ```
 
-- The Subnet ID
-- The NodeID
-- The `MessageID` corresponding to the Warp message in the `RegisterSubnetValidatorTx` that added the validator (SHA256)
-- The `nonce` corresponding to this update
-- The weight of the validator (if `0`, this means that the validation is over)
-- The exact timestamp at which the weight was updated (if the nonce is `0`, this also means the beginning of the `validation`)
-- The uptime observed during the previous validation period (only useful in case a validator weight update)
-
-Note that the timestamp can also be used to update the `endTime` of the previous validation period.
-
-**Note:** Once this discussion/ACP is in an advanced stage, an update to ACP-77 can be made to specify the payload of P-Chain notifications.
-
-### Reference Architecture for Custom “Security Modules”
-
-The `ValidatorSetManager` contract will be ownable (e.g. using [OpenZeppelin Ownable](https://docs.openzeppelin.com/contracts/5.x/api/access#Ownable)). The ownership can be transferred to a smart contract, the “Security Module”, that will implement the security rules for the Subnet.
-
-![ValidatorSetManager architecture](./validatorsetmanager-architecture.png)
-
-The most simple architecture to implement a PoA Subnet would be to use a [Safe Multisig (or Smart Account)](https://docs.safe.global/advanced/smart-account-overview) as owner, effectively reproducing the existing Subnet management functionalities available on the P-Chain today.
-
-Other “Security Modules” could implement PoS, Liquid PoS, etc. The specification of such smart contracts is out of the scope of this ACP.
+"Security modules" could implement PoS, Liquid PoS, etc. The specification of such smart contracts is out of the scope of this ACP.
 
 ## Backwards Compatibility
 
-The `ValidatorSetManager` is only a reference implementation, it doesn’t have any impact on the current behavior of the protocol.
+The `IACP99Manager` and `IACP99SecurityModule` interfaces are only a reference interface, they don’t have any impact on the current behavior of the Avalanche protocol.
 
 ## Reference Implementation
 
-A full reference implementation has not been provided yet. It will be provided once this ACP is considered `Implementable`.
+A work in progress reference implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/acp-99-implementation/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
 
 ## Security Considerations
 
@@ -247,9 +327,9 @@ The audit process of the `ValidatorSetManager` contract is of the utmost importa
 
 ## Open Questions
 
-### Should the Subnet validators’ uptime be tracked on the P-Chain?
+### Is there an interest to keep historical information about the validator set on the manager chain?
 
-Given the direction taken by the Avalanche protocol by the introduction of SOVs (Subnet Only Validators), is it the job of the P-Chain to track Subnet validators’ uptime? If yes, the induced load should be taken into account to compute the continuous fee discussed in ACP-77.
+The functions `getValidation` and `getValidatorValidations` would allow to retrieve historical information about the validator set. The information will anyway be available on the P-Chain, so we could envision only keeping track of the active validations in the `Manager` contract. This would avoid storing historical data on the manager chain and make the implementation of the `Manager` more straightforward.
 
 ### How could we name “Security Modules”?
 
@@ -257,7 +337,7 @@ I don’t really like this name but cannot come up with anything else.
 
 ## Acknowledgments
 
-Special thanks to @leopaul36 and @aaronbuchwald for their review before publication!
+Special thanks to @leopaul36, @aaronbuchwald, @dhrubabasu and @minghinmatthewlam for their reviews of previous versions of this ACP!
 
 ## Copyright
 
