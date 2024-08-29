@@ -196,7 +196,7 @@ For a `RegisterSubnetValidatorTx` to be valid:
 
 - `Signer` must correspond to the `blsPublicKey` defined in the warp message
 
-Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0` or `DisableValidatorTx` is issued.
+Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0`.
 
 ### Modifying Subnet Validators
 
