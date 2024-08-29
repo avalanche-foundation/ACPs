@@ -263,7 +263,7 @@ Subnet Validators can use `DisableValidatorTx` to mark their validator as inacti
 
 The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to stop participating in Subnet validation is critical for censorship-resistance and/or failed Subnets. If a Subnet Validator wishes to stop participating in its Subnet's consensus, they can do so through this transaction. This is enabled on the P-Chain to prevent Subnets from locking Subnet Validators into participating in consensus indefinitely.
 
-Note that this does not modify a Subnet's total staking weight, this transaction marks the Subnet Validator as inactive. Inactive Subnet Validators who issue this transaction can re-activate at any time by increasing their balance through an `IncreaseBalanceTx`.
+Note that this does not modify a Subnet's total staking weight. This transaction only marks the Subnet Validator as inactive but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseBalanceTx`.
 
 Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
 
