@@ -197,9 +197,9 @@ The `Message` field must be an `AddressedCall` with the payload:
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000001` for this transaction
 - `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the Subnet Validator being added
-- `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`.
+- `expiry` is the time at which this message becomes invalid. As of the P-Chain timestamp `expiry` or greater, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`.
 
-    `validationID` of validators added via `RegisterSubnetValidatorTx` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` is required to be no longer than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` with an `expiry` in the past can be flushed from the P-Chain's state.
+    `validationID` of validators added via `RegisterSubnetValidatorTx` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
 
 Subnets are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
@@ -332,7 +332,7 @@ The method of requesting is left unspecified as it can be more generic. A viable
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000003` for this message
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
-- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload is in the past.
+- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload has been reached.
 
 The P-Chain nodes must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
 
