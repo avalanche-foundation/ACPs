@@ -94,7 +94,7 @@ type ConvertSubnetTx struct {
 }
 ```
 
-Once this transaction is accepted, the `Owner` key is powerless. Additionally, `AddSubnetValidatorTx` and `RemoveSubnetValidatorTx` are disabled on the Subnet. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
+Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet. The only action that the `Owner` key is able to take is removing previously existing Subnet validators via `RemoveSubnetValidatorTx`. These previously existing validators otherwise will be removed automatically at their specified `EndTime`. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward, and the `Owner` key is powerless to modify anything related to these newly added validators.
 
 The `validationID` for validators added in `ConvertSubnetTx` is defined as the SHA256 hash of `(convertSubnetTxID,validatorIndex)`, where `validatorIndex` refers to the index into the `Validators` array of within the `ConvertSubnetTx`.
 
@@ -138,6 +138,9 @@ Once a `ConvertSubnetTx` is accepted, P-Chain validators will be willing to sign
                                 | 38 bytes |
                                 +----------+
 ```
+- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
+- `typeID` is the payload type identifier and is `0x00000000` for this transaction
+- `subnetConversionID` is the `subnetConversionID` that has been accepted in a `convertSubnetTx` on the P-Chain.
 
 ### Adding Subnet Validators
 
@@ -192,7 +195,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000000` for this transaction
+- `typeID` is the payload type identifier and is `0x00000001` for this transaction
 - `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the Subnet Validator being added
 - `expiry` is the time after which this message is invalid. After the P-Chain timestamp is past `expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`.
 
@@ -262,7 +265,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000001` for this transaction
+- `typeID` is the payload type identifier and is `0x00000002` for this transaction
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction
 
@@ -327,7 +330,7 @@ The method of requesting is left unspecified as it can be more generic. A viable
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000002` for this message
+- `typeID` is the payload type identifier and is `0x00000003` for this message
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload is in the past.
 
@@ -352,7 +355,7 @@ The P-Chain nodes must refuse to sign any `SubnetValidatorRegistrationMessage` w
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000003` for this message
+- `typeID` is the payload type identifier and is `0x00000004` for this message
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `nonce` is the latest nonce stored with the `validationID` on the P-Chain
 - `weight` is the current weight of the Subnet Validator with `validationID`
@@ -470,7 +473,7 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
   - `DisableValidatorTx`
   - `IncreaseBalanceTx`
 
-Once a Subnet issues a `ConvertSubnetTx`, `AddSubnetValidatorTx` and `RemoveSubnetValidatorTx` can no longer be used to modify that Subnet's validator set. A Subnet Validator added with an `AddSubnetValidatorTx` will continue to validate the Subnet until their `EndTime` is reached. After expiry, those validators (if they want to continue validating) must use the `RegisterSubnetValidatorTx` flow outlined in this ACP to register as a Subnet Validator.
+Once a Subnet issues a `ConvertSubnetTx`, `AddSubnetValidatorTx` can no longer be used to add validators to that Subnet's validator set. Any Subnet Validators previously added with an `AddSubnetValidatorTx` will continue to validate the Subnet until their `EndTime` is reached, or until removed by the Subnet `Owner` key via `RemoveSubnetValidatorTx`. After expiry or removal, those validators (if they want to continue validating) must use the `RegisterSubnetValidatorTx` flow outlined in this ACP to register as a Subnet Validator.
 
 ## Reference Implementation
 
