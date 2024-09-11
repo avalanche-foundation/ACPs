@@ -83,7 +83,7 @@ type ConvertSubnetTx struct {
     // Restrictions:
     // - Must not be the Primary Network ID
     Subnet ids.ID `json:"subnetID"`
-    // BlockchainID where the L1 manager lives
+    // BlockchainID where the Subnet manager lives
     ChainID ids.ID `json:"chainID"`
     // Address of the Subnet manager
     Address []byte `json:"address"`
