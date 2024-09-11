@@ -473,7 +473,7 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
   - `DisableValidatorTx`
   - `IncreaseBalanceTx`
 
-Once a Subnet issues a `ConvertSubnetTx`, `AddSubnetValidatorTx` can no longer be used to add validators to that Subnet's validator set. Any Subnet Validators previously added with an `AddSubnetValidatorTx` will continue to validate the Subnet until their `EndTime` is reached, or until removed by the Subnet `Owner` key via `RemoveSubnetValidatorTx`. After expiry or removal, those validators (if they want to continue validating) must use the `RegisterSubnetValidatorTx` flow outlined in this ACP to register as a Subnet Validator.
+Once a Subnet issues a `ConvertSubnetTx`, `AddSubnetValidatorTx` can no longer be used to add validators to that Subnet's validator set. Any Subnet Validators previously added with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`EndTime`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) is reached, or until removed by the Subnet `Owner` key via `RemoveSubnetValidatorTx`. After expiry or removal, those validators (if they want to continue validating) must use the `RegisterSubnetValidatorTx` flow outlined in this ACP to register as a Subnet Validator.
 
 ## Reference Implementation
 
