@@ -94,7 +94,7 @@ type ConvertSubnetTx struct {
 }
 ```
 
-Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet. The only action that the `Owner` key is able to take is removing previously existing Subnet validators via `RemoveSubnetValidatorTx`. These previously existing validators otherwise will be removed automatically at their specified `EndTime`. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward, and the `Owner` key is powerless to modify anything related to these newly added validators.
+Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet. The only action that the `Owner` key is able to take is removing previously existing Subnet validators via `RemoveSubnetValidatorTx`. Any previously existing validators added with the pre-ACP-77 workflow will otherwise be removed automatically at their specified [`EndTime`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27). `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward, and the `Owner` key is powerless to modify anything related to these newly added validators.
 
 The `validationID` for validators added in `ConvertSubnetTx` is defined as the SHA256 hash of `(convertSubnetTxID,validatorIndex)`, where `validatorIndex` refers to the index into the `Validators` array of within the `ConvertSubnetTx`.
 
