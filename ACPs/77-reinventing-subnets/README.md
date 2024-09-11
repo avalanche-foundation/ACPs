@@ -98,7 +98,8 @@ Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Sub
 
 The `validationID` for validators added in `ConvertSubnetTx` is defined as the SHA256 hash of `(convertSubnetTxID,validatorIndex)`, where `validatorIndex` refers to the index into the `Validators` array of within the `ConvertSubnetTx`.
 
-The following serialization is defined as an `InitialSubnetValidator`:
+The following serialization is defined as a `ValidatorData`:
+
 ```text
 +--------------+----------+-----------+
 |       nodeID : [32]byte |  32 bytes |
@@ -110,23 +111,25 @@ The following serialization is defined as an `InitialSubnetValidator`:
                           |  88 bytes |
                           +-----------+
 ```
+
 The following serialization is defined as the `SubnetConversionData`
+
 ```text
-+-------------------+--------------------------+--------------------------------------------------------------+
-| convertSubnetTxID :                 [32]byte |                                                     32 bytes |
-+-------------------+--------------------------+--------------------------------------------------------------+
-|    managerChainID :                 [32]byte |                                                     32 bytes |
-+-------------------+--------------------------+--------------------------------------------------------------+
-|    managerAddress :                   []byte |                                4 + len(managerAddress) bytes |
-+-------------------+--------------------------+--------------------------------------------------------------+
-| initialValidators : []InitialSubnetValidator |                        4 + len(initialValidators) * 88 bytes |
-+-------------------+--------------------------+--------------------------------------------------------------+
-                                               | 72 + len(managerAddress) + len(initialValidators) * 88 bytes |
-                                               +--------------------------------------------------------------+
++-------------------+--------------------------+-------------------------------------------------------+
+| convertSubnetTxID :                 [32]byte |                                              32 bytes |
++-------------------+--------------------------+-------------------------------------------------------+
+|    managerChainID :                 [32]byte |                                              32 bytes |
++-------------------+--------------------------+-------------------------------------------------------+
+|    managerAddress :                   []byte |                         4 + len(managerAddress) bytes |
++-------------------+--------------------------+-------------------------------------------------------+
+|        validators :          []ValidatorData |                        4 + len(validators) * 88 bytes |
++-------------------+--------------------------+-------------------------------------------------------+
+                                               | 72 + len(managerAddress) + len(validators) * 88 bytes |
+                                               +-------------------------------------------------------+
 ```
-The `subnetConversionID` is defined as the SHA256 hash of the `SubnetConversionData` from a given `ConvertSubnetTx`.
 
 Once a `ConvertSubnetTx` is accepted, P-Chain validators will be willing to sign a `SubnetConversionMessage`, specified as an `AddressedCall` with a empty `originSenderAddress` with the following payload.
+
 ```text
 +--------------------+----------+----------+
 |            codecID :   uint16 |  2 bytes |
@@ -138,9 +141,10 @@ Once a `ConvertSubnetTx` is accepted, P-Chain validators will be willing to sign
                                 | 38 bytes |
                                 +----------+
 ```
+
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000000` for this transaction
-- `subnetConversionID` is the `subnetConversionID` that has been accepted in a `convertSubnetTx` on the P-Chain.
+- `subnetConversionID` is the SHA256 hash of the `SubnetConversionData` from a given `ConvertSubnetTx`.
 
 ### Adding Subnet Validators
 
