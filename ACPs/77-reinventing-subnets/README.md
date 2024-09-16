@@ -128,7 +128,7 @@ The following serialization is defined as the `SubnetConversionData`
                                                +-------------------------------------------------------+
 ```
 
-Once a `ConvertSubnetTx` is accepted, P-Chain validators will be willing to sign a `SubnetConversionMessage`, specified as an `AddressedCall` with a empty `originSenderAddress` with the following payload.
+Once a `ConvertSubnetTx` is accepted, P-Chain validators must be willing to sign an `AddressedCall` with `sourceChainID` set to the P-Chain ID and the `sourceAddress` set to an empty byte array. The payload of the `AddressedCall` must be:
 
 ```text
 +--------------------+----------+----------+
