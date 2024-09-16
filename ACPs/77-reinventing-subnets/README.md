@@ -96,7 +96,7 @@ type ConvertSubnetTx struct {
 
 Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet going forward. The only action that the `Owner` key is able to take is removing any Subnet validators that were added using `AddSubnetValidatorTx` previously via `RemoveSubnetValidatorTx`. Unless removed by the `Owner` key, note that any Subnet Validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their `EndTime` is reached. Once all Subnet Validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
 
-The `validationID` for validators added in `ConvertSubnetTx` is defined as the SHA256 hash of `(convertSubnetTxID,validatorIndex)`, where `validatorIndex` refers to the index into the `Validators` array of within the `ConvertSubnetTx`.
+The `validationID` for validators added through `ConvertSubnetTx` is defined as the SHA256 hash of the 40 bytes resulting from concatenating the 32 byte `convertSubnetTxID` with the 8 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
 The following serialization is defined as a `ValidatorData`:
 
