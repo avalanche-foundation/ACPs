@@ -143,7 +143,7 @@ Once a `ConvertSubnetTx` is accepted, P-Chain validators will be willing to sign
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000000` for this transaction
+- `typeID` is the payload type identifier and is `0x00000000` for this message
 - `subnetConversionID` is the SHA256 hash of the `SubnetConversionData` from a given `ConvertSubnetTx`
 
 ### Adding Subnet Validators
