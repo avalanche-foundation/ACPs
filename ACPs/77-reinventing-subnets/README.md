@@ -284,8 +284,7 @@ Issuing a `SetSubnetValidatorWeightTx` with `Weight` of `0` will remove the Subn
 
 All state related to the Subnet Validator being removed will be removed from the P-Chain's active state (BLS key, NodeID etc). This validator can be newly added to the Subnet's validator set using the `RegisterSubnetValidatorTx` flow.
 
-Since altering a Subnet's validator set after a `ConvertSubnetTx` requires a valid Warp message from the Subnet's current validator set, it is explicitly disallowed for a Subnet to remove it's only validator, which would render the Subnet unable to produce any further valid Warp messages. If a Subnet only has a single validator, it is invalid to set that validator's weight to 0 via a `SetSubnetValidatorWeightTx`.
-
+If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorTx`. With no validators, block production will halt and the Subnet is unrecoverable. To serve as a guardrail against this situation, a Subnet Validator removal will be considered invalid if the validator being removed is the last one. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
 ### Disabling Subnet Validators
 
 #### DisableValidatorTx
