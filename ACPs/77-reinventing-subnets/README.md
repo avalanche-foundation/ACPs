@@ -59,21 +59,35 @@ To validate an `AddressedCall` payload in Avalanche Warp Messaging, the `(chainI
 #### ConvertSubnetTx
 
 ```golang
+type PChainOwner struct {
+    // The threshold number of `Addresses` that must provide a signature in order for
+    // the `PChainOwner` to be considered valid.
+    Threshold uint32 `json:"threshold"`
+    // The 20-byte addresses that are allowed to sign to authenticate a `PChainOwner`.
+    // Note: It is required for:
+    //       - len(Addresses) == 0 if `Threshold` is 0.
+    //       - len(Addresses) >= `Threshold`
+    //       - The values in Addresses to be sorted in ascending order.
+    Addresses [][20]byte `json:"addresses"`
+}
+
 type SubnetValidator struct {
-    // Must be Ed25519 NodeID
+    // NodeID of this validator
     NodeID ids.NodeID `json:"nodeID"`
     // Weight of this validator used when sampling
     Weight uint64 `json:"weight"`
     // Initial balance for this validator
     Balance uint64 `json:"balance"`
-    // [Signer] is the BLS key for this validator.
+    // [Signer] is the BLS public key and proof-of-possession for this validator.
     // Note: We do not enforce that the BLS key is unique across all validators.
     //       This means that validators can share a key if they so choose.
     //       However, a NodeID + Subnet does uniquely map to a BLS key
-    Signer signer.Signer `json:"signer"`
+    Signer signer.ProofOfPossession `json:"signer"`
     // Leftover $AVAX from the [Balance] will be issued to this
     // owner once it is removed from the validator set.
-    ChangeOwner fx.Owner `json:"changeOwner"`
+    RemainingBalanceOwner PChainOwner `json:"remainingBalanceOwner"`
+    // The only owner allowed to disable this validator on the P-Chain.
+    DisableOwner PChainOwner `json:"disableOwner"`
 }
 
 type ConvertSubnetTx struct {
@@ -96,37 +110,43 @@ type ConvertSubnetTx struct {
 
 Once this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet going forward. The only action that the `Owner` key is able to take is removing any Subnet validators that were added using `AddSubnetValidatorTx` previously via `RemoveSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet Validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet Validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
 
-The `validationID` for validators added through `ConvertSubnetTx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `convertSubnetTxID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
+The `validationID` for validators added through `ConvertSubnetTx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
 The following serialization is defined as a `ValidatorData`:
 
 ```text
-+--------------+----------+-----------+
-|       nodeID : [32]byte |  32 bytes |
-+--------------+----------+-----------+
-|       weight :   uint64 |   8 bytes |
-+--------------+----------+-----------+
-| blsPublicKey : [48]byte |  48 bytes |
-+--------------+----------+-----------+
-                          |  88 bytes |
-                          +-----------+
++--------------+----------+------------------------+
+|       nodeID :   []byte |  4 + len(nodeID) bytes |
++--------------+----------+------------------------+
+|       weight :   uint64 |                8 bytes |
++--------------+----------+------------------------+
+| blsPublicKey : [48]byte |               48 bytes |
++--------------+----------+------------------------+
+                          | 60 + len(nodeID) bytes |
+                          +------------------------+
 ```
 
 The following serialization is defined as the `SubnetConversionData`
 
 ```text
-+-------------------+--------------------------+-------------------------------------------------------+
-| convertSubnetTxID :                 [32]byte |                                              32 bytes |
-+-------------------+--------------------------+-------------------------------------------------------+
-|    managerChainID :                 [32]byte |                                              32 bytes |
-+-------------------+--------------------------+-------------------------------------------------------+
-|    managerAddress :                   []byte |                         4 + len(managerAddress) bytes |
-+-------------------+--------------------------+-------------------------------------------------------+
-|        validators :          []ValidatorData |                        4 + len(validators) * 88 bytes |
-+-------------------+--------------------------+-------------------------------------------------------+
-                                               | 72 + len(managerAddress) + len(validators) * 88 bytes |
-                                               +-------------------------------------------------------+
++----------------+-----------------+--------------------------------------------------------+
+|       codecID :           uint16 |                                                2 bytes |
++----------------+-----------------+--------------------------------------------------------+
+|       subnetID :        [32]byte |                                               32 bytes |
++----------------+-----------------+--------------------------------------------------------+
+| managerChainID :        [32]byte |                                               32 bytes |
++----------------+-----------------+--------------------------------------------------------+
+| managerAddress :          []byte |                          4 + len(managerAddress) bytes |
++----------------+-----------------+--------------------------------------------------------+
+|     validators : []ValidatorData |                        4 + sum(validatorLengths) bytes |
++----------------+-----------------+--------------------------------------------------------+
+                                   | 74 + len(managerAddress) + len(validatorLengths) bytes |
+                                   +--------------------------------------------------------+
 ```
+
+- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
+- `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
+- The remaining fields correspond to the respecitive fields of the given `ConvertSubnetTx`
 
 Once a `ConvertSubnetTx` is accepted, P-Chain validators must be willing to sign an `AddressedCall` with `sourceChainID` set to the P-Chain ID and the `sourceAddress` set to an empty byte array. The payload of the `AddressedCall` must be:
 
@@ -158,50 +178,71 @@ type RegisterSubnetValidatorTx struct {
     BaseTx
     // Balance <= sum($AVAX inputs) - sum($AVAX outputs) - TxFee.
     Balance uint64 `json:"balance"`
-    // [Signer] is the BLS key for this validator.
+    // [Signer] is a BLS signature proving ownership of the BLS public key specified
+    // below in `Message` for this validator.
     // Note: We do not enforce that the BLS key is unique across all validators.
     //       This means that validators can share a key if they so choose.
     //       However, a NodeID does uniquely map to a BLS key
-    Signer signer.Signer `json:"signer"`
-    // Leftover $AVAX from the Subnet Validator's Balance will be issued to
-    // this owner after it is removed from the validator set.
-    ChangeOwner fx.Owner `json:"changeOwner"`
+    Signer [96]byte `json:"signer"`
     // AddressedCall with Payload:
+    //   - CodecID
+    //   - TypeID
     //   - SubnetID
-    //   - NodeID (must be Ed25519 NodeID)
-    //   - Weight
+    //   - NodeID
     //   - BLS public key
     //   - Expiry
+    //   - Remaining balance owner
+    //   - Disable owner
+    //   - Weight
     Message warp.Message `json:"message"`
 }
 ```
 
-The `Message` field must be an `AddressedCall` with the payload:
+The following is the serialization of a `PChainOwner`:
 
 ```text
-+--------------+----------+-----------+
-|      codecID :   uint16 |   2 bytes |
-+--------------+----------+-----------+
-|       typeID :   uint32 |   4 bytes |
-+--------------+----------+-----------+
-|     subnetID : [32]byte |  32 bytes |
-+--------------+----------+-----------+
-|       nodeID : [32]byte |  32 bytes |
-+--------------+----------+-----------+
-|       weight :   uint64 |   8 bytes |
-+--------------+----------+-----------+
-| blsPublicKey : [48]byte |  48 bytes |
-+--------------+----------+-----------+
-|       expiry :   uint64 |   8 bytes |
-+--------------+----------+-----------+
-                          | 134 bytes |
-                          +-----------+
++-----------+------------+-------------------------------+
+| threshold :     uint32 |                       4 bytes |
++-----------+------------+-------------------------------+
+| addresses : [][20]byte | 4 + len(addresses) * 20 bytes |
++-----------+------------+-------------------------------+
+                         | 8 + len(addresses) * 20 bytes |
+                         +-------------------------------+
 ```
+
+The `Message` field of a RegisterSubnetValidatorTx must be an `AddressedCall` with the payload:
+
+```text
++-----------------------+-------------+--------------------------------------------------------------------+
+|               codecID :      uint16 |                                                            2 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|                typeID :      uint32 |                                                            4 bytes |
++-----------------------+-------------+-------------------------------------------------------------------+
+|              subnetID :    [32]byte |                                                           32 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|                nodeID :      []byte |                                              4 + len(nodeID) bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|          blsPublicKey :    [48]byte |                                                           48 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|                expiry :      uint64 |                                                            8 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+| remainingBalanceOwner : PChainOwner |                                      4 + len(addresses) * 20 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|          disableOwner : PChainOwner |                                      4 + len(addresses) * 20 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+|                weight :      uint64 |                                                            8 bytes |
++-----------------------+-------------+--------------------------------------------------------------------+
+                                      | 114 + len(nodeID) + (len(addresses1) + len(addresses2)) * 20 bytes |
+                                      +--------------------------------------------------------------------+
+```
+
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000001` for this transaction
 - `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the Subnet Validator being added
 - `expiry` is the time at which this message becomes invalid. As of a P-Chain timestamp `>= expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`
+- `remainingBalanceOwner` is the P-Chain owner where leftover $AVAX from the Subnet Validator's Balance will be issued to when this validator it is removed from the validator set.
+- `disableOwner` is only the P-Chain owner allowed to disable the validator using `DisableValidatorTx` (specified below).
 
     `validationID` of validators added via `RegisterSubnetValidatorTx` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
 
@@ -215,13 +256,7 @@ An EVM Subnet may choose to implement this step like so:
 
 After the `RegisterSubnetValidatorTx` is accepted on the P-Chain, the Subnet Validator is added to the Subnet's validator set. A `minNonce` field corresponding to the `validationID` will be stored on addition to the validator set (initially set to `0`). This field will be used when validating the `SetSubnetValidatorWeightTx` defined below.
 
-For a `RegisterSubnetValidatorTx` to be valid:
-
-- `Balance` must be >= the greater of 5 $AVAX or two weeks of the current fee
-
-    This prevents Subnet Validators from being added with too low of an initial balance where they become immediately delinquent based on the continuous fee mechanism defined below. A Subnet Validator can leave at any time before the initial $AVAX is consumed and claim the remaining balance to the `ChangeOwner` defined in the transaction.
-
-- `Signer` must correspond to the `blsPublicKey` defined in the warp message
+For a `RegisterSubnetValidatorTx` to be valid, `Signer` must be a valid proof-of-possession of the `blsPublicKey` defined in the warp message.
 
 Note: There is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0`.
 
@@ -236,7 +271,7 @@ Note: There is no `EndTime` specified in this transaction. Subnet Validators are
 - Decrease the voting weight of a misbehaving Subnet Validator
 - Remove an inactive Subnet Validator
 
-Since there are no `EndTime`s enforced by the P-Chain, Subnets must use this transaction to set an expired validator's weight to `0`. When a validator's weight is set to `0`, they will be removed from the validator set. After the transaction is accepted, any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `ChangeOwner` defined in the `RegisterSubnetValidatorTx`.
+Since there are no `EndTime`s enforced by the P-Chain, Subnets must use this transaction to set an expired validator's weight to `0`. When a validator's weight is set to `0`, they will be removed from the validator set. After the transaction is accepted, any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `RemainingBalanceOwner` defined in the `RegisterSubnetValidatorTx`.
 
 ```golang
 type SetSubnetValidatorWeightTx struct {
@@ -269,7 +304,7 @@ The `Message` field must be an `AddressedCall` with the payload:
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000002` for this transaction
+- `typeID` is the payload type identifier and is `0x00000003` for this transaction
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `nonce` is a strictly increasing number that denotes the latest validator weight update and provides replay protection for this transaction
 
@@ -290,7 +325,7 @@ If all Subnet Validators are removed, there are no valid Warp messages that can 
 
 #### DisableValidatorTx
 
-Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. Notably, there is no requirement of any interaction on the Subnet to issue this transaction. The only requirement is an Ed25519 Signature (signed with the Subnet Validator's Ed25519 private key) for this transaction to be valid. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `ChangeOwner` defined when this validator was added to the validator set.
+Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. Notably, there is no requirement of any interaction on the Subnet to issue this transaction. The only for this transaction to be valid is a signature from the `DisableOwner` specified for this validator in its `RegisterSubnetValidatorTx`. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `RemaningBalanceOwner` defined when this validator was added to the validator set.
 
 The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to stop participating in Subnet validation is critical for censorship-resistance and/or failed Subnets. If a Subnet Validator wishes to stop participating in its Subnet's consensus, they can do so through this transaction. This is enabled on the P-Chain to prevent Subnets from locking Subnet Validators into participating in consensus indefinitely.
 
@@ -304,8 +339,6 @@ type DisableValidatorTx struct {
     BaseTx
     // ID corresponding to the validator
     ValidationID ids.ID `json:"validationID"`
-    // Ed25519 Signature on [TxID]
-    Signature []byte `json:"signature"`
 }
 ```
 
@@ -313,9 +346,9 @@ type DisableValidatorTx struct {
 
 To track whether a Subnet Validator addition/modification/removal occured on the P-Chain, Subnet Validators must be willing to sign an `AddressedCall` attesting to the validator set change. Since all Subnet Validators sync the P-Chain, only the Subnet Validators need to sign the `AddressedCall`, not all Primary Network Validators.
 
-Two `AddressedCall`s are defined with the below payloads. For each of them, the `sourceChainID` must be set to the P-Chain ID and the `sourceAddress` must be set to an empty byte array.
+For Subnet validator registrations, a `SubnetValidatorRegistrationMessage` serialization is defined below. For Subnet validator weight modifications, the same messages serialization is used as in the `Message` of the `SetSubnetValidatorWeightTx`. For each case, the `sourceChainID` must be set to the P-Chain ID and the `sourceAddress` must be set to an empty byte array.
 
-The method of requesting is left unspecified as it can be more generic. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
+The method of requesting signatures for these messages is left unspecified as it can be more generic. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
 
 #### SubnetValidatorRegistrationMessage
 
@@ -334,35 +367,11 @@ The method of requesting is left unspecified as it can be more generic. A viable
 ```
 
 - `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000003` for this message
+- `typeID` is the payload type identifier and is `0x00000002` for this message
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
-- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will as the `expiry` in the `AddressedCall` payload has been reached.
+- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will in the future.
 
 The P-Chain nodes must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
-
-#### SubnetValidatorWeightUpdateMessage
-
-```text
-+--------------+----------+----------+
-|      codecID :   uint16 |  2 bytes |
-+--------------+----------+----------+
-|       typeID :   uint32 |  4 bytes |
-+--------------+----------+----------+
-| validationID : [32]byte | 32 bytes |
-+--------------+----------+----------+
-|        nonce :   uint64 |  8 bytes |
-+--------------+----------+----------+
-|       weight :   uint64 |  8 bytes |
-+--------------+----------+----------+
-                          | 54 bytes |
-                          +----------+
-```
-
-- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000004` for this message
-- `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
-- `nonce` is the latest nonce stored with the `validationID` on the P-Chain
-- `weight` is the current weight of the Subnet Validator with `validationID`
 
 ### Managing Subnet Validator Balance
 
@@ -435,7 +444,7 @@ class ValidatorQueue:
     def validator_remove(self, vdrNodeID):
         vdr = find_and_remove(self.queue, vdrNodeID)
         vdr.balance = vdr.balance - self.acc
-        vdr.refund() # Refund [vdr.balance] to [ChangeOwner]
+        vdr.refund() # Refund [vdr.balance] to [RemainingBalanceOwner]
         self.queue.remove()
 
     # Validator's balance was topped up
