@@ -41,7 +41,9 @@ To support modifying a Subnet's validator set on the P-Chain via Warp messages, 
 - `SubnetConversionMessage`
 - `RegisterSubnetValidatorMessage`
 - `SubnetValidatorRegistrationMessage`
-- `SetSubnetValidatorWeightMessage`
+- `SubnetValidatorWeightMessage`
+
+The method of requesting signatures for these messages is left unspecified. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
 
 The serialization of each of these messages is as follows, and the functionality of each message described later in this ACP.
 
@@ -177,11 +179,11 @@ The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with
 - `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
 - `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will in the future.
 
-#### `SetSubnetValidatorWeightMessage`
+#### `SubnetValidatorWeightMessage`
 
-`SetSubnetValidatorWeightMessage`s are sent from validator managers to the P-Chain to update the weight of an existing validator, and are sent from the P-Chain back to validator managers to acknowledge that validator weight updates have been effectuated.
+`SubnetValidatorWeightMessage`s are sent from validator managers to the P-Chain to update the weight of an existing validator, and are sent from the P-Chain back to validator managers to acknowledge that validator weight updates have been effectuated.
 
-The `SetSubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
+The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
 ```text
 +--------------+----------+----------+
@@ -276,7 +278,7 @@ type ConvertSubnetTx struct {
 }
 ```
 
-After this transaction is accepted, `AddSubnetValidatorTx` is disabled on the Subnet. The only action that the `Owner` key is able to take is removing any Subnet validators that were added using `AddSubnetValidatorTx` previously via `RemoveSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet Validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet Validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
+After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing any Subnet validators that were added using `AddSubnetValidatorTx` previously via `RemoveSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet Validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet Validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
 
 The `validationID` for validators added through `ConvertSubnetTx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
@@ -305,7 +307,7 @@ type RegisterSubnetValidatorTx struct {
 
 After the `RegisterSubnetValidatorTx` is accepted on the P-Chain, the Subnet Validator is added to the Subnet's validator set. A `minNonce` field corresponding to the `validationID` will be stored on addition to the validator set (initially set to `0`). This field will be used when validating the `SetSubnetValidatorWeightTx` defined below.
 
-The `validationID` of validators added via `RegisterSubnetValidatorTx` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
+The `validationID` of validators added via `RegisterSubnetValidatorTx` is defined as the SHA256 hash of the `Payload` of the `AddressedCall`. This SHA256 hash will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterSubnetValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` of the `RegisterSubnetValidatorMessage` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
 
 Subnets are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
@@ -319,76 +321,39 @@ For a `RegisterSubnetValidatorTx` to be valid, `Signer` must be a valid proof-of
 
 Note that there is no `EndTime` specified in this transaction. Subnet Validators are only removed when a `SetSubnetValidatorWeightTx` sets a validator's weight to `0`.
 
+After a `RegisterSubnetValidatorTx` is accepted, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`, until the time at which the Subnet Validator is removed from the validator set using a `SetSubnetValidatorWeightTx` as described below. 
+
+When it is known that a given `validationID` *is not and never will be* an existing validation period for a Subnet, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterSubnetValidatorTx`, or if the Subnet Validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
+
 #### `SetSubnetValidatorWeightTx`
 
-`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. Applications of this transaction could include:
+`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. The specifcation of this transaction is:
+
+```golang
+type SetSubnetValidatorWeightTx struct {
+    // Metadata, inputs and outputs
+    BaseTx
+    // A SubnetValidatorWeightMessage payload
+    Message warp.Message `json:"message"`
+}
+```
+
+Applications of this transaction could include:
 
 - Increase the voting weight of a Subnet Validator if a delegation is made on the Subnet
 - Increase the voting weight of a Subnet Validator if the stake amount is increased (by staking rewards for example)
 - Decrease the voting weight of a misbehaving Subnet Validator
 - Remove an inactive Subnet Validator
 
-Since there are no `EndTime`s enforced by the P-Chain, Subnets must use this transaction to set an expired validator's weight to `0`. When a validator's weight is set to `0`, they will be removed from the validator set. After the transaction is accepted, any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `RemainingBalanceOwner` defined in the `RegisterSubnetValidatorTx`.
+Subnet validators should be removed by using this transaction with the `Weight` set to `0`. When a validator's weight is set to `0`, they will be removed from the validator set, and any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `RemainingBalanceOwner` for the validator defined in the `RegisterSubnetValidatorMessage`. All state related to the Subnet Validator being removed will be removed from the P-Chain's active state (BLS key, NodeID etc).
 
-```golang
-type SetSubnetValidatorWeightTx struct {
-    // Metadata, inputs and outputs
-    BaseTx
-    // A SetSubnetValidatorWeightMessage payload
-    Message warp.Message `json:"message"`
-}
-```
+If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorMessage`. With no validators, block production will halt and the Subnet is unrecoverable. To serve as a guardrail against this situation, a Subnet Validator removal will be considered invalid if the validator being removed is the last one. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
 
-The `nonce` contained within the `SetSubnetValidatorWeightMessage` in the transaction must satisfy `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator removal since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`.
+The `nonce` contained within the `SubnetValidatorWeightMessage` in the transaction must satisfy `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator removal since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`.
 
 #### `DisableSubnetValidatorTx`
-#### `IncreaseSubnetValidatorWeightTx`
 
-
-#### Bootstrapping Subnet Nodes
-
-Bootstrapping a node/validator is the process of securely recreating the latest state of the blockchain locally. At the end of this process, the local state of a node/validator must be in sync with the local state of other virtuous nodes/validators. The node/validator can then verify new incoming transactions and reach consensus with other nodes/validators.
-
-To bootstrap a node/validator, a few critical questions must be answered: How does one discover peers in the network? How does one determine that a discovered peer is honestly participating in the network?
-
-For standalone networks like the Avalanche Primary Network, this is done by connecting to a hardcoded [set](https://github.com/ava-labs/avalanchego/blob/master/genesis/bootstrappers.json) of trusted bootstrappers to then discover new peers. Ethereum calls their set [bootnodes](https://ethereum.org/developers/docs/nodes-and-clients/bootnodes).
-
-By separating Subnet Validators from Primary Network Validators, a list of validator IPs to connect to (the functional bootstrappers of the Subnet) is no longer provided by simply connecting to the Primary Network Validators. However, the Primary Network can enable nodes tracking a Subnet to seamlessly connect to the Subnet Validators by tracking and gossiping Subnet Validator IPs. Subnets will not need to operate and maintain a set of bootstrappers and can continue to rely on the Primary Network for peer discovery.
-
-
-
-
-
-### Adding Subnet Validators
-
-
-### Modifying Subnet Validators
-
-#### SetSubnetValidatorWeightTx
-
-
-
-### Removing Subnet Validators
-
-#### SetSubnetValidatorWeightTx (Weight = 0)
-
-Issuing a `SetSubnetValidatorWeightTx` with `Weight` of `0` will remove the Subnet Validator from the Subnet's validator set.
-
-All state related to the Subnet Validator being removed will be removed from the P-Chain's active state (BLS key, NodeID etc). This validator can be newly added to the Subnet's validator set using the `RegisterSubnetValidatorTx` flow.
-
-If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorTx`. With no validators, block production will halt and the Subnet is unrecoverable. To serve as a guardrail against this situation, a Subnet Validator removal will be considered invalid if the validator being removed is the last one. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
-
-### Disabling Subnet Validators
-
-#### DisableValidatorTx
-
-Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. Notably, there is no requirement of any interaction on the Subnet to issue this transaction. The only for this transaction to be valid is a signature from the `DisableOwner` specified for this validator in its `RegisterSubnetValidatorTx`. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `RemaningBalanceOwner` defined when this validator was added to the validator set.
-
-The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to stop participating in Subnet validation is critical for censorship-resistance and/or failed Subnets. If a Subnet Validator wishes to stop participating in its Subnet's consensus, they can do so through this transaction. This is enabled on the P-Chain to prevent Subnets from locking Subnet Validators into participating in consensus indefinitely.
-
-Note that this does not modify a Subnet's total staking weight. This transaction only marks the Subnet Validator as inactive but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseBalanceTx`.
-
-Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
+Subnet Validators can use `DisableValidatorTx` to mark their validator as inactive. The specification for this transaction is:
 
 ```golang
 type DisableValidatorTx struct {
@@ -399,44 +364,17 @@ type DisableValidatorTx struct {
 }
 ```
 
-### Proof of Subnet Validator Set Change
+There is no requirement of any interaction on the Subnet to issue this transaction. For this transaction to be valid, a signature from the `DisableOwner` specified for this validator in its `RegisterSubnetValidatorTx`. Any remaining $AVAX in the Subnet Validator's `Balance` will be issued to the `RemaningBalanceOwner` defined when this validator was added to the validator set.
 
-To track whether a Subnet Validator addition/modification/removal occured on the P-Chain, Subnet Validators must be willing to sign an `AddressedCall` attesting to the validator set change. Since all Subnet Validators sync the P-Chain, only the Subnet Validators need to sign the `AddressedCall`, not all Primary Network Validators.
+The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to reclaim the balance allotted to a validator without authorization from the Subnet is critical for failed Subnets.
 
-For Subnet validator registrations, a `SubnetValidatorRegistrationMessage` serialization is defined below. For Subnet validator weight modifications, the same messages serialization is used as in the `Message` of the `SetSubnetValidatorWeightTx`. For each case, the `sourceChainID` must be set to the P-Chain ID and the `sourceAddress` must be set to an empty byte array.
+Note that this does not modify a Subnet's total staking weight. This transaction marks the Subnet Validator as inactive, but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseBalanceTx`.
 
-The method of requesting signatures for these messages is left unspecified as it can be more generic. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
+Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
 
-#### SubnetValidatorRegistrationMessage
+#### `IncreaseSubnetValidatorWeightTx`
 
-```text
-+--------------+----------+----------+
-|      codecID :   uint16 |  2 bytes |
-+--------------+----------+----------+
-|       typeID :   uint32 |  4 bytes |
-+--------------+----------+----------+
-| validationID : [32]byte | 32 bytes |
-+--------------+----------+----------+
-|   registered :     bool |  1 byte  | 
-+--------------+----------+----------+
-                          | 39 bytes |
-                          +----------+
-```
-
-- `codecID` is the codec version used to serialize the payload and is hardcoded to `0x0000`
-- `typeID` is the payload type identifier and is `0x00000002` for this message
-- `validationID` is the SHA256 of the `Payload` of the `AddressedCall` in the `RegisterSubnetValidatorTx` adding the validator to the Subnet's validator set
-- `registered` indicates whether or not the `validationID` corresponds to a valid `AddressedCall` payload. If true, `validationID` corresponds to an active validator. If false, `validationID` does not correspond to an active validator, and never will in the future.
-
-The P-Chain nodes must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
-
-### Managing Subnet Validator Balance
-
-#### IncreaseBalanceTx
-
-This transaction can be issued by anybody to add additional $AVAX to the `Balance` for `NodeID` validating `Subnet`. If the Subnet Validator corresponding to `ValidationID` is currently inactive (`Balance` was exhausted or `DisableValidatorTx` was issued), this transaction will move them back to the active validator set.
-
-Note: The $AVAX added to `Balance` can be claimed at any time by the Subnet Validator using `DisableValidatorTx`.
+Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseSubnetValidatorWeightTx` can be used by anybody to add additional $AVAX to the `Balance` to a Subnet Validator. The specification for this transaction is:
 
 ```golang
 type IncreaseBalanceTx struct {
@@ -449,9 +387,23 @@ type IncreaseBalanceTx struct {
 }
 ```
 
+If the Subnet Validator corresponding to `ValidationID` is currently inactive (`Balance` was exhausted or `DisableValidatorTx` was issued), this transaction will move them back to the active validator set.
+
+Note: The $AVAX added to `Balance` can be claimed at any time by the Subnet Validator using `DisableValidatorTx`.
+
+### Bootstrapping Subnet Nodes
+
+Bootstrapping a node/validator is the process of securely recreating the latest state of the blockchain locally. At the end of this process, the local state of a node/validator must be in sync with the local state of other virtuous nodes/validators. The node/validator can then verify new incoming transactions and reach consensus with other nodes/validators.
+
+To bootstrap a node/validator, a few critical questions must be answered: How does one discover peers in the network? How does one determine that a discovered peer is honestly participating in the network?
+
+For standalone networks like the Avalanche Primary Network, this is done by connecting to a hardcoded [set](https://github.com/ava-labs/avalanchego/blob/master/genesis/bootstrappers.json) of trusted bootstrappers to then discover new peers. Ethereum calls their set [bootnodes](https://ethereum.org/developers/docs/nodes-and-clients/bootnodes).
+
+By separating Subnet Validators from Primary Network Validators, a list of validator IPs to connect to (the functional bootstrappers of the Subnet) is no longer provided by simply connecting to the Primary Network Validators. However, the Primary Network can enable nodes tracking a Subnet to seamlessly connect to the Subnet Validators by tracking and gossiping Subnet Validator IPs. Subnets will not need to operate and maintain a set of bootstrappers and can continue to rely on the Primary Network for peer discovery.
+
 ### Sidebar: Subnet Sovereignty
 
-After this ACP is activated, the P-Chain will no longer support staking of any assets other than $AVAX for the Primary Network. The P-Chain will no longer support distribution of staking rewards for Subnets. All staking-related operations for Subnet Validation must be managed by the Subnet on the Subnet. The P-Chain simply requires a continuous fee per Subnet Validator. If a Subnet would like to manage their Validator's balances on the P-Chain, it can cover the cost for all Subnet Validators by posting the $AVAX balance on the P-Chain. Subnets can implement any mechanism they want to pay the continuous fee charged by the P-Chain for its participants.
+After this ACP is activated, the P-Chain will no longer support staking of any assets other than $AVAX for the Primary Network. The P-Chain will no longer support distribution of staking rewards for Subnets. All staking-related operations for Subnet Validation must be managed by the Subnet's validator manager. The P-Chain simply requires a continuous fee per Subnet Validator. If a Subnet would like to manage their Validator's balances on the P-Chain, it can cover the cost for all Subnet Validators by posting the $AVAX balance on the P-Chain. Subnets can implement any mechanism they want to pay the continuous fee charged by the P-Chain for its participants.
 
 By moving ownership of the Subnet's validator set from the P-Chain to the Subnet, Subnet creators have no restrictions on what requirements they have to join their Subnet as a validator. Any stake that is required to join the Subnet's validator set is locked on the Subnet. If a validator is removed from the Subnet's validator set via a `SetSubnetValidatorWeightTx` with weight `0`, the stake on the Subnet will continue to be locked. How each Subnet handles stake associated with the Subnet Validator is entirely left up to the Subnet and can be treated independently to what happens on the P-Chain.
 
