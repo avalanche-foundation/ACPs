@@ -57,35 +57,24 @@ The `SubnetConversionMessage` is sent from the P-Chain to inform Subnet validato
 
 The following serialization is defined as a `ValidatorData`:
 
-```text
-+--------------+----------+------------------------+
-|       nodeID :   []byte |  4 + len(nodeID) bytes |
-+--------------+----------+------------------------+
-| blsPublicKey : [48]byte |               48 bytes |
-+--------------+----------+------------------------+
-|       weight :   uint64 |                8 bytes |
-+--------------+----------+------------------------+
-                          | 60 + len(nodeID) bytes |
-                          +------------------------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `nodeID` | `[]byte` | 4 + len(`nodeID`) bytes |
+| `blsPublicKey` | `[48]byte` | 48 bytes |
+| `weight` | `uint64` | 8 bytes |
+| | | 60 + len(`nodeID`) bytes |
+
 
 The following serialization is defined as the `SubnetConversionData`:
 
-```text
-+----------------+-----------------+--------------------------------------------------------+
-|       codecID  :          uint16 |                                                2 bytes |
-+----------------+-----------------+--------------------------------------------------------+
-|       subnetID :        [32]byte |                                               32 bytes |
-+----------------+-----------------+--------------------------------------------------------+
-| managerChainID :        [32]byte |                                               32 bytes |
-+----------------+-----------------+--------------------------------------------------------+
-| managerAddress :          []byte |                          4 + len(managerAddress) bytes |
-+----------------+-----------------+--------------------------------------------------------+
-|     validators : []ValidatorData |                        4 + sum(validatorLengths) bytes |
-+----------------+-----------------+--------------------------------------------------------+
-                                   | 74 + len(managerAddress) + len(validatorLengths) bytes |
-                                   +--------------------------------------------------------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `codecID`  | `uint16` | 2 bytes |
+| `subnetID` | `[32]byte` | 32 bytes |
+| `managerChainID` | `[32]byte` | 32 bytes |
+| `managerAddress` | `[]byte` | 4 + len(`managerAddress`) bytes |
+| `validators` | `[]ValidatorData` | 4 + sum(`validatorLengths`) bytes |
+| | | 74 + len(`managerAddress`) + len(`validatorLengths`) bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
@@ -95,17 +84,12 @@ The following serialization is defined as the `SubnetConversionData`:
 
 The `SubnetConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
-```text
-+--------------------+----------+----------+
-|            codecID :   uint16 |  2 bytes |
-+--------------------+----------+----------+
-|             typeID :   uint32 |  4 bytes |
-+--------------------+----------+----------+
-| subnetConversionID : [32]byte | 32 bytes |
-+--------------------+----------+----------+
-                                | 38 bytes |
-                                +----------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `codecID` | `uint16` | 2 bytes |
+| `typeID` | `uint32` | 4 bytes |
+| `subnetConversionID` | `[32]byte` | 32 bytes |
+| | | 38 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000000` for this message
@@ -117,41 +101,26 @@ The `RegisterSubnetValidatorMessage` is sent from validator managers to the P-Ch
 
 The following is the serialization of a `PChainOwner`:
 
-```text
-+-----------+------------+-------------------------------+
-| threshold :     uint32 |                       4 bytes |
-+-----------+------------+-------------------------------+
-| addresses : [][20]byte | 4 + len(addresses) * 20 bytes |
-+-----------+------------+-------------------------------+
-                         | 8 + len(addresses) * 20 bytes |
-                         +-------------------------------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `threshold` | `uint32` | 4 bytes |
+| `addresses` | `[][20]byte` | 4 + len(`addresses`) * 20 bytes |
+| | | 8 + len(`addresses`) * 20 bytes |
 
 The `RegisterSubnetValidatorMessage` is specified as an `AddressedCall` with a payload of:
 
-```text
-+-----------------------+-------------+--------------------------------------------------------------------+
-|               codecID :      uint16 |                                                            2 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|                typeID :      uint32 |                                                            4 bytes |
-+-----------------------+-------------+-------------------------------------------------------------------+
-|              subnetID :    [32]byte |                                                           32 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|                nodeID :      []byte |                                              4 + len(nodeID) bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|          blsPublicKey :    [48]byte |                                                           48 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|                expiry :      uint64 |                                                            8 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-| remainingBalanceOwner : PChainOwner |                                      4 + len(addresses) * 20 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|          disableOwner : PChainOwner |                                      4 + len(addresses) * 20 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-|                weight :      uint64 |                                                            8 bytes |
-+-----------------------+-------------+--------------------------------------------------------------------+
-                                      | 114 + len(nodeID) + (len(addresses1) + len(addresses2)) * 20 bytes |
-                                      +--------------------------------------------------------------------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `codecID` | `uint16` | 2 bytes |
+| `typeID` | `uint32` | 4 bytes |
+| `subnetID` | `[32]byte` | 32 bytes |
+| `nodeID` | `[]byte` | 4 + len(`nodeID`) bytes |
+| `blsPublicKey` | `[48]byte` | 48 bytes |
+| `expiry` | `uint64` | 8 bytes |
+| `remainingBalanceOwner` | `PChainOwner` | 8 + len(`addresses`) * 20 bytes |
+| `disableOwner` | `PChainOwner` | 8 + len(`addresses`) * 20 bytes |
+| `weight` | `uint64` | 8 bytes |
+| | | 122 + len(`nodeID`) + (len(`addresses1`) + len(`addresses2`)) * 20 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000001` for this payload
@@ -166,19 +135,13 @@ A `SubnetValidatorRegistrationMessage` is sent from the P-Chain as an acknowledg
 
 The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
-```text
-+--------------+----------+----------+
-|      codecID :   uint16 |  2 bytes |
-+--------------+----------+----------+
-|       typeID :   uint32 |  4 bytes |
-+--------------+----------+----------+
-| validationID : [32]byte | 32 bytes |
-+--------------+----------+----------+
-|   registered :     bool |  1 byte  | 
-+--------------+----------+----------+
-                          | 39 bytes |
-                          +----------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `codecID` | `uint16` | 2 bytes |
+| `typeID` | `uint32` | 4 bytes |
+| `validationID` | `[32]byte` | 32 bytes |
+| `registered` | `bool` | 1 byte  | 
+| | | 39 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000002` for this message
@@ -191,21 +154,14 @@ The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with
 
 The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
-```text
-+--------------+----------+----------+
-|      codecID :   uint16 |  2 bytes |
-+--------------+----------+----------+
-|       typeID :   uint32 |  4 bytes |
-+--------------+----------+----------+
-| validationID : [32]byte | 32 bytes |
-+--------------+----------+----------+
-|        nonce :   uint64 |  8 bytes |
-+--------------+----------+----------+
-|       weight :   uint64 |  8 bytes |
-+--------------+----------+----------+
-                          | 54 bytes |
-                          +----------+
-```
+| Field | Type | Size |
+| -: | -: | -: |
+| `codecID` | `uint16` | 2 bytes |
+| `typeID` | `uint32` | 4 bytes |
+| `validationID` | `[32]byte` | 32 bytes |
+| `nonce` | `uint64` | 8 bytes |
+| `weight` | `uint64` | 8 bytes |
+| | | 54 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000003` for this message
