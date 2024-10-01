@@ -84,6 +84,10 @@ interface IACP99Manager {
 
     /// @notice Emitted when the security module address is set
     event SetSecurityModule(address indexed securityModule);
+    /// @notice Emitted when an initial validator is registered
+    event RegisterInitialValidator(
+        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
+    );
     /// @notice Emitted when a validator registration to the Subnet is initiated
     event InitiateValidatorRegistration(
         bytes32 indexed nodeID,
@@ -94,10 +98,7 @@ interface IACP99Manager {
     );
     /// @notice Emitted when a validator registration to the Subnet is completed
     event CompleteValidatorRegistration(
-        bytes32 indexed nodeID,
-        bytes32 indexed validationID,
-        uint64 weight,
-        uint64 validationStartTime
+        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
     );
     /// @notice Emitted when a validator weight update is initiated
     event InitiateValidatorWeightUpdate(
@@ -111,11 +112,19 @@ interface IACP99Manager {
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
     );
 
+    error ACP99Manager__ValidatorSetAlreadyInitialized();
+    error ACP99Manager__InvalidSubnetConversionID(
+        bytes32 subnetConversionID, bytes32 messageSubnetConversionID
+    );
+    error ACP99Manager__InvalidManagerBlockchainID(
+        bytes32 managerBlockchainID, bytes32 conversionBlockchainID
+    );
+    error ACP99Manager__InvalidManagerAddress(address managerAddress, address conversionAddress);
     error ACP99Manager__ZeroAddressSecurityModule();
     error ACP99Manager__OnlySecurityModule(address sender, address securityModule);
     error ACP99Manager__InvalidExpiry(uint64 expiry, uint256 timestamp);
     error ACP99Manager__ZeroNodeID();
-    error ACP99Manager__NodeIDAlreadyValidator(bytes32 nodeID);
+    error ACP99Manager__NodeAlreadyValidator(bytes32 nodeID);
     error ACP99Manager__InvalidSignatureLength(uint256 length);
     error ACP99Manager__InvalidValidationID(bytes32 validationID);
     error ACP99Manager__InvalidWarpMessage();
@@ -146,6 +155,23 @@ interface IACP99Manager {
 
     /// @notice Get the list of message IDs associated with a validator of the Subnet
     function getValidatorValidations(bytes32 nodeID) external view returns (bytes32[] memory);
+
+    /**
+     * @notice Set the address of the security module attached to this manager
+     * @param securityModule_ The address of the security module
+     */
+    function setSecurityModule(address securityModule_) external;
+
+    /**
+     * @notice Verifies and sets the initial validator set for the chain through a P-Chain
+     * SubnetConversionMessage.
+     * @param subnetConversionData The subnet conversion message data used to recompute and verify against the subnetConversionID.
+     * @param messsageIndex The index that contains the SubnetConversionMessage Warp message containing the subnetConversionID to be verified against the provided {subnetConversionData}
+     */
+    function initializeValidatorSet(
+        ValidatorMessages.SubnetConversionData calldata subnetConversionData,
+        uint32 messsageIndex
+    ) external;
 
     /**
      * @notice Initiate a validator registration by issuing a RegisterSubnetValidatorTx Warp message
