@@ -49,6 +49,8 @@ The following Warp message payloads are introduced on the P-Chain:
 
 The method of requesting signatures for these messages is left unspecified. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
 
+All node IDs contained within the message specifications are represented as variable length arrays such that they can support new node IDs types should the P-Chain add support for them in the future.
+
 The serialization of each of these messages is as follows.
 
 #### `SubnetConversionMessage`
@@ -106,6 +108,12 @@ The following is the serialization of a `PChainOwner`:
 | `threshold` | `uint32` | 4 bytes |
 | `addresses` | `[][20]byte` | 4 + len(`addresses`) * 20 bytes |
 | | | 8 + len(`addresses`) * 20 bytes |
+
+- `threshold` is the number of `addresses` that must provide a signature for the `PChainOwner` to authorize an action.
+- In order to be a valid:
+   - If `threshold` is `0`, `addresses` must be empty
+   - `threshold` <= len(`addresses`)
+   - Entries of `addresses` must be unique and sorted in ascending order
 
 The `RegisterSubnetValidatorMessage` is specified as an `AddressedCall` with a payload of:
 
@@ -323,6 +331,8 @@ type DisableSubnetValidatorTx struct {
     BaseTx
     // ID corresponding to the validator
     ValidationID ids.ID `json:"validationID"`
+    // Authorizes this validator to be disabled
+    DisableAuth verify.Verifiable `json:"disableAuthorization"`
 }
 ```
 
