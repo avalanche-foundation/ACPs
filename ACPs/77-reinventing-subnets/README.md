@@ -135,7 +135,7 @@ The `RegisterSubnetValidatorMessage` is specified as an `AddressedCall` with a p
 - `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the Subnet Validator being added
 - `expiry` is the time at which this message becomes invalid. As of a P-Chain timestamp `>= expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`
 - `remainingBalanceOwner` is the P-Chain owner where leftover $AVAX from the Subnet Validator's Balance will be issued to when this validator it is removed from the validator set.
-- `disableOwner` is only the P-Chain owner allowed to disable the validator using `DisableSubnetValidatorTx`, specified below.
+- `disableOwner` is the only P-Chain owner allowed to disable the validator using `DisableSubnetValidatorTx`, specified below.
 
 #### `SubnetValidatorRegistrationMessage`
 
