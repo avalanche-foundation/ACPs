@@ -297,7 +297,7 @@ When it is known that a given `validationID` *is not and never will be* an exist
 
 #### `SetSubnetValidatorWeightTx`
 
-`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. The specfication of this transaction is:
+`SetSubnetValidatorWeightTx` is used to modify the voting weight of a Subnet Validator. The specification of this transaction is:
 
 ```golang
 type SetSubnetValidatorWeightTx struct {
