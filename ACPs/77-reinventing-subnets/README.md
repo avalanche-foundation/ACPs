@@ -213,7 +213,7 @@ type PChainOwner struct {
 
 type SubnetValidator struct {
     // NodeID of this validator
-    NodeID ids.NodeID `json:"nodeID"`
+    NodeID []byte `json:"nodeID"`
     // Weight of this validator used when sampling
     Weight uint64 `json:"weight"`
     // Initial balance for this validator
