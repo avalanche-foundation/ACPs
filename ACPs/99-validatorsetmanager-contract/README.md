@@ -14,7 +14,7 @@ This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https:/
 
 ## Motivation
 
-[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a "Subnet manager". The `(blockchainID, address)` pair specified by the Warp Derived Address is responsible for sending Warp `AddressedCall` payloads to issue `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an onchain program to add, modify the weight of, and remove validators.
+[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing a Subnet validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a "Subnet manager". This `(blockchainID, address)` pair is responsible for sending Warp messages contained within `RegisterSubnetValidatorTx` and `SetSubnetValidatorWeightTx` on the P-Chain. This enables an on-chain program to add, modify the weight of, and remove validators.
 
 On each validator set change, the P-Chain is willing to sign an `AddressedCall` to notify any onchain program tracking the validator set. Onchain programs must be able to interpret this message, so they can trigger the appropriate action. The 2 kinds of `AddressedCall`s [defined in ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#proof-of-subnet-validator-set-change) are `SubnetValidatorRegistrationMessage` and `SubnetValidatorWeightUpdateMessage`.
 
@@ -308,7 +308,7 @@ interface IACP99SecurityModule {
 
 ### Reference Architecture
 
-Each `ACP99Manager` contract will be associated with one "security module" that must implement the `IACP99SecurityModule` interface and is the only contract allowed to call the `ACP99Manager` functions related to validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Everytime a validator is added/removed or a weight change is initiated, the `ACP99Manager` will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommand that the "security module" reference an immutable `ACP99Manager` contract address for security reasons.
+Each `ACP99Manager` contract will be associated with one "security module" that must implement the `IACP99SecurityModule` interface and is the only contract allowed to call the `ACP99Manager` functions related to validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Everytime a validator is added/removed or a weight change is initiated, the `ACP99Manager` will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security module" reference an immutable `ACP99Manager` contract address for security reasons.
 
 It is up to the "security module" to decide what action to take when a validator is added/removed or a weight change is confirmed by the P-Chain. Such actions could be starting the withdrawal period and allocating rewards in a PoS Subnet.
 
