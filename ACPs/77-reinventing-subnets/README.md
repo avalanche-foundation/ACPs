@@ -36,7 +36,7 @@ At a high-level, Subnets will now be able to manage their validator sets externa
 
 ### P-Chain Warp Message Payloads
 
-To support modifying a Subnet's validator set on the P-Chain via Warp messages, Warp message verification support will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). Similar to Warp messages received by the C-Chain, in order for a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s validator set must have partcipated in the aggregate BLS signature. 
+To enable management of a Subnet's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-Subnet basis.
 
 For messages sent from the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all Subnet Validators will still sync the P-Chain.
 
