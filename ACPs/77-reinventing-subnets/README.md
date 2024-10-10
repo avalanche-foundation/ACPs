@@ -194,7 +194,7 @@ The following new transaction types are introduced on the P-Chain to support thi
 
 #### `ConvertSubnetTx`
 
-After a `CreateSubnetTx` is issued, a `ConvertSubnetTx` may be issued by the `Owner` to explicitly convert a Subnet from permissioned to permissionless. This transaction will set the `(chainID, address)` pair that will manage the Subnet's validator set going forward.
+To convert a Subnet from permissioned to permissionless, a `ConvertSubnetTx` must be issued to set the `(chainID, address)` pair that will manage the Subnet's validator set going forward. The `Owner` key defined in `CreateSubnetTx` must provide a signature to authorize this conversion.
 
 The `ConvertSubnetTx` specification is:
 
