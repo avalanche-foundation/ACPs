@@ -338,7 +338,7 @@ type DisableSubnetValidatorTx struct {
 
 The `DisableOwner` specified for this validator must sign the transaction. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that both `DisableOwner` and `RemainingBalanceOwner` are specified when the validator is first added to the Subnet's validator set (in either `ConvertSubnetTx` or `RegisterSubnetValidatorTx`).
 
-The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to reclaim the balance allotted to a validator without authorization from the Subnet is critical for failed Subnets.
+For full removal from a Subnet's validator set, a `SetSubnetValidatorWeightTx`  must be issued with weight `0`. To do so, a Warp message is required from the Subnet's manager. However, to support the ability to claim the unspent `Balance` for a Subnet Validator without authorization is critical for failed Subnets.
 
 Note that this does not modify a Subnet's total staking weight. This transaction marks the Subnet Validator as inactive, but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseSubnetValidatorBalanceTx`.
 
