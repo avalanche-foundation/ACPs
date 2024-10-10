@@ -1,9 +1,9 @@
-| ACP           | 151                                                             |
-| :------------ | :-------------------------------------------------------------- |
-| **Title**     | Use current block P-Chain height for ICM signature verification |
-| **Author(s)** | Ian Suvak ([@iansuvak](https://github.com/iansuvak))            |
-| **Status**    | Proposed                                                        |
-| **Track**     | Standards                                                       |
+| ACP           | 151                                                                |
+| :------------ | :----------------------------------------------------------------- |
+| **Title**     | Use current block P-Chain height as context for state verification |
+| **Author(s)** | Ian Suvak ([@iansuvak](https://github.com/iansuvak))               |
+| **Status**    | Proposed                                                           |
+| **Track**     | Standards                                                          |
 
 ## Abstract
 
@@ -11,7 +11,7 @@ Proposes that the ProposerVM passes inner VMs the P-Chain block height of the cu
 
 ## Motivation
 
-Currently the ProposerVM passes the P-Chain height of the parent block to inner VMs, which use the value to verify ICM messages in the current block. Using the parent block's P-Chain height is necessary for verifying the proposer and reaching consensus on the current block, but it is not necessary not for verifying ICM messages within the block.
+Currently the ProposerVM passes the P-Chain height of the parent block to inner VMs, which use the value to verify ICM messages in the current block. Using the parent block's P-Chain height is necessary for verifying the proposer and reaching consensus on the current block, but it is not necessary for verifying ICM messages within the block.
 
 Using the P-Chain height of the current block being built would make operations using ICM messages to modify the validator set, such as ones specified in [ACP-77](../77-reinventing-subnets/README.md) be verifiable sooner and more reliably. Currently at least two new P-Chain blocks need to be produced after the relevant state change for it to be reflected for purposes of ICM aggregate signature verification.
 
