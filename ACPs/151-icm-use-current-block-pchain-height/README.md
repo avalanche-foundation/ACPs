@@ -17,9 +17,9 @@ Using the P-Chain height of the current block being built would make operations 
 
 ## Specification
 
-[Block Context](https://github.com/ava-labs/avalanchego/blob/d2e9d12ed2a1b6581b8fd414cbfb89a6cfa64551/snow/engine/snowman/block/block_context_vm.go#L14) containing `PChainHeight` field is being passed to the VMs building the inner block, and is later being used by the VMs to fetch the canonical validator set for verification of ICM aggregated signatures. 
+The [block context](https://github.com/ava-labs/avalanchego/blob/d2e9d12ed2a1b6581b8fd414cbfb89a6cfa64551/snow/engine/snowman/block/block_context_vm.go#L14) contains a `PChainHeight` field that is passed from the ProposerVM to the inner VMs building the block. It is later used by the inner VMs to fetch the canonical validator set for verification of ICM aggregated signatures.
 
-The height currently passed in is the P-Chain height of the parent block which is the same height used by the ProposerVM to verify the proposer. This is necessary for proposer verification but not for verifying the state of this block so should be populated with the P-Chain height of the block being currently built instead. 
+The `PChainHeight` currently passed in by the ProposerVM is the P-Chain height of the parent block. The proposed change is to instead have the ProposerVM pass in the P-Chain height of the current block.
 
 ## Backwards Compatibility
 
@@ -31,7 +31,7 @@ A full reference implementation has not been provided yet. It must be provided p
 
 ## Security Considerations
 
-ProposerVM needs to use the parent block's P-Chain height to verify proposers for security reasons but we don't have such restrictions for verifying ICM message validity in the current block being built, therefore this should be a safe change.
+ProposerVM needs to use the parent block's P-Chain height to verify proposers for security reasons but we don't have such restrictions for verifying ICM message validity in the current block being built. Therefore, this should be a safe change.
 
 ## Copyright
 
