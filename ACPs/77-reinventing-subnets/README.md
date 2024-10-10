@@ -323,7 +323,7 @@ The `nonce` contained within the `SubnetValidatorWeightMessage` in the transacti
 
 #### `DisableSubnetValidatorTx`
 
-Subnet Validators can use `DisableSubnetValidatorTx` to mark their validator as inactive. The specification for this transaction is:
+Subnet Validators can use `DisableSubnetValidatorTx` to mark their validator as inactive. The specification of this transaction is:
 
 ```golang
 type DisableSubnetValidatorTx struct {
@@ -346,7 +346,7 @@ Subnet creators should be aware that there is no notion of `MinStakeDuration` th
 
 #### `IncreaseSubnetValidatorBalanceTx`
 
-Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseSubnetValidatorBalanceTx` can be used by anybody to add additional $AVAX to the `Balance` to a Subnet Validator. The specification for this transaction is:
+Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseSubnetValidatorBalanceTx` can be used by anybody to add additional $AVAX to the `Balance` to a Subnet Validator. The specification of this transaction is:
 
 ```golang
 type IncreaseSubnetValidatorBalanceTx struct {
