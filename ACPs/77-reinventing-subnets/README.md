@@ -190,7 +190,7 @@ The following new transaction types are introduced on the P-Chain to support thi
 - `RegisterSubnetValidatorTx`
 - `SetSubnetValidatorWeightTx`
 - `DisableSubnetValidatorTx`
-- `IncreaseSubnetValidatorWeightTx`
+- `IncreaseSubnetValidatorBalanceTx`
 
 #### `ConvertSubnetTx`
 
@@ -340,16 +340,16 @@ There is no requirement of any interaction on the Subnet to issue this transacti
 
 The expected path for full removal from a Subnet's validator set is via a `SetSubnetValidatorWeightTx` with weight `0` which requires a Warp message produced by the Subnet. However, the ability to reclaim the balance allotted to a validator without authorization from the Subnet is critical for failed Subnets.
 
-Note that this does not modify a Subnet's total staking weight. This transaction marks the Subnet Validator as inactive, but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseSubnetValidatorWeightTx`.
+Note that this does not modify a Subnet's total staking weight. This transaction marks the Subnet Validator as inactive, but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseSubnetValidatorBalanceTx`.
 
 Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
 
-#### `IncreaseSubnetValidatorWeightTx`
+#### `IncreaseSubnetValidatorBalanceTx`
 
-Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseSubnetValidatorWeightTx` can be used by anybody to add additional $AVAX to the `Balance` to a Subnet Validator. The specification for this transaction is:
+Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseSubnetValidatorBalanceTx` can be used by anybody to add additional $AVAX to the `Balance` to a Subnet Validator. The specification for this transaction is:
 
 ```golang
-type IncreaseSubnetValidatorWeightTx struct {
+type IncreaseSubnetValidatorBalanceTx struct {
     // Metadata, inputs and outputs
     BaseTx
     // ID corresponding to the validator
@@ -387,7 +387,7 @@ Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parame
 
 Every additional Subnet Validator on the P-Chain adds persistent load to the Avalanche Network. When a validator transaction is issued on the P-Chain, it is charged for the computational cost of the transaction itself but is not charged for the cost of an active Subnet Validator over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains, spawning many state rent proposals in the broader blockchain space to address it. The following fee mechanism takes advantage of the fact that each Subnet Validator uses the same amount of computation and charges each Subnet Validator the dynamic base fee for every discrete unit of time it is active.
 
-To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterSubnetValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseSubnetValidatorWeightTx`. When this `Balance` reaches `0`, the Subnet Validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseSubnetValidatorWeightTx`. Once a Subnet Validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseSubnetValidatorWeightTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetSubnetValidatorWeightTx` (`Weight` = 0).
+To charge each Subnet Validator, the notion of a `Balance` is introduced. The `Balance` of a Subnet Validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterSubnetValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseSubnetValidatorBalanceTx`. When this `Balance` reaches `0`, the Subnet Validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseSubnetValidatorBalanceTx`. Once a Subnet Validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseSubnetValidatorBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetSubnetValidatorWeightTx` (`Weight` = 0).
 
 Since each Subnet Validator is charged the same amount at each point in time, tracking the fees for the entire validator set is straight-forward. The accumulated dynamic base fee for the entire network is tracked in a single uint. This accumulated value should be equal to the fee charged if a Subnet Validator was active from the time the accumulator was instantiated. The validator set is maintained in a priority queue. A pseudocode implementation of the continuous fee mechanism is provided below.
 
