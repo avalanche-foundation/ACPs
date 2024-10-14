@@ -139,7 +139,7 @@ The `RegisterSubnetValidatorMessage` is specified as an `AddressedCall` with a p
 
 #### `SubnetValidatorRegistrationMessage`
 
-A `SubnetValidatorRegistrationMessage` is sent from the P-Chain as an acknowledgement to inform validator managers when a validation period has either begun or been invalidated.
+The P-Chain can produce a `SubnetValidatorRegistrationMessage` for consumers to verify that a validation period has either begun or has been invalidated.
 
 The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
