@@ -110,7 +110,7 @@ The following is the serialization of a `PChainOwner`:
 | | | 8 + len(`addresses`) * 20 bytes |
 
 - `threshold` is the number of `addresses` that must provide a signature for the `PChainOwner` to authorize an action.
-- In order to be a valid:
+- Validation criteria:
    - If `threshold` is `0`, `addresses` must be empty
    - `threshold` <= len(`addresses`)
    - Entries of `addresses` must be unique and sorted in ascending order
