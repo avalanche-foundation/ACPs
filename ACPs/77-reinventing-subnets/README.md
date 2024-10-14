@@ -158,7 +158,7 @@ The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with
 
 #### `SubnetValidatorWeightMessage`
 
-`SubnetValidatorWeightMessage`s are sent from validator managers to the P-Chain to update the weight of an existing validator, and are sent from the P-Chain back to validator managers to acknowledge that validator weight updates have been effectuated.
+The P-Chain can consume a `SubnetValidatorWeightMessage` through a `SetSubnetValidatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `SubnetValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
 
 The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
