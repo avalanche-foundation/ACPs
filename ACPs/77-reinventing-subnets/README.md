@@ -38,7 +38,7 @@ At a high-level, Subnets can manage their validator sets externally to the P-Cha
 
 To enable management of a Subnet's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-Subnet basis.
 
-For messages sent from the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all Subnet Validators will still sync the P-Chain.
+For messages produced by the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all Subnet Validators will still sync the P-Chain.
 
 The following Warp message payloads are introduced on the P-Chain:
 
@@ -55,7 +55,7 @@ The serialization of each of these messages is as follows.
 
 #### `SubnetConversionMessage`
 
-The `SubnetConversionMessage` is sent from the P-Chain to inform Subnet validator managers of the initial validator set.
+The P-Chain can produce a `SubnetConversionMessage` for consumers (i.e. validator managers) to be aware of the initial validator set.
 
 The following serialization is defined as a `ValidatorData`:
 
@@ -99,7 +99,7 @@ The `SubnetConversionMessage` is specified as an `AddressedCall` with `sourceCha
 
 #### `RegisterSubnetValidatorMessage`
 
-The `RegisterSubnetValidatorMessage` is sent from validator managers to the P-Chain to inform the P-Chain of additions to Subnet's validator set.
+The P-Chain can consume a `RegisterSubnetValidatorMessage` from validator managers through a `RegisterSubnetValidatorTx` to register an addition to the Subnet's validator set.
 
 The following is the serialization of a `PChainOwner`:
 
@@ -315,11 +315,16 @@ Applications of this transaction could include:
 - Decrease the voting weight of a misbehaving Subnet Validator
 - Remove an inactive Subnet Validator
 
-Note that there is no explicit `EndTime` for Subnet validators added in a `ConvertSubnetTx` or `RegisterSubnetValidatorTx`. Subnet validators should be removed by using this transaction with the `Weight` set to `0`. When a validator's weight is set to `0`, they will be removed from the validator set, and any $AVAX remaining in the `Balance` for the Subnet Validator being removed will be returned to the `RemainingBalanceOwner` for the validator defined in the `RegisterSubnetValidatorMessage`. All state related to the Subnet Validator being removed will be removed from the P-Chain's active state (BLS key, NodeID etc).
+The validation criteria for `SubnetValidatorWeightMessage` is:
+- `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update.
+- When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents Subnets from being unable to remove `nodeID` in a subsequent transaction.
+- If `weight == 0`, the Subnet Validator being removed must not be the last one in the set. If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorMessage`. With no validators, block production will halt and the Subnet is unrecoverable. This validation criteria serves as a guardrail against this situation. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
 
-If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorMessage`. With no validators, block production will halt and the Subnet is unrecoverable. To serve as a guardrail against this situation, a Subnet Validator removal will be considered invalid if the validator being removed is the last one. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
+When `weight != 0`, the weight of the Subnet Validator is updated to `weight` and `minNonce` is updated to `nonce + 1`.
 
-The `nonce` contained within the `SubnetValidatorWeightMessage` in the transaction must satisfy `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update. If `minNonce` is `MaxUint64`, the `weight` in the `SetSubnetValidatorWeightTx` is required to be `0` to prevent Subnets from being unable to remove `nodeID` in a subsequent `SetSubnetValidatorWeightTx`. When a Subnet Validator is removed from the active validator set (`weight == 0`), the `minNonce` and `validationID` will be removed from the P-Chain state. This state can be reaped during validator removal since `validationID` can never be re-initialized as a result of the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. `minNonce` will be set to `nonce + 1` when `SetSubnetValidatorWeightTx` is executed and `weight != 0`.
+When `weight == 0`, the Subnet Validator is removed from the validator set. All state related to the Subnet Validator, including the `minNonce` and `validationID`, are reaped from the P-Chain state. Tracking these post-removal is not required since `validationID` can never be re-initialized due to the replay protection provided by `expiry` in `RegisterSubnetValidatorTx`. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that `RemainingBalanceOwner` is specified when the validator is first added to the Subnet's validator set (in either `ConvertSubnetTx` or `RegisterSubnetValidatorTx`).
+
+Note: There is no explicit `EndTime` for Subnet validators added in a `ConvertSubnetTx` or `RegisterSubnetValidatorTx`. The only time when Subnet validators are removed from the Subnet's validator set is through this transaction when `weight == 0`.
 
 #### `DisableSubnetValidatorTx`
 
