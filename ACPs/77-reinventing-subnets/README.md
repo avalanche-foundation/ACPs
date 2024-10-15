@@ -44,10 +44,10 @@ For messages produced by the P-Chain for a given Subnet, only that Subnet's vali
 
 The following Warp message payloads are introduced on the P-Chain:
 
-- `SubnetConversionMessage`
+- `L1ConversionMessage`
 - `RegisterL1ValidatorMessage`
 - `L1ValidatorRegistrationMessage`
-- `SubnetValidatorWeightMessage`
+- `L1ValidatorWeightMessage`
 
 The method of requesting signatures for these messages is left unspecified. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
 
@@ -55,9 +55,9 @@ All node IDs contained within the message specifications are represented as vari
 
 The serialization of each of these messages is as follows.
 
-#### `SubnetConversionMessage`
+#### `L1ConversionMessage`
 
-The P-Chain can produce a `SubnetConversionMessage` for consumers (i.e. validator managers) to be aware of the initial validator set.
+The P-Chain can produce a `L1ConversionMessage` for consumers (i.e. validator managers) to be aware of the initial validator set.
 
 The following serialization is defined as a `ValidatorData`:
 
@@ -85,7 +85,7 @@ The following serialization is defined as the `SubnetConversionData`:
 - `managerChainID` and `managerAddress` identify the validator manager for the given Subnet. This is the (blockchain ID, adress) tuple allowed to send Warp messages to modify the Subnet's validator set.
 - `validators` are the initial pay-as-you-go validators for the given Subnet.
 
-The `SubnetConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
+The `L1ConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
 |                Field |       Type |     Size |
 | -------------------: | ---------: | -------: |
@@ -157,11 +157,11 @@ The `L1ValidatorRegistrationMessage` is specified as an `AddressedCall` with `so
 - `validationID` identifies the validator for the message
 - `registered` is a boolean representing the status of the `validationID`. If true, the `validationID` corresponds to a validator in the current validator set. If false, the `validationID` does not correspond to a validator in the current validator set, and never will in the future.
 
-#### `SubnetValidatorWeightMessage`
+#### `L1ValidatorWeightMessage`
 
-The P-Chain can consume a `SubnetValidatorWeightMessage` through a `SetL1ValidatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `SubnetValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
+The P-Chain can consume a `L1ValidatorWeightMessage` through a `SetL1ValidatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `L1ValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
 
-The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
+The `L1ValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
 |          Field |       Type |     Size |
 | -------------: | ---------: | -------: |
@@ -255,7 +255,7 @@ After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` a
 
 The `validationID` for validators added through `ConvertL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
-Once this transaction is accepted, the P-Chain must be willing sign a `SubnetConversionMessage` with a `subnetConversionID` corresponding to `SubnetConversionData` populated with the values from this transaction.
+Once this transaction is accepted, the P-Chain must be willing sign a `L1ConversionMessage` with a `subnetConversionID` corresponding to `SubnetConversionData` populated with the values from this transaction.
 
 #### `RegisterL1ValidatorTx`
 
@@ -306,7 +306,7 @@ When it is known that a given `validationID` _is not and never will be_ an exist
 type SetL1ValidatorWeightTx struct {
     // Metadata, inputs and outputs
     BaseTx
-    // A SubnetValidatorWeightMessage payload
+    // A L1ValidatorWeightMessage payload
     Message warp.Message `json:"message"`
 }
 ```
@@ -318,7 +318,7 @@ Applications of this transaction could include:
 - Decrease the voting weight of a misbehaving Subnet Validator
 - Remove an inactive Subnet Validator
 
-The validation criteria for `SubnetValidatorWeightMessage` is:
+The validation criteria for `L1ValidatorWeightMessage` is:
 
 - `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update.
 - When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents Subnets from being unable to remove `nodeID` in a subsequent transaction.
