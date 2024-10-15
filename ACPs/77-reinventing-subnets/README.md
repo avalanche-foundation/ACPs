@@ -214,7 +214,7 @@ type PChainOwner struct {
     Addresses []ids.ShortID `json:"addresses"`
 }
 
-type SubnetValidator struct {
+type L1Validator struct {
     // NodeID of this validator
     NodeID []byte `json:"nodeID"`
     // Weight of this validator used when sampling
@@ -245,7 +245,7 @@ type ConvertL1Tx struct {
     // Address of the Subnet manager
     Address []byte `json:"address"`
     // Initial pay-as-you-go validators for the Subnet
-    Validators []SubnetValidator `json:"validators"`
+    Validators []L1Validator `json:"validators"`
     // Authorizes this conversion
     SubnetAuth verify.Verifiable `json:"subnetAuthorization"`
 }
