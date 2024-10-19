@@ -96,7 +96,7 @@ The `L1ConversionMessage` is specified as an `AddressedCall` with `sourceChainID
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000000` for this message
-- `subnetConversionID` is the SHA256 hash of the `SubnetConversionData` from a given `ConvertL1Tx`
+- `subnetConversionID` is the SHA256 hash of the `SubnetConversionData` from a given `ConvertSubnetToL1Tx`
 
 #### `RegisterL1ValidatorMessage`
 
@@ -189,17 +189,17 @@ To be a Permissionless Subnet:
 
 The following new transaction types are introduced on the P-Chain to support this functionality.
 
-- `ConvertL1Tx`
+- `ConvertSubnetToL1Tx`
 - `RegisterL1ValidatorTx`
 - `SetL1ValidatorWeightTx`
 - `DisableL1ValidatorTx`
 - `IncreaseL1ValidatorBalanceTx`
 
-#### `ConvertL1Tx`
+#### `ConvertSubnetToL1Tx`
 
-To convert a Subnet from permissioned to permissionless, a `ConvertL1Tx` must be issued to set the `(chainID, address)` pair that will manage the Subnet's validator set going forward. The `Owner` key defined in `CreateSubnetTx` must provide a signature to authorize this conversion.
+To convert a Subnet from permissioned to permissionless, a `ConvertSubnetToL1Tx` must be issued to set the `(chainID, address)` pair that will manage the Subnet's validator set going forward. The `Owner` key defined in `CreateSubnetTx` must provide a signature to authorize this conversion.
 
-The `ConvertL1Tx` specification is:
+The `ConvertSubnetToL1Tx` specification is:
 
 ```golang
 type PChainOwner struct {
@@ -233,7 +233,7 @@ type L1Validator struct {
     DisableOwner PChainOwner `json:"disableOwner"`
 }
 
-type ConvertL1Tx struct {
+type ConvertSubnetToL1Tx struct {
     // Metadata, inputs and outputs
     BaseTx
     // ID of the Subnet to transform
@@ -253,13 +253,13 @@ type ConvertL1Tx struct {
 
 After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing Subnet validators that were added using `AddSubnetValidatorTx` previously via `RemoveSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet Validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet Validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
 
-The `validationID` for validators added through `ConvertL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
+The `validationID` for validators added through `ConvertSubnetToL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
 Once this transaction is accepted, the P-Chain must be willing sign a `L1ConversionMessage` with a `subnetConversionID` corresponding to `SubnetConversionData` populated with the values from this transaction.
 
 #### `RegisterL1ValidatorTx`
 
-After a `ConvertL1Tx` has been accepted for a Subnet, new validators for the Subnet must be added by using a `RegisterL1ValidatorTx`. The specification of this transaction is:
+After a `ConvertSubnetToL1Tx` has been accepted for a Subnet, new validators for the Subnet must be added by using a `RegisterL1ValidatorTx`. The specification of this transaction is:
 
 ```golang
 type RegisterL1ValidatorTx struct {
@@ -326,9 +326,9 @@ The validation criteria for `L1ValidatorWeightMessage` is:
 
 When `weight != 0`, the weight of the Subnet Validator is updated to `weight` and `minNonce` is updated to `nonce + 1`.
 
-When `weight == 0`, the Subnet Validator is removed from the validator set. All state related to the Subnet Validator, including the `minNonce` and `validationID`, are reaped from the P-Chain state. Tracking these post-removal is not required since `validationID` can never be re-initialized due to the replay protection provided by `expiry` in `RegisterL1ValidatorTx`. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that `RemainingBalanceOwner` is specified when the validator is first added to the Subnet's validator set (in either `ConvertL1Tx` or `RegisterL1ValidatorTx`).
+When `weight == 0`, the Subnet Validator is removed from the validator set. All state related to the Subnet Validator, including the `minNonce` and `validationID`, are reaped from the P-Chain state. Tracking these post-removal is not required since `validationID` can never be re-initialized due to the replay protection provided by `expiry` in `RegisterL1ValidatorTx`. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that `RemainingBalanceOwner` is specified when the validator is first added to the Subnet's validator set (in either `ConvertSubnetToL1Tx` or `RegisterL1ValidatorTx`).
 
-Note: There is no explicit `EndTime` for Subnet validators added in a `ConvertL1Tx` or `RegisterL1ValidatorTx`. The only time when Subnet validators are removed from the Subnet's validator set is through this transaction when `weight == 0`.
+Note: There is no explicit `EndTime` for Subnet validators added in a `ConvertSubnetToL1Tx` or `RegisterL1ValidatorTx`. The only time when Subnet validators are removed from the Subnet's validator set is through this transaction when `weight == 0`.
 
 #### `DisableL1ValidatorTx`
 
@@ -345,7 +345,7 @@ type DisableL1ValidatorTx struct {
 }
 ```
 
-The `DisableOwner` specified for this validator must sign the transaction. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that both `DisableOwner` and `RemainingBalanceOwner` are specified when the validator is first added to the Subnet's validator set (in either `ConvertL1Tx` or `RegisterL1ValidatorTx`).
+The `DisableOwner` specified for this validator must sign the transaction. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that both `DisableOwner` and `RemainingBalanceOwner` are specified when the validator is first added to the Subnet's validator set (in either `ConvertSubnetToL1Tx` or `RegisterL1ValidatorTx`).
 
 For full removal from a Subnet's validator set, a `SetL1ValidatorWeightTx` must be issued with weight `0`. To do so, a Warp message is required from the Subnet's manager. However, to support the ability to claim the unspent `Balance` for a Subnet Validator without authorization is critical for failed Subnets.
 
@@ -543,7 +543,7 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
 ### New Transactions
 
 - P-Chain
-  - `ConvertL1Tx`
+  - `ConvertSubnetToL1Tx`
   - `RegisterL1ValidatorTx`
   - `SetL1ValidatorWeightTx`
   - `DisableL1ValidatorTx`
