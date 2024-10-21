@@ -44,7 +44,7 @@ For messages produced by the P-Chain for a given Subnet, only that Subnet's vali
 
 The following Warp message payloads are introduced on the P-Chain:
 
-- `L1ConversionMessage`
+- `SubnetToL1ConversionMessage`
 - `RegisterL1ValidatorMessage`
 - `L1ValidatorRegistrationMessage`
 - `L1ValidatorWeightMessage`
