@@ -284,7 +284,7 @@ When a `RegisterL1ValidatorTx` is accepted on the P-Chain, the validator is adde
 
 This `validationID` will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterL1ValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` of the `RegisterL1ValidatorMessage` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
 
-Subnets are responsible for defining the procedure on how to retrieve the above information from prospective validators.
+L1s are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
 An EVM Subnet may choose to implement this step like so:
 
