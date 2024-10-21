@@ -324,7 +324,7 @@ The validation criteria for `L1ValidatorWeightMessage` is:
 - When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents Subnets from being unable to remove `nodeID` in a subsequent transaction.
 - If `weight == 0`, the Subnet Validator being removed must not be the last one in the set. If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterL1ValidatorMessage`. With no validators, block production will halt and the Subnet is unrecoverable. This validation criteria serves as a guardrail against this situation. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
 
-When `weight != 0`, the weight of the Subnet Validator is updated to `weight` and `minNonce` is updated to `nonce + 1`.
+When `weight != 0`, the weight of the validator is updated to `weight` and `minNonce` is updated to `nonce + 1`.
 
 When `weight == 0`, the Subnet Validator is removed from the validator set. All state related to the Subnet Validator, including the `minNonce` and `validationID`, are reaped from the P-Chain state. Tracking these post-removal is not required since `validationID` can never be re-initialized due to the replay protection provided by `expiry` in `RegisterL1ValidatorTx`. Any unspent $AVAX in the Subnet Validator's `Balance` will be issued in a single UTXO to the `RemainingBalanceOwner` for this validator. Recall that `RemainingBalanceOwner` is specified when the validator is first added to the Subnet's validator set (in either `ConvertSubnetToL1Tx` or `RegisterL1ValidatorTx`).
 
