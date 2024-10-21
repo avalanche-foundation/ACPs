@@ -321,7 +321,7 @@ Applications of this transaction could include:
 The validation criteria for `L1ValidatorWeightMessage` is:
 
 - `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update.
-- When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents Subnets from being unable to remove `nodeID` in a subsequent transaction.
+- When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents L1s from being unable to remove `nodeID` in a subsequent transaction.
 - If `weight == 0`, the validator being removed must not be the last one in the set. If all validators are removed, there are no valid Warp messages that can be produced to register new validators through `RegisterL1ValidatorMessage`. With no validators, block production will halt and the L1 is unrecoverable. This validation criteria serves as a guardrail against this situation. A future ACP can remove this guardrail as users get more familiar with the new L1 mechanics and tooling matures to fork an L1.
 
 When `weight != 0`, the weight of the validator is updated to `weight` and `minNonce` is updated to `nonce + 1`.
