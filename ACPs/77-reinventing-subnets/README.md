@@ -40,7 +40,7 @@ At a high-level, Subnets can manage their validator sets externally to the P-Cha
 
 To enable management of a Subnet's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-Subnet basis.
 
-For messages produced by the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all Subnet Validators will still sync the P-Chain.
+For messages produced by the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all validators will still sync the P-Chain.
 
 The following Warp message payloads are introduced on the P-Chain:
 
@@ -332,7 +332,7 @@ Note: There is no explicit `EndTime` for Subnet validators added in a `ConvertSu
 
 #### `DisableL1ValidatorTx`
 
-Subnet Validators can use `DisableL1ValidatorTx` to mark their validator as inactive. The specification of this transaction is:
+L1 Validators can use `DisableL1ValidatorTx` to mark their validator as inactive. The specification of this transaction is:
 
 ```golang
 type DisableL1ValidatorTx struct {
@@ -349,13 +349,13 @@ The `DisableOwner` specified for this validator must sign the transaction. Any u
 
 For full removal from a Subnet's validator set, a `SetL1ValidatorWeightTx` must be issued with weight `0`. To do so, a Warp message is required from the Subnet's manager. However, to support the ability to claim the unspent `Balance` for a validator without authorization is critical for failed Subnets.
 
-Note that this does not modify a Subnet's total staking weight. This transaction marks the validator as inactive, but does not remove it from the Subnet's validator set. Inactive Subnet Validators can re-activate at any time by increasing their balance with an `IncreaseL1ValidatorBalanceTx`.
+Note that this does not modify a Subnet's total staking weight. This transaction marks the validator as inactive, but does not remove it from the Subnet's validator set. Inactive validators can re-activate at any time by increasing their balance with an `IncreaseL1ValidatorBalanceTx`.
 
 Subnet creators should be aware that there is no notion of `MinStakeDuration` that is enforced by the P-Chain. It is expected that Subnets who choose to enforce a `MinStakeDuration` will lock the validator's Stake for the Subnet's desired `MinStakeDuration`.
 
 #### `IncreaseL1ValidatorBalanceTx`
 
-Subnet Validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseL1ValidatorBalanceTx` can be used by anybody to add additional $AVAX to the `Balance` to a validator. The specification of this transaction is:
+L1 validators are required to maintain a non-zero balance used to pay the continuous fee on the P-Chain in order to be considered active. The `IncreaseL1ValidatorBalanceTx` can be used by anybody to add additional $AVAX to the `Balance` to a validator. The specification of this transaction is:
 
 ```golang
 type IncreaseL1ValidatorBalanceTx struct {
@@ -380,15 +380,15 @@ To bootstrap a node/validator, a few critical questions must be answered: How do
 
 For standalone networks like the Avalanche Primary Network, this is done by connecting to a hardcoded [set](https://github.com/ava-labs/avalanchego/blob/master/genesis/bootstrappers.json) of trusted bootstrappers to then discover new peers. Ethereum calls their set [bootnodes](https://ethereum.org/developers/docs/nodes-and-clients/bootnodes).
 
-By separating Subnet Validators from Primary Network Validators, a list of validator IPs to connect to (the functional bootstrappers of the Subnet) is no longer provided by simply connecting to the Primary Network Validators. However, the Primary Network can enable nodes tracking a Subnet to seamlessly connect to the Subnet Validators by tracking and gossiping validator IPs. Subnets will not need to operate and maintain a set of bootstrappers and can continue to rely on the Primary Network for peer discovery.
+By separating Subnet Validators from Primary Network Validators, a list of validator IPs to connect to (the functional bootstrappers of the Subnet) is no longer provided by simply connecting to the Primary Network Validators. However, the Primary Network can enable nodes tracking a Subnet to seamlessly connect to the validators by tracking and gossiping validator IPs. Subnets will not need to operate and maintain a set of bootstrappers and can continue to rely on the Primary Network for peer discovery.
 
 ### Sidebar: Subnet Sovereignty
 
-After this ACP is activated, the P-Chain will no longer support staking of any assets other than $AVAX for the Primary Network. The P-Chain will no longer support distribution of staking rewards for Subnets. All staking-related operations for Subnet Validation must be managed by the Subnet's validator manager. The P-Chain simply requires a continuous fee per validator. If a Subnet would like to manage their Validator's balances on the P-Chain, it can cover the cost for all Subnet Validators by posting the $AVAX balance on the P-Chain. Subnets can implement any mechanism they want to pay the continuous fee charged by the P-Chain for its participants.
+After this ACP is activated, the P-Chain will no longer support staking of any assets other than $AVAX for the Primary Network. The P-Chain will no longer support distribution of staking rewards for Subnets. All staking-related operations for Subnet Validation must be managed by the Subnet's validator manager. The P-Chain simply requires a continuous fee per validator. If a Subnet would like to manage their Validator's balances on the P-Chain, it can cover the cost for all L1 validators by posting the $AVAX balance on the P-Chain. Subnets can implement any mechanism they want to pay the continuous fee charged by the P-Chain for its participants.
 
 By moving ownership of the Subnet's validator set from the P-Chain to the Subnet, Subnet creators have no restrictions on what requirements they have to join their Subnet as a validator. Any stake that is required to join the Subnet's validator set is locked on the Subnet. If a validator is removed from the Subnet's validator set via a `SetL1ValidatorWeightTx` with weight `0`, the stake on the Subnet will continue to be locked. How each Subnet handles stake associated with the validator is entirely left up to the Subnet and can be treated independently to what happens on the P-Chain.
 
-This new relationship between the P-Chain and Subnets provides a dynamic where Subnets can use the P-Chain as an impartial judge to modify parameters (in addition to its existing role of helping to validate incoming Avalanche Warp Messages). If a Validator is misbehaving, the Subnet Validators can collectively generate a BLS multisig to reduce the voting weight of a misbehaving validator. This operation is fully secured by the Avalanche Primary Network (225M $AVAX or $8.325B at the time of writing).
+This new relationship between the P-Chain and Subnets provides a dynamic where Subnets can use the P-Chain as an impartial judge to modify parameters (in addition to its existing role of helping to validate incoming Avalanche Warp Messages). If a Validator is misbehaving, the L1 validators can collectively generate a BLS multisig to reduce the voting weight of a misbehaving validator. This operation is fully secured by the Avalanche Primary Network (225M $AVAX or $8.325B at the time of writing).
 
 Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parametrization of the 67% threshold to enable Subnets to choose a different threshold based on their security model (e.g. a simple majority of 51%).
 
@@ -396,7 +396,7 @@ Follow-up ACPs could extend the P-Chain <> Subnet relationship to include parame
 
 Every additional validator on the P-Chain adds persistent load to the Avalanche Network. When a validator transaction is issued on the P-Chain, it is charged for the computational cost of the transaction itself but is not charged for the cost of an active validator over the time they are validating on the network (which may be indefinitely). This is a common problem in blockchains, spawning many state rent proposals in the broader blockchain space to address it. The following fee mechanism takes advantage of the fact that each L1 validator uses the same amount of computation and charges each L1 validator the dynamic base fee for every discrete unit of time it is active.
 
-To charge each L1 validator, the notion of a `Balance` is introduced. The `Balance` of a validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterL1ValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseL1ValidatorBalanceTx`. When this `Balance` reaches `0`, the validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive Subnet Validators can be moved back to the active validator set at any time using the same `IncreaseL1ValidatorBalanceTx`. Once a validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseL1ValidatorBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetL1ValidatorWeightTx` (`Weight` = 0).
+To charge each L1 validator, the notion of a `Balance` is introduced. The `Balance` of a validator will be continuously charged during the time they are active to cover the cost of storing the associated validator properties (BLS key, weight, nonce) in memory and to track IPs (in addition to other services provided by the Primary Network). This `Balance` is initialized with the `RegisterL1ValidatorTx` that added them to the active validator set. `Balance` can be increased at any time using the `IncreaseL1ValidatorBalanceTx`. When this `Balance` reaches `0`, the validator will be considered "inactive" and will no longer participate in validating the Subnet. Inactive validators can be moved back to the active validator set at any time using the same `IncreaseL1ValidatorBalanceTx`. Once a validator is considered inactive, the P-Chain will remove these properties from memory and only retain them on disk. All messages from that validator will be considered invalid until it is revived using the `IncreaseL1ValidatorBalanceTx`. Subnets can reduce the amount of inactive weight by removing inactive validators with the `SetL1ValidatorWeightTx` (`Weight` = 0).
 
 Since each L1 Validator is charged the same amount at each point in time, tracking the fees for the entire validator set is straight-forward. The accumulated dynamic base fee for the entire network is tracked in a single uint. This accumulated value should be equal to the fee charged if a validator was active from the time the accumulator was instantiated. The validator set is maintained in a priority queue. A pseudocode implementation of the continuous fee mechanism is provided below.
 
@@ -448,7 +448,7 @@ class ValidatorQueue:
 
 [ACP-103](../103-dynamic-fees/README.md) proposes a dynamic fee mechanism for transactions on the P-Chain. This mechanism is repurposed with minor modifications for the active L1 validator continuous fee.
 
-At activation, the number of excess active Subnet Validators $x$ is set to `0`.
+At activation, the number of excess active L1 validators $x$ is set to `0`.
 
 The fee rate per second for an active L1 validator is:
 
@@ -480,16 +480,16 @@ $$x = \max(x + (V - T), 0)$$
 
 Where:
 
-- $V$ is the number of active Subnet Validators
-- $T$ is the target number of active Subnet Validators
+- $V$ is the number of active L1 validators
+- $T$ is the target number of active L1 validators
 
-Whenever $x$ increases by $K$, the price per active L1 validator increases by a factor of `~2.7`. If the price per active L1 validator gets too expensive, some active Subnet Validators will exit the active validator set, decreasing $x$, dropping the price. The price per active L1 validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active Subnet Validators.
+Whenever $x$ increases by $K$, the price per active L1 validator increases by a factor of `~2.7`. If the price per active L1 validator gets too expensive, some active L1 validators will exit the active validator set, decreasing $x$, dropping the price. The price per active L1 validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active L1 validators.
 
 #### Block Timestamp Validity Change
 
-To ensure that validators are removed timely, blocks are considered valid if their timestamps are no greater than the time at which the first validator gets removed from a lack of funds. This upholds the expectation that the number of Subnet Validators remains constant between blocks.
+To ensure that validators are removed timely, blocks are considered valid if their timestamps are no greater than the time at which the first validator gets removed from a lack of funds. This upholds the expectation that the number of L1 validators remains constant between blocks.
 
-The block building protocol is modified to account for this change by first checking if the wall clock time removes any validator due to a lack of funds. If the wall clock time does not remove any Subnet Validators, the wall clock time is used to build the block. If it does, the time at which the first validator gets removed is used.
+The block building protocol is modified to account for this change by first checking if the wall clock time removes any validator due to a lack of funds. If the wall clock time does not remove any L1 validators, the wall clock time is used to build the block. If it does, the time at which the first validator gets removed is used.
 
 #### Fee Calculation
 
@@ -511,8 +511,8 @@ The parameters at activation are:
 
 | Parameter | Value                            |
 | --------- | -------------------------------- |
-| $T$       | `TODO` Subnet Validators         |
-| $C$       | `TODO` Subnet Validators         |
+| $T$       | `TODO` L1 validators             |
+| $C$       | `TODO` L1 validators             |
 | $M$       | `TODO` nAVAX/s (`TODO` AVAX/day) |
 | $K$       | `TODO`                           |
 
@@ -520,9 +520,9 @@ A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modif
 
 #### User Experience
 
-Instead of a fixed up-front cost of 2000 $AVAX, Subnet Validators are now continuously charged a fee, albeit a small one. This poses a new challenge for L1 validators: How do they maintain the balance?
+Instead of a fixed up-front cost of 2000 $AVAX, L1 validators are now continuously charged a fee, albeit a small one. This poses a new challenge for L1 validators: How do they maintain the balance?
 
-Node clients should expose an API to track how much balance is remaining in the validator's account. This will provide a way for Subnet Validators to track how quickly it is going down and top-up when needed. A nice byproduct of the above design is the balance in the validator's account is claimable. This means users can top-up as much $AVAX as they want and rest-assured knowing they can always retrieve it if there is an excessive amount.
+Node clients should expose an API to track how much balance is remaining in the validator's account. This will provide a way for L1 validators to track how quickly it is going down and top-up when needed. A nice byproduct of the above design is the balance in the validator's account is claimable. This means users can top-up as much $AVAX as they want and rest-assured knowing they can always retrieve it if there is an excessive amount.
 
 The expectation is that most users will not interact with node clients or track when or how much they need to top-up their validator account. Wallet providers will abstract away most of this process. For users who desire more convenience, Subnet-as-a-Service providers will abstract away all of this process.
 
@@ -555,15 +555,15 @@ A full reference implementation has not been provided yet. It will be provided o
 
 ## Security Considerations
 
-This ACP significantly reduces the cost of becoming an L1 validator. This can lead to a large increase in the number of Subnet Validators going forward. Each additional validator adds consistent RAM usage to the P-Chain. However, this should be appropriately metered by the continuous fee mechanism outlined above.
+This ACP significantly reduces the cost of becoming an L1 validator. This can lead to a large increase in the number of L1 validators going forward. Each additional validator adds consistent RAM usage to the P-Chain. However, this should be appropriately metered by the continuous fee mechanism outlined above.
 
-With the additional sovereignty Subnets gain from the P-Chain, Subnet staking tokens are no longer locked on the P-Chain for Permissionless Subnets. This poses a new security consideration for Subnet Validators: Malicious Subnets can choose to remove validators at will and take any funds that the validator has on the Subnet. The P-Chain only provides the guarantee that Subnet Validators can retrieve the remaining $AVAX Balance for their Validator via a `DisableL1ValidatorTx`. Any assets on the Subnet is entirely under the purview of the Subnet. The onus is now on Subnet Validators to vet the Subnet's security.
+With the additional sovereignty Subnets gain from the P-Chain, Subnet staking tokens are no longer locked on the P-Chain for Permissionless Subnets. This poses a new security consideration for L1 validators: Malicious chains can choose to remove validators at will and take any funds that the validator has on the Subnet. The P-Chain only provides the guarantee that L1 validators can retrieve the remaining $AVAX Balance for their validator via a `DisableL1ValidatorTx`. Any assets on the Subnet is entirely under the purview of the Subnet. The onus is now on L1 validators to vet the Subnet's security.
 
 With a long window of expiry (48 hours) for the Warp message in `RegisterL1ValidatorTx`, spam of validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
 
 NodeIDs can be added to a Subnet's validator set involuntarily. However, it is important to note that any stake/rewards are _not_ at risk. For a node operator who was added to a validator set involuntarily, they would only need to generate a new NodeID via key rotation as there is no lock-up of any stake to create a NodeID. This is an explicit tradeoff for easier on-boarding of NodeIDs. This mirrors the Primary Network Validators guarantee of no stake/rewards at risk.
 
-The continuous fee mechanism outlined above does not apply to inactive Subnet Validators since they are not stored in memory. However, inactive Subnet Validators are persisted on disk which can lead to persistent P-Chain state growth. The initial balance requirement (the greater of 5 $AVAX or two weeks of the current fee) should be a sufficient deterrent as it must be fully burned for the validator to become inactive. A future ACP can increase the initial balance to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
+The continuous fee mechanism outlined above does not apply to inactive L1 validators since they are not stored in memory. However, inactive L1 validators are persisted on disk which can lead to persistent P-Chain state growth. The initial balance requirement (the greater of 5 $AVAX or two weeks of the current fee) should be a sufficient deterrent as it must be fully burned for the validator to become inactive. A future ACP can increase the initial balance to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
 
 ## Open Questions
 
