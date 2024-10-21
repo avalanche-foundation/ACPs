@@ -57,7 +57,7 @@ The serialization of each of these messages is as follows.
 
 #### `L1ConversionMessage`
 
-The P-Chain can produce a `L1ConversionMessage` for consumers (i.e. validator managers) to be aware of the initial validator set.
+The P-Chain can produce a `SubnetToL1ConversionMessage` for consumers (i.e. validator managers) to be aware of the initial validator set.
 
 The following serialization is defined as a `ValidatorData`:
 
