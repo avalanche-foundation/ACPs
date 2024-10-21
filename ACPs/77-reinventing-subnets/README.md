@@ -315,7 +315,7 @@ Applications of this transaction could include:
 
 - Increase the voting weight of a Subnet Validator if a delegation is made on the Subnet
 - Increase the voting weight of a Subnet Validator if the stake amount is increased (by staking rewards for example)
-- Decrease the voting weight of a misbehaving Subnet Validator
+- Decrease the voting weight of a misbehaving validator
 - Remove an inactive Subnet Validator
 
 The validation criteria for `L1ValidatorWeightMessage` is:
