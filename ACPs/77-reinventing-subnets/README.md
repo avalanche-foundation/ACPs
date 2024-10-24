@@ -16,8 +16,6 @@ Overhaul Subnet creation and management to unlock increased flexibility for Subn
 
 This ACP supersedes [ACP-13](../13-subnet-only-validators/README.md) and borrows some of its language.
 
-See the [Open Questions](#open-questions) section for info on the renaming of Subnets -> Avalanche Layer 1s.
-
 ## Motivation
 
 Each node operator must stake at least 2000 $AVAX ($70k at time of writing) to first become a Primary Network Validator before they qualify to become a Subnet Validator. Most Subnets aim to launch with at least 8 Subnet Validators, which requires staking 16000 $AVAX ($560k at time of writing). All Subnet Validators, to satisfy their role as Primary Network Validators, must also [allocate 8 AWS vCPU, 16 GB RAM, and 1 TB storage](https://github.com/ava-labs/avalanchego/blob/master/README.md#installation) to sync the entire Primary Network (X-Chain, P-Chain, and C-Chain) and participate in its consensus, in addition to whatever resources are required for each Subnet they are validating.
@@ -31,6 +29,12 @@ Although the fee paid to the Primary Network to operate a Subnet does not go up 
 Elastic Subnets, introduced in [Banff](https://medium.com/avalancheavax/banff-elastic-subnets-44042f41e34c), enabled Subnet creators to activate Proof-of-Stake validation and uptime-based rewards using their own token. However, this token is required to be an ANT (created on the X-Chain) and locked on the P-Chain. All staking rewards were distributed on the P-Chain with the reward curve being defined in the `TransformSubnetTx` and, once set, was unable to be modified.
 
 With no Elastic Subnets live on Mainnet, it is clear that Permissionless Subnets as they stand today could be more desirable. There are many successful Permissioned Subnets in production but many Subnet creators have raised the above as points of concern. In summary, the Avalanche community could benefit from a more flexible and affordable mechanism to launch Permissionless Subnets.
+
+### A Note on Nomenclature
+
+Going forward, newly created networks should be referred to as L1s, or Avalanche Layer 1s. L1 validator sets created using the flow introduced in this ACP will **not** be a subset of the primary network validator set, making Subnets a technical misnomer. Any network created with the pre-existing flow will still be considered a Subnet, as these types of validators must stake and validate the Avalanche Primary Network.
+
+Though Subnets have always managed their own consensus mechanisms, transaction processing, and security protocols directly within their own networks, the added functionality introduced in this ACP will solidify their status as standalone networks, or layer 1 blockchains.
 
 ## Specification
 
@@ -567,9 +571,7 @@ The continuous fee mechanism outlined above does not apply to inactive L1 valida
 
 ## Open Questions
 
-### Should they still be called Subnets?
-
-Going forward, Subnets should be referred to as L1s. Unlike layer 2 blockchains, layer 1 blockchains operate independently without relying on other systems for their core functions. They manage their own consensus mechanisms, transaction processing, and security protocols directly within their own networks. Subnets have always operated this way. With the added functionality introduced in this ACP, they are clearly standalone networks, or L1s.
+There are currently no open questions.
 
 ## Acknowledgements
 
