@@ -1,10 +1,10 @@
-| ACP | 77 |
-| :--- | :--- |
-| **Title** | Reinventing Subnets |
-| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
-| **Track** | Standards |
-| **Replaces** | [ACP-13](../13-subnet-only-validators/README.md) |
+| ACP           | 77                                                                                   |
+| :------------ | :----------------------------------------------------------------------------------- |
+| **Title**     | Reinventing Subnets                                                                  |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))                           |
+| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
+| **Track**     | Standards                                                                            |
+| **Replaces**  | [ACP-13](../13-subnet-only-validators/README.md)                                     |
 
 ## Abstract
 
@@ -59,24 +59,23 @@ The P-Chain can produce a `SubnetConversionMessage` for consumers (i.e. validato
 
 The following serialization is defined as a `ValidatorData`:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `nodeID` | `[]byte` | 4 + len(`nodeID`) bytes |
-| `blsPublicKey` | `[48]byte` | 48 bytes |
-| `weight` | `uint64` | 8 bytes |
-| | | 60 + len(`nodeID`) bytes |
-
+|          Field |       Type |                     Size |
+| -------------: | ---------: | -----------------------: |
+|       `nodeID` |   `[]byte` |  4 + len(`nodeID`) bytes |
+| `blsPublicKey` | `[48]byte` |                 48 bytes |
+|       `weight` |   `uint64` |                  8 bytes |
+|                |            | 60 + len(`nodeID`) bytes |
 
 The following serialization is defined as the `SubnetConversionData`:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `codecID`  | `uint16` | 2 bytes |
-| `subnetID` | `[32]byte` | 32 bytes |
-| `managerChainID` | `[32]byte` | 32 bytes |
-| `managerAddress` | `[]byte` | 4 + len(`managerAddress`) bytes |
-| `validators` | `[]ValidatorData` | 4 + sum(`validatorLengths`) bytes |
-| | | 74 + len(`managerAddress`) + len(`validatorLengths`) bytes |
+|            Field |              Type |                                                       Size |
+| ---------------: | ----------------: | ---------------------------------------------------------: |
+|        `codecID` |          `uint16` |                                                    2 bytes |
+|       `subnetID` |        `[32]byte` |                                                   32 bytes |
+| `managerChainID` |        `[32]byte` |                                                   32 bytes |
+| `managerAddress` |          `[]byte` |                            4 + len(`managerAddress`) bytes |
+|     `validators` | `[]ValidatorData` |                          4 + sum(`validatorLengths`) bytes |
+|                  |                   | 74 + len(`managerAddress`) + len(`validatorLengths`) bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
@@ -86,12 +85,12 @@ The following serialization is defined as the `SubnetConversionData`:
 
 The `SubnetConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `codecID` | `uint16` | 2 bytes |
-| `typeID` | `uint32` | 4 bytes |
+|                Field |       Type |     Size |
+| -------------------: | ---------: | -------: |
+|            `codecID` |   `uint16` |  2 bytes |
+|             `typeID` |   `uint32` |  4 bytes |
 | `subnetConversionID` | `[32]byte` | 32 bytes |
-| | | 38 bytes |
+|                      |            | 38 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000000` for this message
@@ -103,32 +102,32 @@ The P-Chain can consume a `RegisterSubnetValidatorMessage` from validator manage
 
 The following is the serialization of a `PChainOwner`:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `threshold` | `uint32` | 4 bytes |
-| `addresses` | `[][20]byte` | 4 + len(`addresses`) * 20 bytes |
-| | | 8 + len(`addresses`) * 20 bytes |
+|       Field |         Type |                             Size |
+| ----------: | -----------: | -------------------------------: |
+| `threshold` |     `uint32` |                          4 bytes |
+| `addresses` | `[][20]byte` | 4 + len(`addresses`) \* 20 bytes |
+|             |              | 8 + len(`addresses`) \* 20 bytes |
 
 - `threshold` is the number of `addresses` that must provide a signature for the `PChainOwner` to authorize an action.
 - Validation criteria:
-   - If `threshold` is `0`, `addresses` must be empty
-   - `threshold` <= len(`addresses`)
-   - Entries of `addresses` must be unique and sorted in ascending order
+  - If `threshold` is `0`, `addresses` must be empty
+  - `threshold` <= len(`addresses`)
+  - Entries of `addresses` must be unique and sorted in ascending order
 
 The `RegisterSubnetValidatorMessage` is specified as an `AddressedCall` with a payload of:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `codecID` | `uint16` | 2 bytes |
-| `typeID` | `uint32` | 4 bytes |
-| `subnetID` | `[32]byte` | 32 bytes |
-| `nodeID` | `[]byte` | 4 + len(`nodeID`) bytes |
-| `blsPublicKey` | `[48]byte` | 48 bytes |
-| `expiry` | `uint64` | 8 bytes |
-| `remainingBalanceOwner` | `PChainOwner` | 8 + len(`addresses`) * 20 bytes |
-| `disableOwner` | `PChainOwner` | 8 + len(`addresses`) * 20 bytes |
-| `weight` | `uint64` | 8 bytes |
-| | | 122 + len(`nodeID`) + (len(`addresses1`) + len(`addresses2`)) * 20 bytes |
+|                   Field |          Type |                                                                      Size |
+| ----------------------: | ------------: | ------------------------------------------------------------------------: |
+|               `codecID` |      `uint16` |                                                                   2 bytes |
+|                `typeID` |      `uint32` |                                                                   4 bytes |
+|              `subnetID` |    `[32]byte` |                                                                  32 bytes |
+|                `nodeID` |      `[]byte` |                                                   4 + len(`nodeID`) bytes |
+|          `blsPublicKey` |    `[48]byte` |                                                                  48 bytes |
+|                `expiry` |      `uint64` |                                                                   8 bytes |
+| `remainingBalanceOwner` | `PChainOwner` |                                          8 + len(`addresses`) \* 20 bytes |
+|          `disableOwner` | `PChainOwner` |                                          8 + len(`addresses`) \* 20 bytes |
+|                `weight` |      `uint64` |                                                                   8 bytes |
+|                         |               | 122 + len(`nodeID`) + (len(`addresses1`) + len(`addresses2`)) \* 20 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000001` for this payload
@@ -143,13 +142,13 @@ The P-Chain can produce a `SubnetValidatorRegistrationMessage` for consumers to 
 
 The `SubnetValidatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `codecID` | `uint16` | 2 bytes |
-| `typeID` | `uint32` | 4 bytes |
+|          Field |       Type |     Size |
+| -------------: | ---------: | -------: |
+|      `codecID` |   `uint16` |  2 bytes |
+|       `typeID` |   `uint32` |  4 bytes |
 | `validationID` | `[32]byte` | 32 bytes |
-| `registered` | `bool` | 1 byte  | 
-| | | 39 bytes |
+|   `registered` |     `bool` |   1 byte |
+|                |            | 39 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000002` for this message
@@ -162,14 +161,14 @@ The P-Chain can consume a `SubnetValidatorWeightMessage` through a `SetSubnetVal
 
 The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
-| Field | Type | Size |
-| -: | -: | -: |
-| `codecID` | `uint16` | 2 bytes |
-| `typeID` | `uint32` | 4 bytes |
+|          Field |       Type |     Size |
+| -------------: | ---------: | -------: |
+|      `codecID` |   `uint16` |  2 bytes |
+|       `typeID` |   `uint32` |  4 bytes |
 | `validationID` | `[32]byte` | 32 bytes |
-| `nonce` | `uint64` | 8 bytes |
-| `weight` | `uint64` | 8 bytes |
-| | | 54 bytes |
+|        `nonce` |   `uint64` |  8 bytes |
+|       `weight` |   `uint64` |  8 bytes |
+|                |            | 54 bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000003` for this message
@@ -179,13 +178,15 @@ The `SubnetValidatorWeightMessage` is specified as an `AddressedCall` with the f
 
 ### New P-Chain Transaction Types
 
-Both before and after this ACP, to create a Subnet, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`). 
+Both before and after this ACP, to create a Subnet, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`).
 
 To be a Permissionless Subnet:
+
 - This `Owner` key must no longer have the ability to modify the Subnet's validator set
 - New transaction types must support modification of a Subnet's validator set via Warp messages.
 
 The following new transaction types are introduced on the P-Chain to support this functionality.
+
 - `ConvertSubnetTx`
 - `RegisterSubnetValidatorTx`
 - `SetSubnetValidatorWeightTx`
@@ -252,7 +253,7 @@ After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` a
 
 The `validationID` for validators added through `ConvertSubnetTx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
-Once this transaction is accepted, the P-Chain must be willing sign a `SubnetConversionMessage` with a `subnetConversionID` corresponding to `SubnetConversionData` populated with the values from this transaction. 
+Once this transaction is accepted, the P-Chain must be willing sign a `SubnetConversionMessage` with a `subnetConversionID` corresponding to `SubnetConversionData` populated with the values from this transaction.
 
 #### `RegisterSubnetValidatorTx`
 
@@ -291,9 +292,9 @@ An EVM Subnet may choose to implement this step like so:
 
 For a `RegisterSubnetValidatorTx` to be valid, `Signer` must be a valid proof-of-possession of the `blsPublicKey` defined in the `RegisterSubnetValidatorMessage` contained in the transaction.
 
-After a `RegisterSubnetValidatorTx` is accepted, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the Subnet Validator is removed from the validator set using a `SetSubnetValidatorWeightTx`, as described below. 
+After a `RegisterSubnetValidatorTx` is accepted, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the Subnet Validator is removed from the validator set using a `SetSubnetValidatorWeightTx`, as described below.
 
-When it is known that a given `validationID` *is not and never will be* an existing validation period for a Subnet, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterSubnetValidatorTx`, or if the Subnet Validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
+When it is known that a given `validationID` _is not and never will be_ an existing validation period for a Subnet, the P-Chain must be willing to sign a `SubnetValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterSubnetValidatorTx`, or if the Subnet Validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `SubnetValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
 
 #### `SetSubnetValidatorWeightTx`
 
@@ -316,6 +317,7 @@ Applications of this transaction could include:
 - Remove an inactive Subnet Validator
 
 The validation criteria for `SubnetValidatorWeightMessage` is:
+
 - `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update.
 - When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents Subnets from being unable to remove `nodeID` in a subsequent transaction.
 - If `weight == 0`, the Subnet Validator being removed must not be the last one in the set. If all Subnet Validators are removed, there are no valid Warp messages that can be produced to register new Subnet Validators through `RegisterSubnetValidatorMessage`. With no validators, block production will halt and the Subnet is unrecoverable. This validation criteria serves as a guardrail against this situation. A future ACP can remove this guardrail as users get more familiar with the new Subnet mechanics and tooling matures to fork a Subnet.
@@ -403,11 +405,11 @@ class ValidatorQueue:
         self.acc = 0
         self.queue = PriorityQueue()
         self.fee_getter = fee_getter
-    
-    # At each time period, increment the accumulator and 
-    # pop all validators from the top of the queue that 
+
+    # At each time period, increment the accumulator and
+    # pop all validators from the top of the queue that
     # ran out of funds.
-    
+
     # Note: The amount of work done in a single block
     # should be bounded to prevent a large number of
     # validator operations from happening at the same
@@ -505,12 +507,12 @@ def cost_over_time(V:int, T:int, x:int, Δt: int) -> int:
 
 The parameters at activation are:
 
-| Parameter | Value |
-| - | - |
-| $T$ | `TODO` Subnet Validators |
-| $C$ | `TODO` Subnet Validators |
-| $M$ | `TODO` nAVAX/s (`TODO` AVAX/day) |
-| $K$ | `TODO` |
+| Parameter | Definition                                    | Value         |
+| --------- | --------------------------------------------- | ------------- |
+| $T$       | target number of validators                   | 10_000        |
+| $C$       | capacity number of validators                 | 20_000        |
+| $M$       | minimum fee rate                              | 512 nAVAX/s   |
+| $K$       | constant to control the rate of change of $M$ | 1_246_488_515 |
 
 A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modify $K$.
 
@@ -531,6 +533,7 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
 ### Deactivated Transactions
 
 - P-Chain
+
   - `TransformSubnetTx`
 
     After this ACP is activated, Elastic Subnets will be disabled. `TransformSubnetTx` will not be accepted post-activation. As there are no Mainnet Elastic Subnets, there should be no production impact with this deactivation.
