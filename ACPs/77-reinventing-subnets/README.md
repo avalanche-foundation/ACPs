@@ -81,7 +81,7 @@ The following serialization is defined as the `ConversionData`:
 | `managerChainID` |        `[32]byte` |                                                   32 bytes |
 | `managerAddress` |          `[]byte` |                            4 + len(`managerAddress`) bytes |
 |     `validators` | `[]ValidatorData` |                          4 + sum(`validatorLengths`) bytes |
-|                  |                   | 74 + len(`managerAddress`) + len(`validatorLengths`) bytes |
+|                  |                   | 74 + len(`managerAddress`) + sum(`validatorLengths`) bytes |
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
