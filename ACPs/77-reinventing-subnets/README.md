@@ -310,7 +310,7 @@ When it is known that a given `validationID` _is not and never will be_ register
 type SetL1ValidatorWeightTx struct {
     // Metadata, inputs and outputs
     BaseTx
-    // A L1ValidatorWeightMessage payload
+    // An L1ValidatorWeightMessage payload
     Message warp.Message `json:"message"`
 }
 ```
