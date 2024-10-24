@@ -567,7 +567,7 @@ With a long window of expiry (48 hours) for the Warp message in `RegisterL1Valid
 
 NodeIDs can be added to an L1's validator set involuntarily. However, it is important to note that any stake/rewards are _not_ at risk. For a node operator who was added to a validator set involuntarily, they would only need to generate a new NodeID via key rotation as there is no lock-up of any stake to create a NodeID. This is an explicit tradeoff for easier on-boarding of NodeIDs. This mirrors the Primary Network validators guarantee of no stake/rewards at risk.
 
-The continuous fee mechanism outlined above does not apply to inactive L1 validators since they are not stored in memory. However, inactive L1 validators are persisted on disk which can lead to persistent P-Chain state growth. The initial balance requirement (the greater of 5 $AVAX or two weeks of the current fee) should be a sufficient deterrent as it must be fully burned for the validator to become inactive. A future ACP can increase the initial balance to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
+The continuous fee mechanism outlined above does not apply to inactive L1 validators since they are not stored in memory. However, inactive L1 validators are persisted on disk which can lead to persistent P-Chain state growth. A future ACP can introduce a mechanism to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
 
 ## Open Questions
 
