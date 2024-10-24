@@ -38,20 +38,20 @@ Though Subnets have always managed their own consensus mechanisms, transaction p
 
 ## Specification
 
-At a high-level, L1s can manage their validator sets externally to the P-Chain by setting the blockchain ID and address of their _validator manager_. The P-Chain will consume Warp messages that modify the L1's validator set. To confirm modification of the L1's validator set, the P-Chain will also produce Warp messages. L1 validators will no longer be required to validate the Primary Network, removing the 2000 $AVAX stake requirement imposed on Subnet validators. In place of the stake requirement, a continuous fee denominated in $AVAX is introduced to maintain an active Subnet validator. Subnet validators are only required to sync the P-Chain (not X/C-Chain) in order to track validator set changes and support cross-Subnet communication.
+At a high-level, L1s can manage their validator sets externally to the P-Chain by setting the blockchain ID and address of their _validator manager_. The P-Chain will consume Warp messages that modify the L1's validator set. To confirm modification of the L1's validator set, the P-Chain will also produce Warp messages. L1 validators will no longer be required to validate the Primary Network, removing the 2000 $AVAX stake requirement previously imposed on Subnet validators. In place of the stake requirement, a continuous fee denominated in $AVAX is introduced to maintain an active L1 validator. L1 validators are only required to sync the P-Chain (not X/C-Chain) in order to track validator set changes and support cross-L1 communication.
 
 ### P-Chain Warp Message Payloads
 
-To enable management of a Subnet's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-Subnet basis.
+To enable management of a L1's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-L1 basis.
 
-For messages produced by the P-Chain for a given Subnet, only that Subnet's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all validators will still sync the P-Chain.
+For messages produced by the P-Chain for a given L1, only that L1's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all validators will still sync the P-Chain.
 
 The following Warp message payloads are introduced on the P-Chain:
 
 - `SubnetToL1ConversionMessage`
 - `RegisterL1validatorMessage`
-- `L1validatorRegistrationMessage`
-- `L1validatorWeightMessage`
+- `L1ValidatorRegistrationMessage`
+- `L1ValidatorWeightMessage`
 
 The method of requesting signatures for these messages is left unspecified. A viable option for supporting this functionality is laid out in [ACP-118](../118-warp-signature-request/README.md) with the `SignatureRequest` message.
 
@@ -142,11 +142,11 @@ The `RegisterL1validatorMessage` is specified as an `AddressedCall` with a paylo
 - `remainingBalanceOwner` is the P-Chain owner where leftover $AVAX from the validator's Balance will be issued to when this validator it is removed from the validator set.
 - `disableOwner` is the only P-Chain owner allowed to disable the validator using `DisableL1validatorTx`, specified below.
 
-#### `L1validatorRegistrationMessage`
+#### `L1ValidatorRegistrationMessage`
 
-The P-Chain can produce a `L1validatorRegistrationMessage` for consumers to verify that a validation period has either begun or has been invalidated.
+The P-Chain can produce a `L1ValidatorRegistrationMessage` for consumers to verify that a validation period has either begun or has been invalidated.
 
-The `L1validatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
+The `L1ValidatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
 |          Field |       Type |     Size |
 | -------------: | ---------: | -------: |
@@ -161,11 +161,11 @@ The `L1validatorRegistrationMessage` is specified as an `AddressedCall` with `so
 - `validationID` identifies the validator for the message
 - `registered` is a boolean representing the status of the `validationID`. If true, the `validationID` corresponds to a validator in the current validator set. If false, the `validationID` does not correspond to a validator in the current validator set, and never will in the future.
 
-#### `L1validatorWeightMessage`
+#### `L1ValidatorWeightMessage`
 
-The P-Chain can consume a `L1validatorWeightMessage` through a `SetL1validatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `L1validatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
+The P-Chain can consume a `L1ValidatorWeightMessage` through a `SetL1validatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `L1ValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
 
-The `L1validatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
+The `L1ValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
 |          Field |       Type |     Size |
 | -------------: | ---------: | -------: |
@@ -298,9 +298,9 @@ An EVM Subnet may choose to implement this step like so:
 
 For a `RegisterL1validatorTx` to be valid, `Signer` must be a valid proof-of-possession of the `blsPublicKey` defined in the `RegisterL1validatorMessage` contained in the transaction.
 
-After a `RegisterL1validatorTx` is accepted, the P-Chain must be willing to sign a `L1validatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the validator is removed from the validator set using a `SetL1validatorWeightTx`, as described below.
+After a `RegisterL1validatorTx` is accepted, the P-Chain must be willing to sign a `L1ValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the validator is removed from the validator set using a `SetL1validatorWeightTx`, as described below.
 
-When it is known that a given `validationID` _is not and never will be_ registered, the P-Chain must be willing to sign a `L1validatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterL1validatorTx`, or if the validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `L1validatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
+When it is known that a given `validationID` _is not and never will be_ registered, the P-Chain must be willing to sign a `L1ValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterL1validatorTx`, or if the validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `L1ValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
 
 #### `SetL1validatorWeightTx`
 
@@ -310,7 +310,7 @@ When it is known that a given `validationID` _is not and never will be_ register
 type SetL1validatorWeightTx struct {
     // Metadata, inputs and outputs
     BaseTx
-    // A L1validatorWeightMessage payload
+    // A L1ValidatorWeightMessage payload
     Message warp.Message `json:"message"`
 }
 ```
@@ -322,7 +322,7 @@ Applications of this transaction could include:
 - Decrease the voting weight of a misbehaving validator
 - Remove an inactive validator
 
-The validation criteria for `L1validatorWeightMessage` is:
+The validation criteria for `L1ValidatorWeightMessage` is:
 
 - `nonce >= minNonce`. Note that `nonce` is not required to be incremented by `1` with each successive validator weight update.
 - When `minNonce == MaxUint64`, `nonce` must be `MaxUint64` and `weight` must be `0`. This prevents L1s from being unable to remove `nodeID` in a subsequent transaction.
