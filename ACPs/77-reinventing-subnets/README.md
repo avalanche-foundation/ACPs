@@ -275,7 +275,7 @@ type RegisterL1ValidatorTx struct {
     // below in `Message` for this validator.
     // Note: We do not enforce that the BLS key is unique across all validators.
     //       This means that validators can share a key if they so choose.
-    //       However, a NodeID does uniquely map to a BLS key
+    //       However, a NodeID + L1 does uniquely map to a BLS key
     Signer [96]byte `json:"signer"`
     // A RegisterL1ValidatorMessage payload
     Message warp.Message `json:"message"`
