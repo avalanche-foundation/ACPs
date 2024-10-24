@@ -85,9 +85,9 @@ The following serialization is defined as the `ConversionData`:
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
-- `subnetID` identifies the Subnet that is being converted (described further below).
-- `managerChainID` and `managerAddress` identify the validator manager for the given Subnet. This is the (blockchain ID, adress) tuple allowed to send Warp messages to modify the Subnet's validator set.
-- `validators` are the initial pay-as-you-go validators for the given Subnet.
+- `subnetID` identifies the Subnet that is being converted to an L1 (described further below).
+- `managerChainID` and `managerAddress` identify the validator manager for the L1 being converted. This is the (blockchain ID, address) tuple allowed to send Warp messages to modify the L1's validator set.
+- `validators` are the initial dynamic-fee-paying validators for the given L1.
 
 The `SubnetToL1ConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
@@ -104,7 +104,7 @@ The `SubnetToL1ConversionMessage` is specified as an `AddressedCall` with `sourc
 
 #### `RegisterL1ValidatorMessage`
 
-The P-Chain can consume a `RegisterL1ValidatorMessage` from validator managers through a `RegisterL1ValidatorTx` to register an addition to the Subnet's validator set.
+The P-Chain can consume a `RegisterL1ValidatorMessage` from validator managers through a `RegisterL1ValidatorTx` to register an addition to the L1's validator set.
 
 The following is the serialization of a `PChainOwner`:
 
@@ -184,12 +184,12 @@ The `L1ValidatorWeightMessage` is specified as an `AddressedCall` with the follo
 
 ### New P-Chain Transaction Types
 
-Both before and after this ACP, to create a Subnet, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetvalidatorTx`) or removals (`RemoveSubnetvalidatorTx`).
+Both before and after this ACP, to create a Subnet or an L1, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`).
 
-To be a Permissionless Subnet:
+To be considered permissionless:
 
-- This `Owner` key must no longer have the ability to modify the Subnet's validator set
-- New transaction types must support modification of a Subnet's validator set via Warp messages.
+- This `Owner` key must no longer have the ability to modify the validator set.
+- New transaction types must support modification of an L1's validator set via Warp messages.
 
 The following new transaction types are introduced on the P-Chain to support this functionality.
 
@@ -218,7 +218,7 @@ type PChainOwner struct {
     Addresses []ids.ShortID `json:"addresses"`
 }
 
-type L1validator struct {
+type L1Validator struct {
     // NodeID of this validator
     NodeID []byte `json:"nodeID"`
     // Weight of this validator used when sampling
@@ -228,7 +228,7 @@ type L1validator struct {
     // [Signer] is the BLS public key and proof-of-possession for this validator.
     // Note: We do not enforce that the BLS key is unique across all validators.
     //       This means that validators can share a key if they so choose.
-    //       However, a NodeID + Subnet does uniquely map to a BLS key
+    //       However, a NodeID + L1 does uniquely map to a BLS key
     Signer signer.ProofOfPossession `json:"signer"`
     // Leftover $AVAX from the [Balance] will be issued to this
     // owner once it is removed from the validator set.
@@ -244,18 +244,18 @@ type ConvertSubnetToL1Tx struct {
     // Restrictions:
     // - Must not be the Primary Network ID
     Subnet ids.ID `json:"subnetID"`
-    // BlockchainID where the Subnet manager lives
+    // BlockchainID where the validator manager lives
     ChainID ids.ID `json:"chainID"`
-    // Address of the Subnet manager
+    // Address of the validator manager
     Address []byte `json:"address"`
-    // Initial pay-as-you-go validators for the Subnet
-    validators []L1validator `json:"validators"`
+    // Initial set of validators for the L1
+    validators []L1Validator `json:"validators"`
     // Authorizes this conversion
     SubnetAuth verify.Verifiable `json:"subnetAuthorization"`
 }
 ```
 
-After this transaction is accepted, `CreateChainTx` and `AddSubnetvalidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing Subnet validators that were added using `AddSubnetvalidatorTx` previously via `RemoveSubnetvalidatorTx`. Unless removed by the `Owner` key, any Subnet validators added previously with an `AddSubnetvalidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet validators added with `AddSubnetvalidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` must be used to manage the Subnet's validator set going forward.
+After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing Subnet validators with `RemoveSubnetValidatorTx` that had been previously added using `AddSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` must be used to manage the L1's validator set going forward.
 
 The `validationID` for validators added through `ConvertSubnetToL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `validators` array within the transaction).
 
