@@ -512,7 +512,7 @@ The parameters at activation are:
 | $T$       | target number of validators                   | 10_000        |
 | $C$       | capacity number of validators                 | 20_000        |
 | $M$       | minimum fee rate                              | 512 nAVAX/s   |
-| $K$       | constant to control the rate of change of $M$ | 1_246_488_515 |
+| $K$       | constant to control the rate of fee changes | 1_246_488_515 |
 
 A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modify $K$.
 
