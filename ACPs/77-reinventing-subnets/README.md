@@ -290,7 +290,7 @@ This `validationID` will be used for replay protection. Used `validationID`s wil
 
 L1s are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
-A Subnet-EVM based L1 may choose to implement this step like so:
+A EVM-compatible L1 may choose to implement this step like so:
 
 - Use the number of tokens the user has staked into a smart contract on the L1 to determine the weight of their validator
 - Require the user to submit an on-chain transaction with their validator information
