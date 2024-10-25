@@ -384,7 +384,7 @@ To bootstrap a node/validator, a few critical questions must be answered: How do
 
 For standalone networks like the Avalanche Primary Network, this is done by connecting to a hardcoded [set](https://github.com/ava-labs/avalanchego/blob/master/genesis/bootstrappers.json) of trusted bootstrappers to then discover new peers. Ethereum calls their set [bootnodes](https://ethereum.org/developers/docs/nodes-and-clients/bootnodes).
 
-By separating L1 validators from Primary Network validators, a list of validator IPs to connect to (the functional bootstrappers of the L1) is no longer provided by simply connecting to the Primary Network validators. However, the Primary Network can enable nodes tracking an L1 to seamlessly connect to the validators by tracking and gossiping validator IPs. L1s will not need to operate and maintain a set of bootstrappers and can continue to rely on the Primary Network for peer discovery.
+Since L1 validators are not required to be Primary Network validators, a list of validator IPs to connect to (the functional bootstrappers of the L1) cannot be provided by simply connecting to the Primary Network validators. However, the Primary Network can enable nodes tracking an L1 to seamlessly connect to the validators by tracking and gossiping L1 validator IPs. L1s will not need to operate and maintain a set of bootstrappers and can rely on the Primary Network for peer discovery.
 
 ### Sidebar: L1 Sovereignty
 
