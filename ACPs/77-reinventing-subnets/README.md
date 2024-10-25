@@ -559,7 +559,7 @@ A full reference implementation has not been provided yet. It will be provided o
 
 ## Security Considerations
 
-This ACP significantly reduces the cost of becoming an L1 validator. This can lead to a large increase in the number of L1 validators going forward. Each additional validator adds consistent RAM usage to the P-Chain. However, this should be appropriately metered by the continuous fee mechanism outlined above.
+This ACP introduces Avalanche Layer 1s, a new network type that costs significantly less than Avalanche Subnets. This can lead to a large increase in the number of networks and, by extension, the number of validators. Each additional validator adds consistent RAM usage to the P-Chain. However, this should be appropriately metered by the continuous fee mechanism outlined above.
 
 With the additional sovereignty L1s gain from the P-Chain, staking tokens are no longer locked on the P-Chain. This poses a new security consideration for L1 validators: Malicious chains can choose to remove validators at will and take any funds that the validator has on the L1. The P-Chain only provides the guarantee that L1 validators can retrieve the remaining $AVAX Balance for their validator via a `DisableL1ValidatorTx`. Any assets on the L1 is entirely under the purview of the L1. The onus is now on L1 validators to vet the L1's security.
 
