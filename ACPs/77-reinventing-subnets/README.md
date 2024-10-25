@@ -87,7 +87,7 @@ The following serialization is defined as the `ConversionData`:
 - `sum(validatorLengths)` is the sum of the lengths of `ValidatorData` serializations included in `validators`.
 - `subnetID` identifies the Subnet that is being converted to an L1 (described further below).
 - `managerChainID` and `managerAddress` identify the validator manager for the newly created L1. This is the (blockchain ID, address) tuple allowed to send Warp messages to modify the L1's validator set.
-- `validators` are the initial dynamic-fee-paying validators for the given L1.
+- `validators` are the initial continuous-fee-paying validators for the given L1.
 
 The `SubnetToL1ConversionMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
