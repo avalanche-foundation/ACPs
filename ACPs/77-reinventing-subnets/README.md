@@ -201,7 +201,7 @@ The following new transaction types are introduced on the P-Chain to support thi
 
 #### `ConvertSubnetToL1Tx`
 
-To convert a Subnet into an L1, a `ConvertSubnetToL1Tx` must be issued to set the `(chainID, address)` pair that will manage the L1's validator set going forward. The `Owner` key defined in `CreateSubnetTx` must provide a signature to authorize this conversion.
+To convert a Subnet into an L1, a `ConvertSubnetToL1Tx` must be issued to set the `(chainID, address)` pair that will manage the L1's validator set. The `Owner` key defined in `CreateSubnetTx` must provide a signature to authorize this conversion.
 
 The `ConvertSubnetToL1Tx` specification is:
 
