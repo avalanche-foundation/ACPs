@@ -189,7 +189,7 @@ Both before and after this ACP, to create a Subnet or an L1, a `CreateSubnetTx` 
 To be considered a permissionless network, or Avalanche Layer 1:
 
 - This `Owner` key must no longer have the ability to modify the validator set.
-- New transaction types must support modification of an L1's validator set via Warp messages.
+- New transaction types must support modification of the validator set via Warp messages.
 
 The following new transaction types are introduced on the P-Chain to support this functionality:
 
@@ -249,21 +249,21 @@ type ConvertSubnetToL1Tx struct {
     // Address of the validator manager
     Address []byte `json:"address"`
     // Initial set of validators for the L1
-    validators []L1Validator `json:"validators"`
+    Validators []L1Validator `json:"validators"`
     // Authorizes this conversion
     SubnetAuth verify.Verifiable `json:"subnetAuthorization"`
 }
 ```
 
-After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing Subnet validators with `RemoveSubnetValidatorTx` that had been previously added using `AddSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` must be used to manage the L1's validator set going forward.
+After this transaction is accepted, `CreateChainTx` and `AddSubnetValidatorTx` are disabled on the Subnet. The only action that the `Owner` key is able to take is removing Subnet validators with `RemoveSubnetValidatorTx` that had been added using `AddSubnetValidatorTx`. Unless removed by the `Owner` key, any Subnet validators added previously with an `AddSubnetValidatorTx` will continue to validate the Subnet until their [`End`](https://github.com/ava-labs/avalanchego/blob/a1721541754f8ee23502b456af86fea8c766352a/vms/platformvm/txs/validator.go#L27) time is reached. Once all Subnet validators added with `AddSubnetValidatorTx` are no longer in the validator set, the `Owner` key is powerless. `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` must be used to manage the L1's validator set.
 
-The `validationID` for validators added through `ConvertSubnetToL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `validators` array within the transaction).
+The `validationID` for validators added through `ConvertSubnetToL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
 
 Once this transaction is accepted, the P-Chain must be willing sign a `SubnetToL1ConversionMessage` with a `conversionID` corresponding to `ConversionData` populated with the values from this transaction.
 
 #### `RegisterL1ValidatorTx`
 
-After a `ConvertSubnetToL1Tx` has been accepted, new validators must be added by using a `RegisterL1ValidatorTx`. The specification of this transaction is:
+After a `ConvertSubnetToL1Tx` has been accepted, new validators can only be added by using a `RegisterL1ValidatorTx`. The specification of this transaction is:
 
 ```golang
 type RegisterL1ValidatorTx struct {
@@ -429,19 +429,19 @@ class ValidatorQueue:
                 continue
             return
 
-    # validator was added
+    # Validator was added
     def validator_enter(self, vdr):
         vdr.balance = vdr.balance + self.acc
         self.queue.add(vdr)
 
-    # validator was removed
+    # Validator was removed
     def validator_remove(self, vdrNodeID):
         vdr = find_and_remove(self.queue, vdrNodeID)
         vdr.balance = vdr.balance - self.acc
         vdr.refund() # Refund [vdr.balance] to [RemainingBalanceOwner]
         self.queue.remove()
 
-    # validator's balance was topped up
+    # Validator's balance was topped up
     def validator_increase(self, vdrNodeID, balance):
         vdr = find_and_remove(self.queue, vdrNodeID)
         vdr.balance = vdr.balance + balance
@@ -568,8 +568,6 @@ With a long window of expiry (48 hours) for the Warp message in `RegisterL1Valid
 NodeIDs can be added to an L1's validator set involuntarily. However, it is important to note that any stake/rewards are _not_ at risk. For a node operator who was added to a validator set involuntarily, they would only need to generate a new NodeID via key rotation as there is no lock-up of any stake to create a NodeID. This is an explicit tradeoff for easier on-boarding of NodeIDs. This mirrors the Primary Network validators guarantee of no stake/rewards at risk.
 
 The continuous fee mechanism outlined above does not apply to inactive L1 validators since they are not stored in memory. However, inactive L1 validators are persisted on disk which can lead to persistent P-Chain state growth. A future ACP can introduce a mechanism to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
-
-## Open Questions
 
 There are currently no open questions.
 
