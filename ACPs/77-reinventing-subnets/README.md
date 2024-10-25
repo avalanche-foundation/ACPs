@@ -137,7 +137,7 @@ The `RegisterL1ValidatorMessage` is specified as an `AddressedCall` with a paylo
 
 - `codecID` is the codec version used to serialize the payload, and is hardcoded to `0x0000`
 - `typeID` is the payload type identifier and is `0x00000001` for this payload
-- `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the validators being added
+- `subnetID`, `nodeID`, `weight`, and `blsPublicKey` are for the validator being added
 - `expiry` is the time at which this message becomes invalid. As of a P-Chain timestamp `>= expiry`, this Avalanche Warp Message can no longer be used to add the `nodeID` to the validator set of `subnetID`
 - `remainingBalanceOwner` is the P-Chain owner where leftover $AVAX from the validator's Balance will be issued to when this validator it is removed from the validator set.
 - `disableOwner` is the only P-Chain owner allowed to disable the validator using `DisableL1ValidatorTx`, specified below.
