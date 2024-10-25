@@ -569,7 +569,6 @@ NodeIDs can be added to an L1's validator set involuntarily. However, it is impo
 
 The continuous fee mechanism outlined above does not apply to inactive L1 validators since they are not stored in memory. However, inactive L1 validators are persisted on disk which can lead to persistent P-Chain state growth. A future ACP can introduce a mechanism to decrease the rate of P-Chain state growth or provide a state expiry path to reduce the amount of P-Chain state.
 
-There are currently no open questions.
 
 ## Acknowledgements
 
