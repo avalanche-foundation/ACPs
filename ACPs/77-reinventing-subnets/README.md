@@ -38,7 +38,7 @@ All networks created through the old network creation flow will continue to be r
 
 ## Specification
 
-At a high-level, L1s can manage their validator sets externally to the P-Chain by setting the blockchain ID and address of their _validator manager_. The P-Chain will consume Warp messages that modify the L1's validator set. To confirm modification of the L1's validator set, the P-Chain will also produce Warp messages. L1 validators will no longer be required to validate the Primary Network, removing the 2000 $AVAX stake requirement previously imposed on Subnet validators. In place of the stake requirement, a continuous fee denominated in $AVAX is introduced to maintain an active L1 validator. L1 validators are only required to sync the P-Chain (not X/C-Chain) in order to track validator set changes and support cross-L1 communication.
+At a high-level, L1s can manage their validator sets externally to the P-Chain by setting the blockchain ID and address of their _validator manager_. The P-Chain will consume Warp messages that modify the L1's validator set. To confirm modification of the L1's validator set, the P-Chain will also produce Warp messages. L1 validators are not required to validate the Primary Network, and do not have the same 2000 $AVAX stake requirement that Subnet validators have. To maintain an active L1 validator, a continuous fee denominated in $AVAX is assessed. L1 validators are only required to sync the P-Chain (not X/C-Chain) in order to track validator set changes and support cross-L1 communication.
 
 ### P-Chain Warp Message Payloads
 
