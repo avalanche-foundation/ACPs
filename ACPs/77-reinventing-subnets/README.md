@@ -144,7 +144,7 @@ The `RegisterL1ValidatorMessage` is specified as an `AddressedCall` with a paylo
 
 #### `L1ValidatorRegistrationMessage`
 
-The P-Chain can produce a `L1ValidatorRegistrationMessage` for consumers to verify that a validation period has either begun or has been invalidated.
+The P-Chain can produce an `L1ValidatorRegistrationMessage` for consumers to verify that a validation period has either begun or has been invalidated.
 
 The `L1ValidatorRegistrationMessage` is specified as an `AddressedCall` with `sourceChainID` set to the P-Chain ID, the `sourceAddress` set to an empty byte array, and a payload of:
 
@@ -163,7 +163,7 @@ The `L1ValidatorRegistrationMessage` is specified as an `AddressedCall` with `so
 
 #### `L1ValidatorWeightMessage`
 
-The P-Chain can consume a `L1ValidatorWeightMessage` through a `SetL1ValidatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce a `L1ValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
+The P-Chain can consume an `L1ValidatorWeightMessage` through a `SetL1ValidatorWeightTx` to update the weight of an existing validator. The P-Chain can also produce an `L1ValidatorWeightMessage` for consumers to verify that the validator weight update has been effectuated.
 
 The `L1ValidatorWeightMessage` is specified as an `AddressedCall` with the following payload. When sent from the P-Chain, the `sourceChainID` is set to the P-Chain ID, and the `sourceAddress` is set to an empty byte array.
 
@@ -290,7 +290,7 @@ This `validationID` will be used for replay protection. Used `validationID`s wil
 
 L1s are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
-A EVM-compatible L1 may choose to implement this step like so:
+An EVM-compatible L1 may choose to implement this step like so:
 
 - Use the number of tokens the user has staked into a smart contract on the L1 to determine the weight of their validator
 - Require the user to submit an on-chain transaction with their validator information
@@ -298,9 +298,9 @@ A EVM-compatible L1 may choose to implement this step like so:
 
 For a `RegisterL1ValidatorTx` to be valid, `Signer` must be a valid proof-of-possession of the `blsPublicKey` defined in the `RegisterL1ValidatorMessage` contained in the transaction.
 
-After a `RegisterL1ValidatorTx` is accepted, the P-Chain must be willing to sign a `L1ValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the validator is removed from the validator set using a `SetL1ValidatorWeightTx`, as described below.
+After a `RegisterL1ValidatorTx` is accepted, the P-Chain must be willing to sign an `L1ValidatorRegistrationMessage` for the given `validationID` with `registered` set to `true`. This remains the case until the time at which the validator is removed from the validator set using a `SetL1ValidatorWeightTx`, as described below.
 
-When it is known that a given `validationID` _is not and never will be_ registered, the P-Chain must be willing to sign a `L1ValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterL1ValidatorTx`, or if the validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `L1ValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
+When it is known that a given `validationID` _is not and never will be_ registered, the P-Chain must be willing to sign an `L1ValidatorRegistrationMessage` for the `validationID` with `registered` set to `false`. This could be the case if the `expiry` time of the message has passed prior to the message being delivered in a `RegisterL1ValidatorTx`, or if the validator was successfully registered and then later removed. This enables the P-Chain to prove to validator managers that a validator has been removed or never added. The P-Chain must refuse to sign any `L1ValidatorRegistrationMessage` where the `validationID` does not correspond to an active validator and the `expiry` is in the future.
 
 #### `SetL1ValidatorWeightTx`
 
