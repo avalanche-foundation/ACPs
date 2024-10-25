@@ -524,7 +524,7 @@ A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modif
 
 #### User Experience
 
-Instead of a fixed up-front cost of 2000 $AVAX, L1 validators are now continuously charged a fee, albeit a small one. This poses a new challenge for L1 validators: How do they maintain the balance?
+L1 validators are continuously charged a fee, albeit a small one. This poses a challenge for L1 validators: How do they maintain the balance over time?
 
 Node clients should expose an API to track how much balance is remaining in the validator's account. This will provide a way for L1 validators to track how quickly it is going down and top-up when needed. A nice byproduct of the above design is the balance in the validator's account is claimable. This means users can top-up as much $AVAX as they want and rest-assured knowing they can always retrieve it if there is an excessive amount.
 
