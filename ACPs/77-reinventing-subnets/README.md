@@ -191,7 +191,7 @@ To be considered a permissionless network, or Avalanche Layer 1:
 - This `Owner` key must no longer have the ability to modify the validator set.
 - New transaction types must support modification of an L1's validator set via Warp messages.
 
-The following new transaction types are introduced on the P-Chain to support this functionality.
+The following new transaction types are introduced on the P-Chain to support this functionality:
 
 - `ConvertSubnetToL1Tx`
 - `RegisterL1ValidatorTx`
