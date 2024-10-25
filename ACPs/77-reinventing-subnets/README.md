@@ -184,7 +184,7 @@ The `L1ValidatorWeightMessage` is specified as an `AddressedCall` with the follo
 
 ### New P-Chain Transaction Types
 
-Both before and after this ACP, to create a Subnet or an L1, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`).
+Both before and after this ACP, to create a Subnet, a `CreateSubnetTx` must be issued on the P-Chain. This transaction includes an `Owner` field which defines the key that today can be used to authorize any validator set additions (`AddSubnetValidatorTx`) or removals (`RemoveSubnetValidatorTx`).
 
 To be considered a permissionless network, or Avalanche Layer 1:
 
