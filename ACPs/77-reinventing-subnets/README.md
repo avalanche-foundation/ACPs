@@ -406,7 +406,7 @@ Since each L1 validator is charged the same amount at each point in time, tracki
 
 ```python
 # Pseudocode
-class validatorQueue:
+class ValidatorQueue:
     def __init__(self, fee_getter):
         self.acc = 0
         self.queue = PriorityQueue()
