@@ -32,9 +32,9 @@ With no Elastic Subnets live on Mainnet, it is clear that Permissionless Subnets
 
 ### A Note on Nomenclature
 
-Going forward, newly created networks should be referred to as L1s, or Avalanche Layer 1s. L1 validator sets created using the flow introduced in this ACP will **not** be a subset of the Primary Network validator set, making Subnets a technical misnomer. Any network created with the pre-existing flow will still be considered a Subnet, as these types of validators must stake and validate the Avalanche Primary Network.
+Avalanche Subnets are subnetworks validated by a subset of the Primary Network validator set. The new network creation flow outlined in this ACP does not require any intersection between the new network's validator set and the Primary Network's validator set. Moreover, the new networks have greater functionality and sovereignty than Subnets. To distinguish between these two kinds of networks, the community has been referring to these new networks as _Avalanche Layer 1s_, or L1s for short.
 
-Though Subnets have always managed their own consensus mechanisms, transaction processing, and security protocols directly within their own networks, the added functionality introduced in this ACP will solidify their status as standalone networks, or layer 1 blockchains.
+All networks created through the old network creation flow will continue to be referred to as Avalanche Subnets.
 
 ## Specification
 
