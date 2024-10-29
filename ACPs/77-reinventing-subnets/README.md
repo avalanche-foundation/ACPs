@@ -521,7 +521,7 @@ The parameters at activation are:
 | $K$       | constant to control the rate of fee changes | 1_246_488_515 |
 
 The minimum fee rate $M$ of 512 nAVAX/s equates to approximately 1.33 AVAX paid per month to run an L1 validator, so long as the total number of dynamic-fee-paying L1 validators stays at or below the target $T$.
-$K$ was chosen to allow the fee rate to double at a maximum of once every 24 hours. This is in the extreme case that the network has $C$ number of validators for prolonged periods of time; if the network has $T$+1 number of validators for example, the fee rate would increase very, very slowly.
+$K$ was chosen to allow the fee rate to double at a maximum of once every 24 hours. This is in the extreme case that the network has $C$ validators for prolonged periods of time; if the network has $T$+1 validators for example, the fee rate would double every ~27 years.
 
 A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modify $K$.
 
