@@ -513,12 +513,16 @@ def cost_over_time(V:int, T:int, x:int, Δt: int) -> int:
 
 The parameters at activation are:
 
-| Parameter | Value                            |
-| --------- | -------------------------------- |
-| $T$       | `TODO` L1 validators             |
-| $C$       | `TODO` L1 validators             |
-| $M$       | `TODO` nAVAX/s (`TODO` AVAX/day) |
-| $K$       | `TODO`                           |
+| Parameter | Definition                                  | Value         |
+| --------- | ------------------------------------------- | ------------- |
+| $T$       | target number of validators                 | 10_000        |
+| $C$       | capacity number of validators               | 20_000        |
+| $M$       | minimum fee rate                            | 512 nAVAX/s   |
+| $K$       | constant to control the rate of fee changes | 1_246_488_515 |
+
+An $M$ of 512 nAVAX/s equates to ~1.33 AVAX/month to run an L1 validator, so long as the total number of continuous-fee-paying L1 validators stays at or below $T$.
+
+$K$ was chosen to set the maximum fee doubling rate to ~24 hours. This is in the extreme case that the network has $C$ validators for prolonged periods of time; if the network has $T$+1 validators for example, the fee rate would double every ~27 years.
 
 A future ACP can adjust the parameters to increase $T$, reduce $M$, and/or modify $K$.
 
