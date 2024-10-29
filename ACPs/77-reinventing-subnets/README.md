@@ -248,7 +248,7 @@ type ConvertSubnetToL1Tx struct {
     ChainID ids.ID `json:"chainID"`
     // Address of the validator manager
     Address []byte `json:"address"`
-    // Initial set of validators for the L1
+    // Initial continuous-fee-paying validators for the L1
     Validators []L1Validator `json:"validators"`
     // Authorizes this conversion
     SubnetAuth verify.Verifiable `json:"subnetAuthorization"`
