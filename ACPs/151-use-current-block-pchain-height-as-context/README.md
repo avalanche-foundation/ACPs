@@ -1,9 +1,9 @@
-| ACP           | 151                                                                |
-| :------------ | :----------------------------------------------------------------- |
-| **Title**     | Use current block P-Chain height as context for state verification |
-| **Author(s)** | Ian Suvak ([@iansuvak](https://github.com/iansuvak))               |
-| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/152)) |
-| **Track**     | Standards                                                          |
+| ACP           | 151                                                                                        |
+| :------------ | :----------------------------------------------------------------------------------------- |
+| **Title**     | Use current block P-Chain height as context for state verification                         |
+| **Author(s)** | Ian Suvak ([@iansuvak](https://github.com/iansuvak))                                       |
+| **Status**    | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/152)) |
+| **Track**     | Standards                                                                                  |
 
 ## Abstract
 
@@ -27,11 +27,15 @@ This change requires an upgrade to make sure that all validators verifying the v
 
 ## Reference Implementation
 
-A full reference implementation has not been provided yet. It must be provided prior to this ACP being considered "Implementable". 
+An implementation of this ACP for avalanchego can be found [here](https://github.com/ava-labs/avalanchego/pull/3459)
 
 ## Security Considerations
 
 ProposerVM needs to use the parent block's P-Chain height to verify proposers for security reasons but we don't have such restrictions for verifying ICM message validity in the current block being built. Therefore, this should be a safe change.
+
+## Acknowledgments
+
+Thanks to [@StephenButtolph](https://github.com/StephenButtolph) and [@michaelkaplan13](https://github.com/michaelkaplan13) for discussion and feedback on this ACP.
 
 ## Copyright
 
