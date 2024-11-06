@@ -2,8 +2,9 @@
 | :--- | :--- |
 | **Title** | Dynamic multidimensional fees for P-chain and X-chain |
 | **Author(s)** | Alberto Benegiamo ([@abi87](https://github.com/abi87)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/89)) |
+| **Status** | Stale |
 | **Track** | Standards |
+| **Superseded-By** | [ACP-103](../103-dynamic-fees/README.md) |
 
 ## Abstract
 
