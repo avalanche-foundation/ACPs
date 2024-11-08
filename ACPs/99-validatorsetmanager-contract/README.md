@@ -376,17 +376,21 @@ The audit process of the `ACP99Manager` contract is of the utmost importance for
 ### Is there an interest to keep historical information about the validator set on the manager chain?
 
 The functions `getValidation` and `getValidatorValidations` would allow to retrieve historical information about the validator set directly from state, notably each validator's performance (uptime) during past validations.
-If we don't keep track of the historical information in the `Manager` contract, this information will still be available in archive nodes and offchain tools (e.g. explorers).
+If we don't keep track of the historical information in the `ACP99Manager` contract, this information will still be available in archive nodes and offchain tools (e.g. explorers).
 
 ### Should uptime be tracked for each `ValidationPeriod`?
 
 Currently, the `ValidatorUptimeInfo` struct contains the total uptime of a validator during a validation. This means that the uptime is tracked for the entire validation, not for each period.
 
-If we want to track the uptime for each period, we need to figure out how the uptime tracked by the VM can diverge from the validation periods as tracked on the P-Chain. There is indeed a delay between the time the `ValidationPeriod` is ended in the `Manager` state (validator weight set to `0`) and the time the P-Chain registers the weight update.
+If we want to track the uptime for each period, we need to figure out how the uptime tracked by the VM can diverge from the validation periods as tracked on the P-Chain. There is indeed a delay between the time the `ValidationPeriod` is ended in the `ACP99Manager` state (validator weight set to `0`) and the time the P-Chain registers the weight update.
 
 ### Is an upgradeable architecture more appropriate?
 
-The Teleporter team has been working on its own implementation of a `ValidatorManager` contract that is based on abstract and upgradeable contracts.
+The Teleporter team has been working on its own implementation of a `ValidatorManager` contract in the [teleporter](https://github.com/ava-labs/teleporter/blob/main/contracts/validator-manager/ValidatorManager.sol) repository that is based on abstract and upgradeable contracts.
+
+### Should the `ACP99Manager` include a churn control mechanism?
+
+The Teleporter team implentation of the `ValidatorManager` contract includes a churn control mechanism that prevents too much weight from being added or removed from the validator set in a short amount of time.
 
 ### How could we name “Security Modules”?
 
