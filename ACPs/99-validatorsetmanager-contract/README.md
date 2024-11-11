@@ -64,8 +64,6 @@ interface IACP99Manager {
         ValidationStatus status;
         bytes32 nodeID;
         ValidationPeriod[] periods;
-        uint64 activeSeconds;
-        uint64 uptimeSeconds;
     }
 
     /**
@@ -78,6 +76,21 @@ interface IACP99Manager {
         uint64 weight;
         uint64 startTime;
         uint64 endTime;
+        uint64 uptimeSeconds;
+    }
+
+    /**
+     * @notice Information about a validator's uptime
+     * @param activeSeconds The total number of seconds the validator was active
+     * @param uptimeSeconds The total number of seconds the validator was online
+     * @param activeWeightSeconds The total weight x seconds the validator was active
+     * @param uptimeWeightSeconds The total weight x seconds the validator was online
+     */
+    struct ValidatorUptimeInfo {
+        uint64 activeSeconds;
+        uint64 uptimeSeconds;
+        uint256 activeWeightSeconds;
+        uint256 uptimeWeightSeconds;
     }
 
     /// @notice Emitted when the security module address is set
@@ -143,6 +156,11 @@ interface IACP99Manager {
     function getValidation(
         bytes32 validationID
     ) external view returns (Validation memory);
+
+    /// @notice Get the uptime information for a given validation ID
+    function getValidationUptimeInfo(
+        bytes32 validationID
+    ) external view returns (ValidatorUptimeInfo memory);
 
     /// @notice Get an L1 validator's active validation ID
     function getValidatorActiveValidation(
@@ -267,23 +285,11 @@ interface IACP99SecurityModule {
      * @param weight The initial weight assigned to the validator
      * @param startTime The timestamp when the validation started
      */
-    struct ValidatiorRegistrationInfo {
+    struct ValidatorRegistrationInfo {
         bytes32 nodeID;
         bytes32 validationID;
         uint64 weight;
         uint64 startTime;
-    }
-
-    /**
-     * @notice Information about a validator's uptime
-     * @param activeSeconds The total number of seconds the validator was active
-     * @param uptimeSeconds The total number of seconds the validator was online
-     * @param averageWeight The average weight of the validator during the period
-     */
-    struct ValidatorUptimeInfo {
-        uint64 activeSeconds;
-        uint64 uptimeSeconds;
-        uint64 averageWeight;
     }
 
     /**
@@ -299,7 +305,7 @@ interface IACP99SecurityModule {
         bytes32 validationID;
         uint64 nonce;
         uint64 newWeight;
-        ValidatorUptimeInfo uptimeInfo;
+        IACP99Manager.ValidatorUptimeInfo uptimeInfo;
     }
 
     error ACP99SecurityModule__ZeroAddressManager();
@@ -313,7 +319,7 @@ interface IACP99SecurityModule {
      * @param validatorInfo The information about the validator
      */
     function handleValidatorRegistration(
-        ValidatiorRegistrationInfo memory validatorInfo
+        ValidatorRegistrationInfo memory validatorInfo
     ) external;
 
     /**
@@ -377,12 +383,6 @@ The audit process of the `ACP99Manager` contract is of the utmost importance for
 
 The functions `getValidation` and `getValidatorValidations` would allow to retrieve historical information about the validator set directly from state, notably each validator's performance (uptime) during past validations.
 If we don't keep track of the historical information in the `ACP99Manager` contract, this information will still be available in archive nodes and offchain tools (e.g. explorers).
-
-### Should uptime be tracked for each `ValidationPeriod`?
-
-Currently, the `ValidatorUptimeInfo` struct contains the total uptime of a validator during a validation. This means that the uptime is tracked for the entire validation, not for each period.
-
-If we want to track the uptime for each period, we need to figure out how the uptime tracked by the VM can diverge from the validation periods as tracked on the P-Chain. There is indeed a delay between the time the `ValidationPeriod` is ended in the `ACP99Manager` state (validator weight set to `0`) and the time the P-Chain registers the weight update.
 
 ### Is an upgradeable architecture more appropriate?
 
