@@ -489,15 +489,23 @@ Where:
 
 Whenever $x$ increases by $K$, the price per active L1 validator increases by a factor of `~2.7`. If the price per active L1 validator gets too expensive, some active L1 validators will exit the active validator set, decreasing $x$, dropping the price. The price per active L1 validator constantly adjusts to make sure that, on average, the P-Chain has no more than $T$ active L1 validators.
 
-#### Block Timestamp Validity Change
+#### Block Processing
 
-To ensure that validators are removed timely, blocks are considered valid if their timestamps are no greater than the time at which the first validator gets removed from a lack of funds. This upholds the expectation that the number of L1 validators remains constant between blocks.
+Before processing the transactions inside a block, all validators that no longer have a sufficient (non-zero) balance are deactivated.
+
+After processing the transactions inside a block, all validators that do not have a sufficient balance for the next second are deactivated.
+
+##### Block Timestamp Validity Change
+
+To ensure that validators are charged accurately, blocks are only considered valid if advancing the chain times would not cause a validator to have a negative balance.
+
+This upholds the expectation that the number of L1 validators remains constant between blocks.
 
 The block building protocol is modified to account for this change by first checking if the wall clock time removes any validator due to a lack of funds. If the wall clock time does not remove any L1 validators, the wall clock time is used to build the block. If it does, the time at which the first validator gets removed is used.
 
-#### Fee Calculation
+##### Fee Calculation
 
-Prior to processing the next block, the total validator fee assessed in the $\Delta t$ between the current block and the next block is:
+The total validator fee assessed in $\Delta t$ is:
 
 ```python
 # Calculate the fee to charge over Δt
