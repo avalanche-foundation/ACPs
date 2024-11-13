@@ -559,9 +559,9 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
 
 ## Reference Implementation
 
-ACP-77 was implemented and merged into AvalancheGo behind the `Etna` upgrade flag. The full body of work can be found tagged with the `acp77` label [here](https://github.com/ava-labs/avalanchego/issues?q=sort%3Aupdated-desc+label%3Aacp77).
+ACP-77 was implemented and will be merged into AvalancheGo behind the `Etna` upgrade flag. The full body of work can be found tagged with the `acp77` label [here](https://github.com/ava-labs/avalanchego/issues?q=sort%3Aupdated-desc+label%3Aacp77).
 
-Since Etna is not activated, all new transactions introduced in ACP-77 will be rejected by AvalancheGo. If any modifications are made to ACP-77 as part of the ACP process, the implementation must be updated prior to activation.
+Since Etna is not yet activated, all new transactions introduced in ACP-77 will be rejected by AvalancheGo. If any modifications are made to ACP-77 as part of the ACP process, the implementation must be updated prior to activation.
 
 ## Security Considerations
 
