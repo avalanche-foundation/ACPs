@@ -491,7 +491,7 @@ Whenever $x$ increases by $K$, the price per active L1 validator increases by a 
 
 #### Block Processing
 
-Before processing the transactions inside a block, all validators that no longer have a sufficient, non-zero, balance are deactivated.
+Before processing the transactions inside a block, all validators that no longer have a sufficient (non-zero) balance are deactivated.
 
 After processing the transactions inside a block, all validators that do not have a sufficient balance for the next second are deactivated.
 
