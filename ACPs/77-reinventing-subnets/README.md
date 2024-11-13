@@ -1,10 +1,10 @@
-| ACP           | 77                                                                                   |
-| :------------ | :----------------------------------------------------------------------------------- |
-| **Title**     | Reinventing Subnets                                                                  |
-| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))                           |
-| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
-| **Track**     | Standards                                                                            |
-| **Replaces**  | [ACP-13](../13-subnet-only-validators/README.md)                                     |
+| ACP           | 77                                                                                        |
+| :------------ | :---------------------------------------------------------------------------------------- |
+| **Title**     | Reinventing Subnets                                                                       |
+| **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))                                |
+| **Status**    | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
+| **Track**     | Standards                                                                                 |
+| **Replaces**  | [ACP-13](../13-subnet-only-validators/README.md)                                          |
 
 ## Abstract
 
@@ -567,7 +567,9 @@ Any state execution changes must be coordinated through a mandatory upgrade. Imp
 
 ## Reference Implementation
 
-A full reference implementation has not been provided yet. It will be provided once this ACP is considered `Implementable`.
+ACP-77 was implemented and will be merged into AvalancheGo behind the `Etna` upgrade flag. The full body of work can be found tagged with the `acp77` label [here](https://github.com/ava-labs/avalanchego/issues?q=sort%3Aupdated-desc+label%3Aacp77).
+
+Since Etna is not yet activated, all new transactions introduced in ACP-77 will be rejected by AvalancheGo. If any modifications are made to ACP-77 as part of the ACP process, the implementation must be updated prior to activation.
 
 ## Security Considerations
 
