@@ -104,8 +104,8 @@ A block gas limit does not need to be set as it is implicitly derived from $r$.
 
 The parameters at activation are:
 
-| Parameter | P-Chain |
-| - | - | - |
+| Parameter | P-Chain Configuration|
+| - | - |
 | $T$ - target gas consumed per second | TODO |
 | $M$ - minimum gas price | TODO |
 | $K$ - gas price update constant | TODO |
