@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Add Dynamic Fees to the P-Chain |
 | **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -30,11 +30,11 @@ There are four dimensions that will be used to approximate the computational cos
 1. Bandwidth $B$ is the amount of network bandwidth used for transaction broadcast. This is set to the size of the transaction in bytes.
 2. Reads $R$ is the number of state/database reads used in transaction execution.
 3. Writes $W$ is the number of state/database writes used in transaction execution.
-4. Compute $C$ is the total amount of compute used to verify and execute a transaction.
+4. Compute $C$ is the total amount of compute used to verify and execute a transaction, measured in microseconds.
 
 The gas consumed $G$ in a transaction is:
 
-$$G = B + R + W + C$$
+$$G = B + 1000R + 1000W + 4C$$
 
 TODO: Each dimension will not be equally weighted as shown above. The correct weights for each dimension must be specified prior to this ACP being considered "Implementable"
 
@@ -106,11 +106,13 @@ The parameters at activation are:
 
 | Parameter | P-Chain Configuration|
 | - | - |
-| $T$ - target gas consumed per second | TODO |
-| $M$ - minimum gas price | TODO |
-| $K$ - gas price update constant | TODO |
-| $L$ - gas limit constant | TODO |
-| $S$ - gas limit time period | TODO |
+| $T$ - target gas consumed per second | 50,000 |
+| $M$ - minimum gas price | 1 nAVAX |
+| $K$ - gas price update constant | 2_164_043 |
+| $L$ - gas limit constant | 1,000,000 |
+| $S$ - gas limit time period | 10 seconds |
+
+$K$ was chosen such that at sustained maximum capacity (100,000 gas/second), the fee rate will double every ~30 seconds.
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the gas consumption rate.
 
@@ -146,7 +148,7 @@ After this ACP is activated, any transaction issued on the P-Chain must account 
 
 ## Reference Implementation
 
-A full reference implementation has not been provided yet. It must be provided prior to this ACP being considered "Implementable".
+ACP-103 was implemented into AvalancheGo behind the `Etna` upgrade flag. The full body of work can be found tagged with the `acp103` label [here](https://github.com/ava-labs/avalanchego/pulls?q=is%3Apr+label%3Aacp103).
 
 ## Security Considerations
 
