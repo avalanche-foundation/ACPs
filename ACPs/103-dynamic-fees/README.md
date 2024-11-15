@@ -108,9 +108,11 @@ The parameters at activation are:
 | - | - |
 | $T$ - target gas consumed per second | 50,000 |
 | $M$ - minimum gas price | 1 nAVAX |
-| $K$ - gas price update constant | (100,000 - 50,000) * 30 / ln(2) |
+| $K$ - gas price update constant | 2_164_043 |
 | $L$ - gas limit constant | 1,000,000 |
 | $S$ - gas limit time period | 10 seconds |
+
+$K$ was chosen such that at sustained maximum capacity (100,000 gas/second), the fee rate will double every ~30 seconds.
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the gas consumption rate.
 
