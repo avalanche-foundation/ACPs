@@ -124,7 +124,7 @@ interface IACP99Manager {
     );
 
     error ACP99Manager__ValidatorSetAlreadyInitialized();
-    error ACP99Manager__InvalidSubnetConversionID(bytes32 conversionID, bytes32 messageConversionID);
+    error ACP99Manager__InvalidConversionID(bytes32 conversionID, bytes32 messageConversionID);
     error ACP99Manager__InvalidManagerBlockchainID(
         bytes32 managerBlockchainID, bytes32 conversionBlockchainID
     );
