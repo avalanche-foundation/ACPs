@@ -2,7 +2,7 @@
 | :----------- | :----------------------------------------------------------------------------------- |
 | Title        | Validator Manager Solidity Standard                                                  |
 | Author(s)    | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))                        |
-| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/98)) |
+| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/165)) |
 | Track        | Best Practices                                                                       |
 | Dependencies | [ACP-77](../77-reinventing-subnets/README.md)                                        |
 
