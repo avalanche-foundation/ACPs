@@ -38,61 +38,74 @@ Once deployed, the `ACP99Manager` contract will be used as the `Address` in the 
 Here is the proposed interface for the `IACP99Manager` contract:
 
 ```solidity
+/// @notice L1 validation status
+enum ValidationStatus {
+    Registering,
+    Active,
+    Updating,
+    Removing,
+    Completed,
+    Expired
+}
+
+/**
+ * @notice Specifies the owner of a validator's remaining balance or disable owner on the P-Chain.
+ * P-Chain addresses are also 20-bytes, so we use the address type to represent them.
+ */
+struct PChainOwner {
+    uint32 threshold;
+    address[] addresses;
+}
+
+/**
+ * @notice L1 validation
+ * @param status The validation status
+ * @param nodeID The NodeID of the validator
+ * @param startTime The start time of the validation
+ * @param endTime The end time of the validation
+ * @param periods The list of validation periods.
+ * The index is the nonce associated with the weight update.
+ * @param activeSeconds The time during which the validator was active during this validation
+ * @param uptimeSeconds The uptime of the validator for this validation
+ */
+struct Validation {
+    ValidationStatus status;
+    bytes32 nodeID;
+    ValidationPeriod[] periods;
+}
+
+/**
+ * @notice L1 validation period
+ * @param weight The weight of the validator during the period
+ * @param startTime The start time of the validation period
+ * @param endTime The end time of the validation period (only ≠ 0 when the period is over)
+ */
+struct ValidationPeriod {
+    uint64 weight;
+    uint64 startTime;
+    uint64 endTime;
+    uint64 uptimeSeconds;
+}
+
+/**
+ * @notice Information about a validator's uptime
+ * @param activeSeconds The total number of seconds the validator was active
+ * @param uptimeSeconds The total number of seconds the validator was online
+ * @param activeWeightSeconds The total weight x seconds the validator was active
+ * @param uptimeWeightSeconds The total weight x seconds the validator was online
+ */
+struct ValidatorUptimeInfo {
+    uint64 activeSeconds;
+    uint64 uptimeSeconds;
+    uint256 activeWeightSeconds;
+    uint256 uptimeWeightSeconds;
+}
+
+/*
+ * @title IACP99Manager
+ * @notice The IACP99Manager interface is the interface for the ACP99Manager contract.
+ */
 interface IACP99Manager {
-    /// @notice L1 validation status
-    enum ValidationStatus {
-        Registering,
-        Active,
-        Updating,
-        Removing,
-        Completed,
-        Expired
-    }
-
-    /**
-     * @notice L1 validation
-     * @param status The validation status
-     * @param nodeID The NodeID of the validator
-     * @param startTime The start time of the validation
-     * @param endTime The end time of the validation
-     * @param periods The list of validation periods.
-     * The index is the nonce associated with the weight update.
-     * @param activeSeconds The time during which the validator was active during this validation
-     * @param uptimeSeconds The uptime of the validator for this validation
-     */
-    struct Validation {
-        ValidationStatus status;
-        bytes32 nodeID;
-        ValidationPeriod[] periods;
-    }
-
-    /**
-     * @notice L1 validation period
-     * @param weight The weight of the validator during the period
-     * @param startTime The start time of the validation period
-     * @param endTime The end time of the validation period (only ≠ 0 when the period is over)
-     */
-    struct ValidationPeriod {
-        uint64 weight;
-        uint64 startTime;
-        uint64 endTime;
-        uint64 uptimeSeconds;
-    }
-
-    /**
-     * @notice Information about a validator's uptime
-     * @param activeSeconds The total number of seconds the validator was active
-     * @param uptimeSeconds The total number of seconds the validator was online
-     * @param activeWeightSeconds The total weight x seconds the validator was active
-     * @param uptimeWeightSeconds The total weight x seconds the validator was online
-     */
-    struct ValidatorUptimeInfo {
-        uint64 activeSeconds;
-        uint64 uptimeSeconds;
-        uint256 activeWeightSeconds;
-        uint256 uptimeWeightSeconds;
-    }
-
     /// @notice Emitted when the security module address is set
     event SetSecurityModule(address indexed securityModule);
     /// @notice Emitted when an initial validator is registered
@@ -234,6 +247,16 @@ interface IACP99Manager {
     ) external;
 
     /**
+     * @notice Updates the uptime of a validator for a given validation ID
+     * @param nodeID The ID of the node to update the uptime for
+     * @param messageIndex The index of the Warp message to be received providing the uptime proof
+     */
+    function updateUptime(
+        bytes memory nodeID,
+        uint32 messageIndex
+    ) external returns (ValidatorUptimeInfo memory);
+
+    /**
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
      * If the weight is 0, this initiates the removal of the validator from the L1. An uptime proof can be
      * included. This proof might be required to claim validator rewards (handled by the security module).
@@ -277,37 +300,43 @@ This transaction allows the `DisableOwner` of a validator to disable it directly
 Here is the proposed interface for the `IACP99SecurityModule` contract:
 
 ```solidity
+/**
+ * @notice Information about a validator registration
+ * @param nodeID The NodeID of the validator node
+ * @param validationID The ValidationID of the validation
+ * @param weight The initial weight assigned to the validator
+ * @param startTime The timestamp when the validation started
+ */
+struct ValidatorRegistrationInfo {
+    bytes32 nodeID;
+    bytes32 validationID;
+    uint64 weight;
+    uint64 startTime;
+}
+
+/**
+ * @notice Information about a change in a validator's weight
+ * @param nodeID The NodeID of the validator node
+ * @param validationID The ValidationID of the validation
+ * @param nonce A sequential number to order weight changes
+ * @param newWeight The new weight assigned to the validator
+ * @param uptime The uptime information for the validator
+ */
+struct ValidatorWeightChangeInfo {
+    bytes32 nodeID;
+    bytes32 validationID;
+    uint64 nonce;
+    uint64 newWeight;
+    ValidatorUptimeInfo uptimeInfo;
+}
+
+/*
+ * @title IACP99SecurityModule
+ * @author ADDPHO
+ * @notice The IACP99SecurityModule interface is the interface for the ACP99 security modules.
+ * @custom:security-contact security@suzaku.network
+ */
 interface IACP99SecurityModule {
-    /**
-     * @notice Information about a validator registration
-     * @param nodeID The NodeID of the validator node
-     * @param validationID The ValidationID of the validation
-     * @param weight The initial weight assigned to the validator
-     * @param startTime The timestamp when the validation started
-     */
-    struct ValidatorRegistrationInfo {
-        bytes32 nodeID;
-        bytes32 validationID;
-        uint64 weight;
-        uint64 startTime;
-    }
-
-    /**
-     * @notice Information about a change in a validator's weight
-     * @param nodeID The NodeID of the validator node
-     * @param validationID The ValidationID of the validation
-     * @param nonce A sequential number to order weight changes
-     * @param newWeight The new weight assigned to the validator
-     * @param uptime The uptime information for the validator
-     */
-    struct ValidatorWeightChangeInfo {
-        bytes32 nodeID;
-        bytes32 validationID;
-        uint64 nonce;
-        uint64 newWeight;
-        IACP99Manager.ValidatorUptimeInfo uptimeInfo;
-    }
-
     error ACP99SecurityModule__ZeroAddressManager();
     error ACP99SecurityModule__OnlyManager(address sender, address manager);
 
