@@ -36,8 +36,6 @@ The gas consumed $G$ in a transaction is:
 
 $$G = B + 1000R + 1000W + 4C$$
 
-TODO: Each dimension will not be equally weighted as shown above. The correct weights for each dimension must be specified prior to this ACP being considered "Implementable"
-
 A future ACP could remove the merging of these dimensions to granularly meter usage of each resource in a multidimensional scheme.
 
 ### Mechanism
