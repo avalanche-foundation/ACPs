@@ -1,9 +1,9 @@
-| ACP | 103 |
-| :--- | :--- |
-| **Title** | Add Dynamic Fees to the X-Chain and P-Chain |
+| ACP           | 103                                                                                                                                                                                           |
+| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**     | Add Dynamic Fees to the X-Chain and P-Chain                                                                                                                                                   |
 | **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
-| **Track** | Standards |
+| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104))                                                                                                         |
+| **Track**     | Standards                                                                                                                                                                                     |
 
 ## Abstract
 
@@ -33,8 +33,6 @@ There are four dimensions that will be used to approximate the computational cos
 The gas consumed $G$ in a transaction is:
 
 $$G = B + R + W + C$$
-
-TODO: Each dimension will not be equally weighted as shown above. The correct weights for each dimension must be specified prior to this ACP being considered "Implementable"
 
 A future ACP could remove the merging of these dimensions to granularly meter usage of each resource in a multidimensional scheme.
 
@@ -102,13 +100,13 @@ A block gas limit does not need to be set as it is implicitly derived from $r$.
 
 The parameters at activation are:
 
-| Parameter | X-Chain | P-Chain |
-| - | - | - |
-| $T$ - target gas consumed per second | TODO | TODO |
-| $M$ - minimum gas price | TODO | TODO |
-| $K$ - gas price update constant | TODO | TODO |
-| $L$ - gas limit constant | TODO | TODO |
-| $S$ - gas limit time period | TODO | TODO |
+| Parameter                            | X-Chain | P-Chain |
+| ------------------------------------ | ------- | ------- |
+| $T$ - target gas consumed per second | TODO    | TODO    |
+| $M$ - minimum gas price              | TODO    | TODO    |
+| $K$ - gas price update constant      | TODO    | TODO    |
+| $L$ - gas limit constant             | TODO    | TODO    |
+| $S$ - gas limit time period          | TODO    | TODO    |
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the gas consumption rate.
 
