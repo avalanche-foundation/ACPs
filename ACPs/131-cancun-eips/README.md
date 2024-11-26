@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Activate Cancun EIPs on C-Chain and Subnet-EVM chains |
 | **Author(s)** | Darioush Jalali ([@darioush](https://github.com/darioush)), Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/139)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/139)) |
 | **Track** | Standards, Subnet |
 
 ## Abstract
