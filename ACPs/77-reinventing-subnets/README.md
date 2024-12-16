@@ -2,7 +2,7 @@
 | :------------ | :---------------------------------------------------------------------------------------- |
 | **Title**     | Reinventing Subnets                                                                       |
 | **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))                                |
-| **Status**    | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
+| **Status**    | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/78)) |
 | **Track**     | Standards                                                                                 |
 | **Replaces**  | [ACP-13](../13-subnet-only-validators/README.md)                                          |
 

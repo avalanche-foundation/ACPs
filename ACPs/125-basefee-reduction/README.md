@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Darioush Jalali ([@darioush](https://github.com/darioush)) |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/127)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/127)) |
 | **Track** | Standards |
 
 ## Abstract
