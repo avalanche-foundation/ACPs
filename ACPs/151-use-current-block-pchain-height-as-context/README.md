@@ -2,7 +2,7 @@
 | :------------ | :----------------------------------------------------------------------------------------- |
 | **Title**     | Use current block P-Chain height as context for state verification                         |
 | **Author(s)** | Ian Suvak ([@iansuvak](https://github.com/iansuvak))                                       |
-| **Status**    | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/152)) |
+| **Status**    | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/152)) |
 | **Track**     | Standards                                                                                  |
 
 ## Abstract

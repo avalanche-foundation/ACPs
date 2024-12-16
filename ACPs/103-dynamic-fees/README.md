@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Add Dynamic Fees to the P-Chain |
 | **Author(s)** | Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/104)) |
 | **Track** | Standards |
 
 ## Abstract
