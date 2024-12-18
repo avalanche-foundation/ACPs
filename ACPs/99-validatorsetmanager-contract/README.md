@@ -98,11 +98,11 @@ struct Validation {
 }
 
 /*
- * @title IACP99Manager
- * @notice The IACP99Manager interface represents the functionality for sovereign L1
+ * @title ACP99Manager
+ * @notice The ACP99Manager interface represents the functionality for sovereign L1
  * validator management, as specified in ACP-77
  */
-interface IACP99Manager {
+abstract contract ACP99Manager {
     /// @notice Emitted when an initial validator is registered
     event RegisteredInitialValidator(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
@@ -132,15 +132,15 @@ interface IACP99Manager {
     );
 
     /// @notice Returns the ID of the Subnet tied to this manager
-    function subnetID() external view returns (bytes32);
+    function subnetID() virtual public view returns (bytes32);
 
     /// @notice Returns the validation details for a given validation ID
-    function getValidation(
+    function getValidator(
         bytes32 validationID
-    ) external view returns (Validation memory);
+    ) virtual public view returns (Validator memory);
 
     /// @notice Returns the total weight of the current L1 validator set
-    function l1TotalWeight() external view returns (uint64);
+    function l1TotalWeight() virtual public view returns (uint64);
 
     /**
      * @notice Verifies and sets the initial validator set for the chain through a P-Chain
@@ -151,7 +151,7 @@ interface IACP99Manager {
     function initializeValidatorSet(
         ConversionData calldata conversionData,
         uint32 messsageIndex
-    ) external;
+    ) virtual public;
 
     /**
      * @notice Initiate a validator registration by issuing a RegisterL1ValidatorTx Warp message. The validator should
@@ -170,7 +170,7 @@ interface IACP99Manager {
         PChainOwner memory remainingBalanceOwner,
         PChainOwner memory disableOwner,
         uint64 weight
-    ) external returns (bytes32);
+    ) virtual internal returns (bytes32);
 
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
@@ -179,19 +179,19 @@ interface IACP99Manager {
      */
     function completeValidatorRegistration(
         uint32 messageIndex
-    ) external returns (bytes32);
+    ) virtual public returns (bytes32);
 
     /**
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
      * If the weight is 0, this initiates the removal of the validator from the L1. The validator weight change
      * should not have any effect until completeValidatorWeightUpdate is called.
-     * @param nodeID The ID of the node to modify
-     * @param weight The new weight of the node on the L1
+     * @param validationID The ID of the validation period to modify
+     * @param weight The new weight of the validation
      */
     function initiateValidatorWeightUpdate(
         bytes32 validationID,
         uint64 weight
-    ) external returns (uint64);
+    ) virtual internal returns (uint64);
 
     /**
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
@@ -200,7 +200,7 @@ interface IACP99Manager {
      */
     function completeValidatorWeightUpdate(
         uint32 messageIndex
-    ) external;
+    ) virtual public returns (bytes32);
 }
 ```
 
