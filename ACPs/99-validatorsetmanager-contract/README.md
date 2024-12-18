@@ -8,7 +8,7 @@
 
 ## Abstract
 
-Define a reference interface for a minimal Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain.
+Define a standard interface for a minimal Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain.
 
 This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on it to be marked as `Implementable`.
 
@@ -25,11 +25,13 @@ Given these assumptions and the fact that most of the active blockchains on Aval
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
 4. Be easily integrated into applications implementing various security models (e.g. Proof-of-Stake).
 
+Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching L1s on Avalanche.
+
 Once deployed, the `IACP99Manager` implementation contract will be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
 
 ## Specification
 
-**Note:** The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
+> **Note:**: The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
 
 ### IACP99Manager
 
@@ -97,15 +99,16 @@ struct Validation {
 
 /*
  * @title IACP99Manager
- * @notice The IACP99Manager interface is the interface for the ACP99Manager contract.
+ * @notice The IACP99Manager interface represents the functionality for sovereign L1
+ * validator management, as specified in ACP-77
  */
 interface IACP99Manager {
     /// @notice Emitted when an initial validator is registered
-    event RegisterInitialValidator(
+    event RegisteredInitialValidator(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
     );
     /// @notice Emitted when a validator registration to the L1 is initiated
-    event InitiateValidatorRegistration(
+    event InitiatedValidatorRegistration(
         bytes32 indexed nodeID,
         bytes32 indexed validationID,
         bytes32 registrationMessageID,
@@ -113,30 +116,30 @@ interface IACP99Manager {
         uint64 weight
     );
     /// @notice Emitted when a validator registration to the L1 is completed
-    event CompleteValidatorRegistration(
+    event CompletedValidatorRegistration(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
     );
     /// @notice Emitted when a validator weight update is initiated
-    event InitiateValidatorWeightUpdate(
+    event InitiatedValidatorWeightUpdate(
         bytes32 indexed nodeID,
         bytes32 indexed validationID,
         bytes32 weightUpdateMessageID,
         uint64 weight
     );
     /// @notice Emitted when a validator weight update is completed
-    event CompleteValidatorWeightUpdate(
+    event CompletedValidatorWeightUpdate(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
     );
 
-    /// @notice Get the ID of the Subnet tied to this manager
+    /// @notice Returns the ID of the Subnet tied to this manager
     function subnetID() external view returns (bytes32);
 
-    /// @notice Get the validation details for a given validation ID
+    /// @notice Returns the validation details for a given validation ID
     function getValidation(
         bytes32 validationID
     ) external view returns (Validation memory);
 
-    /// @notice Get the total weight of the current L1 validator set
+    /// @notice Returns the total weight of the current L1 validator set
     function l1TotalWeight() external view returns (uint64);
 
     /**
@@ -148,7 +151,7 @@ interface IACP99Manager {
     function initializeValidatorSet(
         ConversionData calldata conversionData,
         uint32 messsageIndex
-    ) internal;
+    ) external;
 
     /**
      * @notice Initiate a validator registration by issuing a RegisterL1ValidatorTx Warp message. The validator should
@@ -167,7 +170,7 @@ interface IACP99Manager {
         PChainOwner memory remainingBalanceOwner,
         PChainOwner memory disableOwner,
         uint64 weight
-    ) internal returns (bytes32);
+    ) external returns (bytes32);
 
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
@@ -176,7 +179,7 @@ interface IACP99Manager {
      */
     function completeValidatorRegistration(
         uint32 messageIndex
-    ) internal returns (bytes32);
+    ) external returns (bytes32);
 
     /**
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
@@ -188,7 +191,7 @@ interface IACP99Manager {
     function initiateValidatorWeightUpdate(
         bytes32 validationID,
         uint64 weight
-    ) internal returns (uint64);
+    ) external returns (uint64);
 
     /**
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
@@ -197,7 +200,7 @@ interface IACP99Manager {
      */
     function completeValidatorWeightUpdate(
         uint32 messageIndex
-    ) internal;
+    ) external;
 }
 ```
 
@@ -288,7 +291,7 @@ title: ACP-99 Single-Contract Architecture implementing PoA
   ValidatorManager <|-- PoAValidatorManager
 ```
 
-A reference implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager). 
+A reference implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager).
 
 ## Security Considerations
 
