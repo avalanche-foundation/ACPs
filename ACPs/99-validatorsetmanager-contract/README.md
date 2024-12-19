@@ -8,7 +8,7 @@
 
 ## Abstract
 
-Define a standard interface for a minimal Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain.
+Define a standard Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain.
 
 This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on it to be marked as `Implementable`.
 
@@ -18,7 +18,7 @@ This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https:/
 
 On each validator set change, the P-Chain is willing to sign an `AddressedCall` to notify any on-chain program tracking the validator set. On-chain programs must be able to interpret this message, so they can trigger the appropriate action. The 2 kinds of `AddressedCall`s [defined in ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#p-chain-warp-message-payloads) are `L1ValidatorRegistrationMessage` and `L1ValidatorWeightMessage`.
 
-Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose `IACP99Manager` as the standard Solidity interface that can:
+Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose `ACP99Manager` as the standard Solidity contract specification that can:
 
 1. Hold relevant information about the current Subnet validator set
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
@@ -27,15 +27,16 @@ Given these assumptions and the fact that most of the active blockchains on Aval
 
 Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching L1s on Avalanche.
 
-Once deployed, the `IACP99Manager` implementation contract will be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
+Once deployed, the `ACP99Manager` implementation contract will be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
 
 ## Specification
 
 > **Note:**: The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
 
-### IACP99Manager
 
-Here is the proposed interface for the `IACP99Manager` contract:
+### Type Definitions
+
+The following type definitions are used in the function signatures described in [Contract Specification](#contract-specification)
 
 ```solidity
 /**
@@ -96,7 +97,21 @@ struct Validation {
     uint64 startTime;
     uint64 endTime;
 }
+```
 
+#### About `Validation`s
+
+A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
+
+Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the Subnet's validator set, as defined in ACP-77.
+
+### Contract Specification
+
+The following abstract contract describes the standard `ACP99Manager` functionality. 
+
+For a full implementation, please see the [Reference Implementation](#reference-implementation)
+
+```solidity
 /*
  * @title ACP99Manager
  * @notice The ACP99Manager interface represents the functionality for sovereign L1
@@ -145,6 +160,9 @@ abstract contract ACP99Manager {
     /**
      * @notice Verifies and sets the initial validator set for the chain through a P-Chain
      * SubnetToL1ConversionMessage.
+     * 
+     * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
+     *
      * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
      * @param messsageIndex The index that contains the SubnetToL1ConversionMessage Warp message containing the ConversionID to be verified against the provided {conversionData}
      */
@@ -156,6 +174,9 @@ abstract contract ACP99Manager {
     /**
      * @notice Initiate a validator registration by issuing a RegisterL1ValidatorTx Warp message. The validator should
      * not be considered active until completeValidatorRegistration is called.
+     *
+     * Emits an {InitiatedValidatorRegistration} event on success.
+     *
      * @param nodeID The ID of the node to add to the L1
      * @param blsPublicKey The BLS public key of the validator
      * @param registrationExpiry The time after which this message is invalid
@@ -175,6 +196,9 @@ abstract contract ACP99Manager {
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
      * validationID from the P-Chain. The validator should not be considered active until this method is called.
+     *
+     * Emits a {CompletedValidatorRegistration} event on success.
+     *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
      */
     function completeValidatorRegistration(
@@ -185,6 +209,9 @@ abstract contract ACP99Manager {
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
      * If the weight is 0, this initiates the removal of the validator from the L1. The validator weight change
      * should not have any effect until completeValidatorWeightUpdate is called.
+     *
+     * Emits an {InitiatedValidatorWeightUpdate} event on success.
+     *
      * @param validationID The ID of the validation period to modify
      * @param weight The new weight of the validation
      */
@@ -196,6 +223,9 @@ abstract contract ACP99Manager {
     /**
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
      * validationID from the P-Chain. The validator weight change should not have any effect until this method is called.
+     *
+     * Emits a {CompletedValidatorWeightUpdate} event on success
+     *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
      */
     function completeValidatorWeightUpdate(
@@ -204,13 +234,13 @@ abstract contract ACP99Manager {
 }
 ```
 
-> **Note:** `IACP99Manager` does not include a method to return all active validations. This is because a `mapping` is a reasonable way to store active validations internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
+#### Internal Functions
 
-#### About `Validation`s
+Most of the methods described above are `public`, with the exception of `initiateValidatorRegistration` and `initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as a PoA model requiring a specific sender, or a PoS model transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
 
-A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
+#### Returning Active Validations
 
-Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the Subnet's validator set, as defined in ACP-77.
+While `ACP99Manager` does provide a way to fetch a `Validation` based on its `validationID`, it does not include a method to return all active validations. This is because a `mapping` is a reasonable way to store active validations internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
 
 #### About `DisableL1ValidatorTx`
 
@@ -218,15 +248,19 @@ This transaction allows the `DisableOwner` of a validator to disable it directly
 
 ## Backwards Compatibility
 
-The `IACP99Manager` interface is only a reference interface, it don’t have any impact on the current behavior of the Avalanche protocol.
+`ACP99Manager` is a reference specification. As such, it doesn't have any impact on the current behavior of the Avalanche protocol.
 
 ## Reference Implementation
 
-`IACP99Manager` is designed to be easily incorporated into any architecture. Two reference implementations are included in this ACP, each of which uses different architectures. At least one of the below reference implementations will need to be updated to conform to `IACP99Manager` before this ACP may be marked `Implementable`.
+A reference implementation will be provided in Ava Labs' [ICM Contracts](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager) repository. This reference implementation will need to be updated to conform to `ACP99Manager` before this ACP may be marked `Implementable`.
 
-### Two-contract Design
+### Example Integrations
 
-The reference two-contract design consists of a contract that implements `IACP99Manager`, and a separate "security module" contract that implements a single staking security model, such as PoS or PoA. Each `IACP99Manager` implementation contract is associated with one "security module" that is the only contract allowed to call the `IACP99Manager` functions that initiate validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Every time a validator is added/removed or a weight change is initiated, the `IACP99Manager` implementation will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security module" reference an immutable `IACP99Manager` contract address for security reasons.
+`ACP99Manager` is designed to be easily incorporated into any architecture. Two example integrations are included in this ACP, each of which uses a different architecture.
+
+#### Two-contract Design
+
+The two-contract design consists of a contract that implements `ACP99Manager`, and a separate "security module" contract that implements a single staking security model, such as PoS or PoA. Each `ACP99Manager` implementation contract is associated with one "security module" that is the only contract allowed to call the `ACP99Manager` functions that initiate validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Every time a validator is added/removed or a weight change is initiated, the `ACP99Manager` implementation will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security module" reference an immutable `ACP99Manager` contract address for security reasons.
 
 It is up to the "security module" to decide what action to take when a validator is added/removed or a weight change is confirmed by the P-Chain. Such actions could be starting the withdrawal period and allocating rewards in a PoS L1.
 
@@ -257,25 +291,25 @@ graph LR
 
 "Security modules" could implement PoS, Liquid PoS, etc. The specification of such smart contracts is out of the scope of this ACP.
 
-A work in progress reference implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/acp-99-implementation/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
+A work in progress implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/acp-99-implementation/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
 
-### Single-contract Design
+#### Single-contract Design
 
-The reference single-contract design consists of a class hierarchy with the base class implementing `IACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS. 
+The single-contract design consists of a class hierarchy with the base class implementing `ACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS. 
 
 ```mermaid
 ---
 title: ACP-99 Single-Contract Architecture implementing PoA
 ---
   classDiagram
-  class IACP99Manager {
+  class ACP99Manager {
     initializeValidatorSet
     initiateValidatorRegistration
     completeValidatorRegistration
     initiateValidatorWeightUpdate
     completeValidatorWeightUpdate
   }
-  <<interface>> IACP99Manager
+  <<abstract>> ACP99Manager
 
   class ValidatorManager {
     completeValidatorRegistration
@@ -287,25 +321,25 @@ title: ACP-99 Single-Contract Architecture implementing PoA
     completeEndValidation
   }
 
-  IACP99Manager <|--ValidatorManager
+  ACP99Manager <|--ValidatorManager
   ValidatorManager <|-- PoAValidatorManager
 ```
 
-A reference implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager).
+This implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager).
 
 ## Security Considerations
 
-The audit process of `IACP99Manager` and reference implementations is of the utmost importance for the future of the Avalanche ecosystem as most L1s would rely upon it to secure their L1.
+The audit process of `ACP99Manager` and reference implementations is of the utmost importance for the future of the Avalanche ecosystem as most L1s would rely upon it to secure their L1.
 
 ## Open Questions
 
 ### Is there an interest to keep historical information about the validator set on the manager chain?
 
-It's undefined if `getValidation` should return allow historical information about ended validations. Should `IACP99Manager` enforce that validation information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `IACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
+It's undefined if `getValidation` should return allow historical information about ended validations. Should `ACP99Manager` enforce that validation information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `ACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
 
-If we don't require `IACP99Manager` implementations to keep track of historical validations, this information will still be available in archive nodes and offchain tools (e.g. explorers).
+If we don't require `ACP99Manager` implementations to keep track of historical validations, this information will still be available in archive nodes and offchain tools (e.g. explorers).
 
-### Should `IACP99Manager` include a churn control mechanism?
+### Should `ACP99Manager` include a churn control mechanism?
 
 The Ava Labs [implementation](https://github.com/ava-labs/icm-contracts/blob/main/contracts/validator-manager/ValidatorManager.sol) of the `ValidatorManager` contract includes a churn control mechanism that prevents too much weight from being added or removed from the validator set in a short amount of time. Excessive churn can cause consensus failures, so it may be appropriate to require that churn tracking is implemented in some capacity.
 
