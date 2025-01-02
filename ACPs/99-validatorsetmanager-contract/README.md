@@ -258,7 +258,7 @@ A reference implementation will be provided in Ava Labs' [ICM Contracts](https:/
 
 `ACP99Manager` is designed to be easily incorporated into any architecture. Two example integrations are included in this ACP, each of which uses a different architecture.
 
-#### Two-contract Design
+#### Multi-contract Design
 
 The multi-contract design consists of a contract that implements `ACP99Manager`, and separate "security module" contracts that implement security models, such as PoS or PoA. Each `ACP99Manager` implementation contract is associated with one or more "security modules" that are the only contracts allowed to call the `ACP99Manager` functions that initiate validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Every time a validator is added/removed or a weight change is initiated, the `ACP99Manager` implementation will, in turn, call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security modules" reference an immutable `ACP99Manager` contract address for security reasons.
 
