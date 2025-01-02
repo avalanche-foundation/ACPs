@@ -23,7 +23,7 @@ Given these assumptions and the fact that most of the active blockchains on Aval
 1. Hold relevant information about the current Subnet validator set
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
-4. Be easily integrated into applications implementing various security models (e.g. Proof-of-Stake).
+4. Be easily integrated into validator manager implementations that utilize various security models (e.g. Proof-of-Stake).
 
 Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching L1s on Avalanche.
 
