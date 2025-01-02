@@ -266,7 +266,7 @@ It is up to the "security module" to decide what action to take when a validator
 
 ```mermaid
 ---
-title: ACP-99 Two-Contract Architecture with a PoA Security Module
+title: ACP-99 Multi-contract Architecture with a PoA Security Module
 ---
 graph LR
   Safe(Safe multisig)
