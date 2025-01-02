@@ -335,7 +335,7 @@ The audit process of `ACP99Manager` and reference implementations is of the utmo
 
 ### Is there an interest to keep historical information about the validator set on the manager chain?
 
-It's undefined if `getValidation` should return allow historical information about ended validations. Should `ACP99Manager` enforce that validation information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `ACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
+It's undefined if `getValidation` should return historical information about ended validations. Should `ACP99Manager` enforce that validation information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `ACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
 
 If we don't require `ACP99Manager` implementations to keep track of historical validations, this information will still be available in archive nodes and offchain tools (e.g. explorers).
 
