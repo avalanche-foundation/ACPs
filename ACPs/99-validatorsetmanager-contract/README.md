@@ -80,13 +80,13 @@ struct PChainOwner {
 
 /**
  * @notice Contains the active state of a Validation
- * @notice status is the validation status
- * @notice nodeID is The NodeID of the validator
- * @notice startingWeight is the weight of the validator at the time of registration
- * @notice messageNonce is the current weight update nonce
- * @notice weight is the current weight of the validator
- * @notice startTime The start time of the validation
- * @notice endTime The end time of the validation
+ * @param status is the validation status
+ * @param nodeID is The NodeID of the validator
+ * @param startingWeight is the weight of the validator at the time of registration
+ * @param messageNonce is the current weight update nonce
+ * @param weight is the current weight of the validator
+ * @param startTime The start time of the validation
+ * @param endTime The end time of the validation
  */
 struct Validation {
     ValidationStatus status;
