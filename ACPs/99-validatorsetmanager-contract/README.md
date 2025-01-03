@@ -195,7 +195,7 @@ abstract contract ACP99Manager {
 
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
-     * validationID from the P-Chain. The validator should not be considered active until this method is called.
+     * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
      *
      * Emits a {CompletedValidatorRegistration} event on success.
      *
@@ -208,7 +208,7 @@ abstract contract ACP99Manager {
     /**
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
      * If the weight is 0, this initiates the removal of the validator from the L1. The validator weight change
-     * should not have any effect until completeValidatorWeightUpdate is called.
+     * should not have any effect until completeValidatorWeightUpdate is successfully called.
      *
      * Emits an {InitiatedValidatorWeightUpdate} event on success.
      *
@@ -222,7 +222,7 @@ abstract contract ACP99Manager {
 
     /**
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
-     * validationID from the P-Chain. The validator weight change should not have any effect until this method is called.
+     * validationID from the P-Chain. The validator weight change should not have any effect until this method is successfully called.
      *
      * Emits a {CompletedValidatorWeightUpdate} event on success
      *
