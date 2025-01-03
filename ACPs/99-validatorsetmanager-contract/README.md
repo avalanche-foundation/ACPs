@@ -46,7 +46,7 @@ The following type definitions are used in the function signatures described in 
  * and verified by the Validator Manager.
  */
 struct ConversionData {
-    bytes32 l1ID;
+    bytes32 subnetID;
     bytes32 validatorManagerBlockchainID;
     address validatorManagerAddress;
     InitialValidator[] initialValidators;
