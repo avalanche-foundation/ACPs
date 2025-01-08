@@ -20,7 +20,7 @@ On each validator set change, the P-Chain is willing to sign an `AddressedCall` 
 
 Given these assumptions and the fact that most of the active blockchains on Avalanche Mainnet are EVM-based, we propose `ACP99Manager` as the standard Solidity contract specification that can:
 
-1. Hold relevant information about the current Subnet validator set
+1. Hold relevant information about the current L1 validator set
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
 4. Be easily integrated into validator manager implementations that utilize various security models (e.g. Proof-of-Stake).
