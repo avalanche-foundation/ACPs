@@ -18,7 +18,7 @@ This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https:/
 
 On each validator set change, the P-Chain is willing to sign an `AddressedCall` to notify any on-chain program tracking the validator set. On-chain programs must be able to interpret this message, so they can trigger the appropriate action. The 2 kinds of `AddressedCall`s [defined in ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#p-chain-warp-message-payloads) are `L1ValidatorRegistrationMessage` and `L1ValidatorWeightMessage`.
 
-Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose `ACP99Manager` as the standard Solidity contract specification that can:
+Given these assumptions and the fact that most of the active blockchains on Avalanche Mainnet are EVM-based, we propose `ACP99Manager` as the standard Solidity contract specification that can:
 
 1. Hold relevant information about the current Subnet validator set
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
