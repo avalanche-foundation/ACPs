@@ -27,7 +27,7 @@ Given these assumptions and the fact that most of the active blockchains on Aval
 
 Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching L1s on Avalanche.
 
-Once deployed, the `ACP99Manager` implementation contract will be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
+Once deployed, the `ACP99Manager` implementation contract can be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
 
 ## Specification
 
