@@ -146,7 +146,7 @@ abstract contract ACP99Manager {
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
     );
 
-    /// @notice Returns the ID of the Subnet tied to this manager.
+    /// @notice Returns the SubnetID of the L1 tied to this manager
     function subnetID() virtual public view returns (bytes32);
 
     /// @notice Returns the validator details for a given validation ID.
