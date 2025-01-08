@@ -59,7 +59,7 @@ struct InitialValidator {
     uint64 weight;
 }
 
-/// @notice L1 validation status
+/// @notice L1 validator status.
 enum ValidatorStatus {
     Unknown,
     PendingAdded,
@@ -79,17 +79,17 @@ struct PChainOwner {
 }
 
 /**
- * @notice Contains the active state of a Validation
- * @param status The validation status
- * @param nodeID The NodeID of the validator
- * @param startingWeight The weight of the validator at the time of registration
- * @param messageNonce The current weight update nonce
- * @param weight The current weight of the validator
- * @param startTime The start time of the validation
- * @param endTime The end time of the validation
+ * @notice Contains the active state of a Validator.
+ * @param status The validator status.
+ * @param nodeID The NodeID of the validator.
+ * @param startingWeight The weight of the validator at the time of registration.
+ * @param messageNonce The current weight update nonce.
+ * @param weight The current weight of the validator.
+ * @param startTime The start time of the validator.
+ * @param endTime The end time of the validator.
  */
-struct Validation {
-    ValidationStatus status;
+struct Validator {
+    ValidatorStatus status;
     bytes nodeID;
     uint64 startingWeight;
     uint64 messageNonce;
@@ -99,11 +99,11 @@ struct Validation {
 }
 ```
 
-#### About `Validation`s
+#### About `Validator`s
 
-A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
+A `Validator` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator's weight changes.
 
-Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the L1's validator set, as defined in ACP-77.
+Each `Validator` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the L1's validator set, as defined in ACP-77.
 
 ### Contract Specification
 
@@ -115,14 +115,14 @@ For a full implementation, please see the [Reference Implementation](#reference-
 /*
  * @title ACP99Manager
  * @notice The ACP99Manager interface represents the functionality for sovereign L1
- * validator management, as specified in ACP-77
+ * validator management, as specified in ACP-77.
  */
 abstract contract ACP99Manager {
-    /// @notice Emitted when an initial validator is registered
+    /// @notice Emitted when an initial validator is registered.
     event RegisteredInitialValidator(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
     );
-    /// @notice Emitted when a validator registration to the L1 is initiated
+    /// @notice Emitted when a validator registration to the L1 is initiated.
     event InitiatedValidatorRegistration(
         bytes32 indexed nodeID,
         bytes32 indexed validationID,
@@ -130,31 +130,31 @@ abstract contract ACP99Manager {
         uint64 registrationExpiry,
         uint64 weight
     );
-    /// @notice Emitted when a validator registration to the L1 is completed
+    /// @notice Emitted when a validator registration to the L1 is completed.
     event CompletedValidatorRegistration(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
     );
-    /// @notice Emitted when a validator weight update is initiated
+    /// @notice Emitted when a validator weight update is initiated.
     event InitiatedValidatorWeightUpdate(
         bytes32 indexed nodeID,
         bytes32 indexed validationID,
         bytes32 weightUpdateMessageID,
         uint64 weight
     );
-    /// @notice Emitted when a validator weight update is completed
+    /// @notice Emitted when a validator weight update is completed.
     event CompletedValidatorWeightUpdate(
         bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
     );
 
-    /// @notice Returns the ID of the Subnet tied to this manager
+    /// @notice Returns the ID of the Subnet tied to this manager.
     function subnetID() virtual public view returns (bytes32);
 
-    /// @notice Returns the validation details for a given validation ID
+    /// @notice Returns the validator details for a given validation ID.
     function getValidator(
         bytes32 validationID
     ) virtual public view returns (Validator memory);
 
-    /// @notice Returns the total weight of the current L1 validator set
+    /// @notice Returns the total weight of the current L1 validator set.
     function l1TotalWeight() virtual public view returns (uint64);
 
     /**
@@ -164,7 +164,7 @@ abstract contract ACP99Manager {
      * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
      *
      * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
-     * @param messsageIndex The index that contains the SubnetToL1ConversionMessage Warp message containing the ConversionID to be verified against the provided {conversionData}
+     * @param messsageIndex The index that contains the SubnetToL1ConversionMessage Warp message containing the ConversionID to be verified against the provided {conversionData}.
      */
     function initializeValidatorSet(
         ConversionData calldata conversionData,
@@ -177,14 +177,15 @@ abstract contract ACP99Manager {
      *
      * Emits an {InitiatedValidatorRegistration} event on success.
      *
-     * @param nodeID The ID of the node to add to the L1
-     * @param blsPublicKey The BLS public key of the validator
-     * @param registrationExpiry The time after which this message is invalid
-     * @param remainingBalanceOwner The remaining balance owner of the validator
-     * @param disableOwner The disable owner of the validator
-     * @param weight The weight of the node on the L1
+     * @param nodeID The ID of the node to add to the L1.
+     * @param blsPublicKey The BLS public key of the validator.
+     * @param registrationExpiry The time after which this message is invalid.
+     * @param remainingBalanceOwner The remaining balance owner of the validator.
+     * @param disableOwner The disable owner of the validator.
+     * @param weight The weight of the node on the L1.
+     * @return ValidationID of the registered validator.
      */
-    function initiateValidatorRegistration(
+    function _initiateValidatorRegistration(
         bytes memory nodeID,
         bytes memory blsPublicKey,
         uint64 registrationExpiry,
@@ -200,6 +201,7 @@ abstract contract ACP99Manager {
      * Emits a {CompletedValidatorRegistration} event on success.
      *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     * @return ValidationID of the registered validator.
      */
     function completeValidatorRegistration(
         uint32 messageIndex
@@ -212,10 +214,11 @@ abstract contract ACP99Manager {
      *
      * Emits an {InitiatedValidatorWeightUpdate} event on success.
      *
-     * @param validationID The ID of the validation period to modify
-     * @param weight The new weight of the validation
+     * @param validationID The ID of the validator to modify.
+     * @param weight The new weight of the validator.
+     * @return Weight of the validator.
      */
-    function initiateValidatorWeightUpdate(
+    function _initiateValidatorWeightUpdate(
         bytes32 validationID,
         uint64 weight
     ) virtual internal returns (uint64);
@@ -224,9 +227,10 @@ abstract contract ACP99Manager {
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
      * validationID from the P-Chain. The validator weight change should not have any effect until this method is successfully called.
      *
-     * Emits a {CompletedValidatorWeightUpdate} event on success
+     * Emits a {CompletedValidatorWeightUpdate} event on success.
      *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     * @return ValidationID of the validator.
      */
     function completeValidatorWeightUpdate(
         uint32 messageIndex
@@ -238,13 +242,13 @@ abstract contract ACP99Manager {
 
 Most of the methods described above are `public`, with the exception of `initiateValidatorRegistration` and `initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as a PoA model requiring a specific sender, or a PoS model transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
 
-#### Returning Active Validations
+#### Returning Active Validators
 
-While `ACP99Manager` does provide a way to fetch a `Validation` based on its `validationID`, it does not include a method to return all active validations. This is because a `mapping` is a reasonable way to store active validations internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
+While `ACP99Manager` does provide a way to fetch a `Validator` based on its `validationID`, it does not include a method to return all active validators. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
 
 #### About `DisableL1ValidatorTx`
 
-This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validation of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
+This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validator of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
 
 ## Backwards Compatibility
 
@@ -335,9 +339,9 @@ The audit process of `ACP99Manager` and reference implementations is of the utmo
 
 ### Is there an interest to keep historical information about the validator set on the manager chain?
 
-It's undefined if `getValidation` should return historical information about ended validations. Should `ACP99Manager` enforce that validation information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `ACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
+It's undefined if `getValidator` should return historical information about historical validators. Should `ACP99Manager` enforce that validator information be kept in the contract's state indefinitely? Note that validator performance (uptime) is _not_ specified in the `ACP99Manager` interface, as it may not be relevant to some applications (e.g. PoA). Historical uptime would be a useful metric to query, but it may be more appropriately left to implementations to enforce.
 
-If we don't require `ACP99Manager` implementations to keep track of historical validations, this information will still be available in archive nodes and offchain tools (e.g. explorers).
+If we don't require `ACP99Manager` implementations to keep track of historical validators, this information will still be available in archive nodes and offchain tools (e.g. explorers).
 
 ### Should `ACP99Manager` include a churn control mechanism?
 
