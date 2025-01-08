@@ -103,7 +103,7 @@ struct Validation {
 
 A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
 
-Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the Subnet's validator set, as defined in ACP-77.
+Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the L1's validator set, as defined in ACP-77.
 
 ### Contract Specification
 
