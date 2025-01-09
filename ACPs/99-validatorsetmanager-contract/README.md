@@ -94,7 +94,6 @@ struct Validator {
     uint64 startingWeight;
     uint64 messageNonce;
     uint64 weight;
-    uint64 startTime;
     uint64 endTime;
 }
 ```
@@ -120,42 +119,42 @@ For a full implementation, please see the [Reference Implementation](#reference-
 abstract contract ACP99Manager {
     /// @notice Emitted when an initial validator is registered.
     event RegisteredInitialValidator(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
+        bytes32 indexed validationID, bytes nodeID, uint64 weight
     );
     /// @notice Emitted when a validator registration to the L1 is initiated.
     event InitiatedValidatorRegistration(
-        bytes32 indexed nodeID,
         bytes32 indexed validationID,
+        bytes nodeID
         bytes32 registrationMessageID,
         uint64 registrationExpiry,
         uint64 weight
     );
     /// @notice Emitted when a validator registration to the L1 is completed.
     event CompletedValidatorRegistration(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
+        bytes32 indexed validationID, bytes nodeID, uint64 weight
     );
     /// @notice Emitted when a validator weight update is initiated.
     event InitiatedValidatorWeightUpdate(
-        bytes32 indexed nodeID,
         bytes32 indexed validationID,
+        bytes nodeID,
         bytes32 weightUpdateMessageID,
         uint64 weight
     );
     /// @notice Emitted when a validator weight update is completed.
     event CompletedValidatorWeightUpdate(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
+        bytes32 indexed validationID, bytes nodeID, uint64 nonce, uint64 weight
     );
 
     /// @notice Returns the SubnetID of the L1 tied to this manager
-    function subnetID() virtual public view returns (bytes32);
+    function subnetID() virtual public view returns (bytes32 subnetID);
 
     /// @notice Returns the validator details for a given validation ID.
     function getValidator(
         bytes32 validationID
-    ) virtual public view returns (Validator memory);
+    ) virtual public view returns (Validator memory validator);
 
     /// @notice Returns the total weight of the current L1 validator set.
-    function l1TotalWeight() virtual public view returns (uint64);
+    function l1TotalWeight() virtual public view returns (uint64 weight);
 
     /**
      * @notice Verifies and sets the initial validator set for the chain through a P-Chain
@@ -183,7 +182,7 @@ abstract contract ACP99Manager {
      * @param remainingBalanceOwner The remaining balance owner of the validator.
      * @param disableOwner The disable owner of the validator.
      * @param weight The weight of the node on the L1.
-     * @return ValidationID of the registered validator.
+     * @return validationID The ID of the registered validator.
      */
     function _initiateValidatorRegistration(
         bytes memory nodeID,
@@ -192,7 +191,7 @@ abstract contract ACP99Manager {
         PChainOwner memory remainingBalanceOwner,
         PChainOwner memory disableOwner,
         uint64 weight
-    ) virtual internal returns (bytes32);
+    ) virtual internal returns (bytes32 validationID);
 
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
@@ -201,11 +200,11 @@ abstract contract ACP99Manager {
      * Emits a {CompletedValidatorRegistration} event on success.
      *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
-     * @return ValidationID of the registered validator.
+     * @return validationID The ID of the registered validator.
      */
     function completeValidatorRegistration(
         uint32 messageIndex
-    ) virtual public returns (bytes32);
+    ) virtual public returns  (bytes32 validationID);
 
     /**
      * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
@@ -216,12 +215,13 @@ abstract contract ACP99Manager {
      *
      * @param validationID The ID of the validator to modify.
      * @param weight The new weight of the validator.
-     * @return Weight of the validator.
+     * @return nonce The validator nonce associated with the weight change.
+     * @return messageID The ICM message used to update the validator's weight.
      */
     function _initiateValidatorWeightUpdate(
         bytes32 validationID,
         uint64 weight
-    ) virtual internal returns (uint64);
+    ) virtual internal returns (uint64 nonce, bytes32 messageID);
 
     /**
      * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
@@ -230,17 +230,17 @@ abstract contract ACP99Manager {
      * Emits a {CompletedValidatorWeightUpdate} event on success.
      *
      * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
-     * @return ValidationID of the validator.
+     * @return validationID The ID of the validator.
      */
     function completeValidatorWeightUpdate(
         uint32 messageIndex
-    ) virtual public returns (bytes32);
+    ) virtual public returns (bytes32 validationID);
 }
 ```
 
 #### Internal Functions
 
-Most of the methods described above are `public`, with the exception of `initiateValidatorRegistration` and `initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as a PoA model requiring a specific sender, or a PoS model transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
+Most of the methods described above are `public`, with the exception of `_initiateValidatorRegistration` and `_initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as a PoA model requiring a specific sender, or a PoS model transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
 
 #### Returning Active Validators
 
