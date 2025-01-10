@@ -105,7 +105,7 @@ struct Validator {
 
 A `Validator` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator's weight changes.
 
-Each `Validator` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the L1's validator set, as defined in ACP-77.
+Each `Validator` is identified by its `validationID`. If a validator was added as part of the initial set of continuous dynamic fee paying validators, its `validationID` is the SHA256 hash of the `ConvertSubnetToL1Tx` ID and the index of the initial validator. If a validator was added to the L1's validator set post-conversion, its `validationID` is the SHA256 of the payload of the `AddressedCall` in the `RegisterL1ValidatorTx` used to add it, as defined in ACP-77.
 
 ### Contract Specification
 
