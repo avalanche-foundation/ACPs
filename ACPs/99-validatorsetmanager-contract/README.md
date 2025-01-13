@@ -262,7 +262,7 @@ abstract contract ACP99Manager {
     ) virtual internal returns (uint64 nonce, bytes32 messageID);
 
     /**
-     * @notice Completes the validator weight update process by consuming a L1ValidatorWeightMessage from the P-Chain
+     * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
      * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
      *
      * Emits a {CompletedValidatorWeightUpdate} event on success.
