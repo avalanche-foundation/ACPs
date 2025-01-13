@@ -246,7 +246,7 @@ abstract contract ACP99Manager {
     ) virtual public returns (bytes32 validationID);
 
     /**
-     * @notice Initiates validator weight update by issuing a L1ValidatorWeightMessage with a nonzero weight.
+     * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
      * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
      *
      * Emits an {InitiatedValidatorWeightUpdate} event on success.
