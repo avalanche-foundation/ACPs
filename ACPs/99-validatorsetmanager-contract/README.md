@@ -222,7 +222,7 @@ abstract contract ACP99Manager {
     ) virtual public returns  (bytes32 validationID);
 
     /**
-    * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
+    * @notice Initiates validator removal by issuing an L1ValidatorWeightMessage with the weight set to zero.
     * The validator should be considered inactive as soon as this function is called.
     *
     * Emits an {InitiatedValidatorRemoval} on success.
