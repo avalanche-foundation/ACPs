@@ -107,7 +107,7 @@ The parameters at activation are:
 | $T$ - target gas consumed per second | 50,000 |
 | $M$ - minimum gas price | 1 nAVAX |
 | $K$ - gas price update constant | 2_164_043 |
-| $C$ - gas capacity | 1,000,000 |
+| $C$ - maximum gas capacity | 1,000,000 |
 | $R$ - gas capacity added per second | 100,000 |
 
 $K$ was chosen such that at sustained maximum capacity ($R=100,000$ gas/second), the fee rate will double every ~30 seconds.
