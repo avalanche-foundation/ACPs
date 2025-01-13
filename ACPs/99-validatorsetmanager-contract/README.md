@@ -234,7 +234,7 @@ abstract contract ACP99Manager {
     ) virtual internal;
 
     /**
-    * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
+    * @notice Completes validator removal by consuming a RegisterL1ValidatorMessage from the P-Chain acknowledging
     * that the validator has been removed.
     *
     * Emits a {CompletedValidatorRemoval} on success.
