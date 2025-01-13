@@ -16,7 +16,9 @@ In order to safely utilize randomness produced by this mechanism, the consumer o
 3. After waiting for `x` blocks, the consumer must verify that the randomness was not biased during the `x` blocks.
 4. If the randomness was biased, it insufficient to request randomness again, as this would allow the malicious block producer to discard randomness that it did not like. The consumer of randomness must be able to terminate the request for randomness in such a way that no participant would desire the outcome. However, potential griefing attacks would result from such a construction.
 
-There are alternative mechanisms that would not result in such concerns.
+### Alternative Mechanisms
+
+There are alternative mechanisms that would not result in such security concerns.
 
 - Utilizing a deterministic threshold signature scheme to finalize a block in consensus would allow the threshold signature to be used during the execution of the block.
 - Utilizing threshold commit-reveal schemes that guarantee that committed values will always be revealed timely.
