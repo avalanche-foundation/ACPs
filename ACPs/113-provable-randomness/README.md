@@ -2,9 +2,30 @@
 | :------------ | :------------------------------------------------------------------------------------ |
 | **Title**     | Provable Virtual Machine Randomness                                                   |
 | **Author(s)** | Tsachi Herman <http://github.com/tsachiherman>                                        |
-| **Status**    | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/142)) |
+| **Status**    | Stale ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/142)) |
 | **Track**     | Standards                                                                             |
 
+## Future Work
+
+This ACP was marked as stale due to its documented security concerns.
+
+In order to safely utilize randomness produced by this mechanism, the consumer of the randomness must:
+
+1. Define a security threshold `x` which is the maximum number of consecutive blocks which can be proposed by a malicious entity.
+2. After committing to a request for randomness, the consumer must wait for `x` blocks.
+3. After waiting for `x` blocks, the consumer must verify that the randomness was not biased during the `x` blocks.
+4. If the randomness was biased, it would be insufficient to request randomness again, as this would allow the malicious block producer to discard any randomness that it did not like. If using the randomness mechanism proposed in this ACP, the consumer of the randomness must be able to terminate the request for randomness in such a way that no participant would desire the outcome. Griefing attacks would likely result from such a construction.
+
+### Alternative Mechanisms
+
+There are alternative mechanisms that would not result in such security concerns, such as:
+
+- Utilizing a deterministic threshold signature scheme to finalize a block in consensus would allow the threshold signature to be used during the execution of the block.
+- Utilizing threshold commit-reveal schemes that guarantee that committed values will always be revealed in a timely manner.
+
+However, these mechanisms are likely too costly to be introduced into the Avalanche Primary Network due to its validator set size.
+
+It is left to a future ACP to specify the implementation of one of these alternative schemes for L1 networks with smaller sized validator sets.
 
 ## Abstract
 
