@@ -48,9 +48,9 @@ $$x = 0$$
 
 At the start of building/executing block $b$, $x$ is updated:
 
-$$x = \max(x - (T \cdot \Delta t), 0)$$
+$$x = \max(x - T \cdot \Delta{t}, 0)$$
 
-Where $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp.
+Where $\Delta{t}$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp.
 
 The gas price for block $b$ is:
 
@@ -82,7 +82,7 @@ $$x = x + G$$
 
 Whenever $x$ increases by $K$, the gas price increases by a factor of `~2.7`. If the gas price gets too expensive, average gas consumption drops, and $x$ starts decreasing, dropping the price. The gas price constantly adjusts to make sure that, on average, the blockchain consumes $T$ gas per second.
 
-A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) is employed to meter the maximum rate of gas consumption. Define $L$ as the capacity of the bucket, $S$ as the number of seconds for the bucket to leak $L$ gas ($\frac{L}{S}$ gas leaked per second), and $r$ as the amount of gas that can be added to the bucket without it overflowing.
+A [token bucket](https://en.wikipedia.org/wiki/Token_bucket) is employed to meter the maximum rate of gas consumption. Define $C$ as the capacity of the bucket, $R$ as the amount of gas to add to the bucket per second, and $r$ as the amount of gas currently in the bucket.
 
 Prior to the activation of this mechanism, $r$ is initialized:
 
@@ -90,9 +90,9 @@ $$r = 0$$
 
 At the beginning of processing block $b$, $r$ is set:
 
-$$r = \min\left(r + \frac{L \cdot \Delta{t}}{S}, L\right)$$
+$$r = \min\left(r + R \cdot \Delta{t}, C\right)$$
 
-Where $\Delta t$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp. The maximum gas consumed in a given $\Delta{t}$ is $r + \frac{L \cdot \Delta{t}}{S}$. The upper bound across all $\Delta{t}$ is $L + \frac{L \cdot \Delta{t}}{S}$.
+Where $\Delta{t}$ is the number of seconds between $b$'s block timestamp and $b$'s parent's block timestamp. The maximum gas consumed in a given $\Delta{t}$ is $r + R \cdot \Delta{t}$. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$.
 
 After processing block $b$, the total gas consumed in $b$, or $G$, will be known. If $G \gt r$, $b$ is considered an invalid block. If $b$ is a valid block, $r$ is updated:
 
@@ -107,10 +107,10 @@ The parameters at activation are:
 | $T$ - target gas consumed per second | 50,000 |
 | $M$ - minimum gas price | 1 nAVAX |
 | $K$ - gas price update constant | 2_164_043 |
-| $L$ - gas limit constant | 1,000,000 |
-| $S$ - gas limit time period | 10 seconds |
+| $C$ - maximum gas capacity | 1,000,000 |
+| $R$ - gas capacity added per second | 100,000 |
 
-$K$ was chosen such that at sustained maximum capacity (100,000 gas/second), the fee rate will double every ~30 seconds.
+$K$ was chosen such that at sustained maximum capacity ($R=100,000$ gas/second), the fee rate will double every ~30 seconds.
 
 As the network gains capacity to handle additional load, this algorithm can be tuned to increase the gas consumption rate.
 
