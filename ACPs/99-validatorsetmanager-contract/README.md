@@ -160,7 +160,7 @@ abstract contract ACP99Manager {
     );
 
     /// @notice Returns the SubnetID of the L1 tied to this manager
-    function subnetID() virtual public view returns (bytes32 subnetID);
+    function subnetID() virtual public view returns (bytes32 id);
 
     /// @notice Returns the validator details for a given validation ID.
     function getValidator(
