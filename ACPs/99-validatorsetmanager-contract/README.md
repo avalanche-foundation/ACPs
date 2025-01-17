@@ -103,7 +103,7 @@ struct Validator {
 
 #### About `Validator`s
 
-A `Validator` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator's weight changes.
+A `Validator` represents the continuous time frame during which a node is part of the validator set.
 
 Each `Validator` is identified by its `validationID`. If a validator was added as part of the initial set of continuous dynamic fee paying validators, its `validationID` is the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `ConvertSubnetToL1Tx` transaction ID and the 4 byte index of the initial validator within the transaction. If a validator was added to the L1's validator set post-conversion, its `validationID` is the SHA256 of the payload of the `AddressedCall` in the `RegisterL1ValidatorTx` used to add it, as defined in ACP-77.
 
@@ -237,7 +237,7 @@ abstract contract ACP99Manager {
         returns (bytes32 validationID);
 
     /**
-     * @notice Initiates validator weight update by issuing a L1ValidatorWeightMessage with a nonzero weight.
+     * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
      * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
      *
      * Emits an {InitiatedValidatorWeightUpdate} event on success.
@@ -253,7 +253,7 @@ abstract contract ACP99Manager {
     ) internal virtual returns (uint64 nonce, bytes32 messageID);
 
     /**
-     * @notice Completes the validator weight update process by consuming a L1ValidatorWeightMessage from the P-Chain
+     * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
      * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
      *
      * Emits a {CompletedValidatorWeightUpdate} event on success.
