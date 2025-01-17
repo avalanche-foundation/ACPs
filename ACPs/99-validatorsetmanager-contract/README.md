@@ -268,11 +268,12 @@ abstract contract ACP99Manager {
      * Emits a {CompletedValidatorWeightUpdate} event on success.
      *
      * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
-     * @return validationID The ID of the validator.
+     * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
+     * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
      */
     function completeValidatorWeightUpdate(
         uint32 messageIndex
-    ) virtual public returns (bytes32 validationID);
+    ) virtual public returns (bytes32 validationID, uint64 nonce);
 }
 ```
 
