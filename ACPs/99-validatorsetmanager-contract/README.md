@@ -8,44 +8,65 @@
 
 ## Abstract
 
-Define (i) a reference interface for a minimal Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain, as well as (ii) a modular architecture to easily plug in custom “security modules” on top of this contract (e.g. to implement a PoS Subnet).
+Define a standard Validator Manager Solidity smart contract to be deployed on any Avalanche EVM chain.
 
 This ACP relies on concepts introduced in [ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets). It depends on it to be marked as `Implementable`.
 
 ## Motivation
 
-[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing an L1 validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a "validator manager". This `(blockchainID, address)` pair is responsible for sending Warp messages contained within `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` on the P-Chain. This enables an on-chain program to add, modify the weight of, and remove validators.
+[ACP-77 (Reinventing Subnets)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets) opens the door to managing an L1 validator set (stored on the P-Chain) from any chain on the Avalanche Network. The P-Chain allows a Subnet to specify a "validator manager" if it is converted to an L1 using `ConvertSubnetToL1Tx`. This `(blockchainID, address)` pair is responsible for sending ICM messages contained within `RegisterL1ValidatorTx` and `SetL1ValidatorWeightTx` on the P-Chain. This enables an on-chain program to add, modify the weight of, and remove validators.
 
 On each validator set change, the P-Chain is willing to sign an `AddressedCall` to notify any on-chain program tracking the validator set. On-chain programs must be able to interpret this message, so they can trigger the appropriate action. The 2 kinds of `AddressedCall`s [defined in ACP-77](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#p-chain-warp-message-payloads) are `L1ValidatorRegistrationMessage` and `L1ValidatorWeightMessage`.
 
-Given these assumptions and the fact that most of the active blockchains on Avalanche mainnet are EVM-based, we propose defining a reference implementation for a Solidity smart contract that can:
+Given these assumptions and the fact that most of the active blockchains on Avalanche Mainnet are EVM-based, we propose `ACP99Manager` as the standard Solidity contract specification that can:
 
-1. Hold relevant information about the current Subnet validator set, as well as historical information
+1. Hold relevant information about the current L1 validator set
 2. Send validator set updates to the P-Chain by generating `AdressedCall`s defined in ACP-77
 3. Correctly update the validator set by interpreting notification messages received from the P-Chain
-4. Be easily extended with custom “security modules” to implement any security model (e.g. PoS). Those modules have to implement the `IACP99SecurityModule` interface and will be called by the `ACP99Manager` contract upon validator set updates.
+4. Be easily integrated into validator manager implementations that utilize various security models (e.g. Proof-of-Stake).
 
-Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching Subnets on Avalanche.
+Having an audited and open-source reference implementation freely available will contribute to lowering the cost of launching L1s on Avalanche.
 
-Once deployed, the `ACP99Manager` contract will be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
+Once deployed, the `ACP99Manager` implementation contract can be used as the `Address` in the [`ConvertSubnetToL1Tx`](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/77-reinventing-subnets#convertsubnettol1tx).
 
 ## Specification
 
-**Note:** The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
+> **Note:**: The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
 
-### IACP99Manager
 
-Here is the proposed interface for the `IACP99Manager` contract:
+### Type Definitions
+
+The following type definitions are used in the function signatures described in [Contract Specification](#contract-specification)
 
 ```solidity
-/// @notice L1 validation status
-enum ValidationStatus {
-    Registering,
+/**
+ * @notice Description of the conversion data used to convert
+ * a subnet to an L1 on the P-Chain.
+ * This data is the pre-image of a hash that is authenticated by the P-Chain
+ * and verified by the Validator Manager.
+ */
+struct ConversionData {
+    bytes32 subnetID;
+    bytes32 validatorManagerBlockchainID;
+    address validatorManagerAddress;
+    InitialValidator[] initialValidators;
+}
+
+/// @notice Specifies an initial validator, used in the conversion data.
+struct InitialValidator {
+    bytes nodeID;
+    bytes blsPublicKey;
+    uint64 weight;
+}
+
+/// @notice L1 validator status.
+enum ValidatorStatus {
+    Unknown,
+    PendingAdded,
     Active,
-    Updating,
-    Removing,
+    PendingRemoved,
     Completed,
-    Expired
+    Invalidated
 }
 
 /**
@@ -58,318 +79,229 @@ struct PChainOwner {
 }
 
 /**
- * @notice L1 validation
- * @param status The validation status
- * @param nodeID The NodeID of the validator
- * @param startTime The start time of the validation
- * @param endTime The end time of the validation
- * @param periods The list of validation periods.
- * The index is the nonce associated with the weight update.
- * @param activeSeconds The time during which the validator was active during this validation
- * @param uptimeSeconds The uptime of the validator for this validation
+ * @notice Contains the active state of a Validator.
+ * @param status The validator status.
+ * @param nodeID The NodeID of the validator.
+ * @param startingWeight The weight of the validator at the time of registration.
+ * @param sentNonce The current weight update nonce sent by the manager.
+ * @param receivedNonce The highest nonce received from the P-Chain.
+ * @param weight The current weight of the validator.
+ * @param startTime The start time of the validator.
+ * @param endTime The end time of the validator.
  */
-struct Validation {
-    ValidationStatus status;
-    bytes32 nodeID;
-    ValidationPeriod[] periods;
-}
-
-/**
- * @notice L1 validation period
- * @param weight The weight of the validator during the period
- * @param startTime The start time of the validation period
- * @param endTime The end time of the validation period (only ≠ 0 when the period is over)
- */
-struct ValidationPeriod {
+struct Validator {
+    ValidatorStatus status;
+    bytes nodeID;
+    uint64 startingWeight;
+    uint64 sentNonce;
+    uint64 receivedNonce;
     uint64 weight;
     uint64 startTime;
     uint64 endTime;
-    uint64 uptimeSeconds;
 }
+```
 
-/**
- * @notice Information about a validator's uptime
- * @param activeSeconds The total number of seconds the validator was active
- * @param uptimeSeconds The total number of seconds the validator was online
- * @param activeWeightSeconds The total weight x seconds the validator was active
- * @param uptimeWeightSeconds The total weight x seconds the validator was online
- */
-struct ValidatorUptimeInfo {
-    uint64 activeSeconds;
-    uint64 uptimeSeconds;
-    uint256 activeWeightSeconds;
-    uint256 uptimeWeightSeconds;
-}
+#### About `Validator`s
 
+A `Validator` represents the continuous time frame during which a node is part of the validator set.
+
+Each `Validator` is identified by its `validationID`. If a validator was added as part of the initial set of continuous dynamic fee paying validators, its `validationID` is the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `ConvertSubnetToL1Tx` transaction ID and the 4 byte index of the initial validator within the transaction. If a validator was added to the L1's validator set post-conversion, its `validationID` is the SHA256 of the payload of the `AddressedCall` in the `RegisterL1ValidatorTx` used to add it, as defined in ACP-77.
+
+### Contract Specification
+
+The following abstract contract describes the standard `ACP99Manager` functionality. 
+
+For a full implementation, please see the [Reference Implementation](#reference-implementation)
+
+```solidity
 /*
- * @title IACP99Manager
- * @notice The IACP99Manager interface is the interface for the ACP99Manager contract.
+ * @title ACP99Manager
+ * @notice The ACP99Manager interface represents the functionality for sovereign L1
+ * validator management, as specified in ACP-77.
  */
-interface IACP99Manager {
-    /// @notice Emitted when the security module address is set
-    event SetSecurityModule(address indexed securityModule);
-    /// @notice Emitted when an initial validator is registered
-    event RegisterInitialValidator(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
-    );
-    /// @notice Emitted when a validator registration to the L1 is initiated
-    event InitiateValidatorRegistration(
-        bytes32 indexed nodeID,
+abstract contract ACP99Manager {
+    /// @notice Emitted when an initial validator is registered.
+    event RegisteredInitialValidator(bytes32 indexed validationID, bytes20 indexed nodeID, uint64 weight);
+    /// @notice Emitted when a validator registration to the L1 is initiated.
+    event InitiatedValidatorRegistration(
         bytes32 indexed validationID,
+        bytes20 indexed nodeID,
         bytes32 registrationMessageID,
         uint64 registrationExpiry,
         uint64 weight
     );
-    /// @notice Emitted when a validator registration to the L1 is completed
-    event CompleteValidatorRegistration(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 weight
-    );
-    /// @notice Emitted when a validator weight update is initiated
-    event InitiateValidatorWeightUpdate(
-        bytes32 indexed nodeID,
+    /// @notice Emitted when a validator registration to the L1 is completed.
+    event CompletedValidatorRegistration(bytes32 indexed validationID, uint64 weight);
+    /// @notice Emitted when removal of an L1 validator is initiated.
+    event InitiatedValidatorRemoval(
         bytes32 indexed validationID,
-        bytes32 weightUpdateMessageID,
-        uint64 weight
+        bytes32 validatorWeightMessageID,
+        uint64 weight,
+        uint64 endTime
     );
-    /// @notice Emitted when a validator weight update is completed
-    event CompleteValidatorWeightUpdate(
-        bytes32 indexed nodeID, bytes32 indexed validationID, uint64 nonce, uint64 weight
+    /// @notice Emitted when removal of an L1 validator is completed.
+    event CompletedValidatorRemoval(bytes32 indexed validationID);
+    /// @notice Emitted when a validator weight update is initiated.
+    event InitiatedValidatorWeightUpdate(
+        bytes32 indexed validationID, uint64 nonce, bytes32 weightUpdateMessageID, uint64 weight
     );
+    /// @notice Emitted when a validator weight update is completed.
+    event CompletedValidatorWeightUpdate(bytes32 indexed validationID, uint64 nonce, uint64 weight);
 
-    error ACP99Manager__ValidatorSetAlreadyInitialized();
-    error ACP99Manager__InvalidConversionID(bytes32 conversionID, bytes32 messageConversionID);
-    error ACP99Manager__InvalidManagerBlockchainID(
-        bytes32 managerBlockchainID, bytes32 conversionBlockchainID
-    );
-    error ACP99Manager__InvalidManagerAddress(address managerAddress, address conversionAddress);
-    error ACP99Manager__ZeroAddressSecurityModule();
-    error ACP99Manager__OnlySecurityModule(address sender, address securityModule);
-    error ACP99Manager__InvalidExpiry(uint64 expiry, uint256 timestamp);
-    error ACP99Manager__ZeroNodeID();
-    error ACP99Manager__NodeAlreadyValidator(bytes nodeID);
-    error ACP99Manager__InvalidPChainOwnerThreshold(uint256 threshold, uint256 addressesLength);
-    error ACP99Manager__PChainOwnerAddressesNotSorted();
-    error ACP99Manager__InvalidSignatureLength(uint256 length);
-    error ACP99Manager__InvalidValidationID(bytes32 validationID);
-    error ACP99Manager__InvalidWarpMessage();
-    error ACP99Manager__InvalidSourceChainID(bytes32 sourceChainID);
-    error ACP99Manager__InvalidOriginSenderAddress(address originSenderAddress);
-    error ACP99Manager__InvalidRegistration();
-    error ACP99Manager__NodeIDNotActiveValidator(bytes nodeID);
-    error ACP99Manager__InvalidUptimeValidationID(bytes32 validationID);
-    error ACP99Manager__InvalidSetL1ValidatorWeightNonce(uint64 nonce, uint64 currentNonce);
+    /// @notice Returns the SubnetID of the L1 tied to this manager
+    function subnetID() public view virtual returns (bytes32 id);
 
-    /// @notice Get the ID of the Subnet tied to this manager
-    function subnetID() external view returns (bytes32);
+    /// @notice Returns the validator details for a given validation ID.
+    function getValidator(bytes32 validationID)
+        public
+        view
+        virtual
+        returns (Validator memory validator);
 
-    /// @notice Get the address of the security module attached to this manager
-    function getSecurityModule() external view returns (address);
-
-    /// @notice Get the validation details for a given validation ID
-    function getValidation(
-        bytes32 validationID
-    ) external view returns (Validation memory);
-
-    /// @notice Get the uptime information for a given validation ID
-    function getValidationUptimeInfo(
-        bytes32 validationID
-    ) external view returns (ValidatorUptimeInfo memory);
-
-    /// @notice Get an L1 validator's active validation ID
-    function getValidatorActiveValidation(
-        bytes memory nodeID
-    ) external view returns (bytes32);
-
-    /// @notice Get the current L1 validator set (list of NodeIDs)
-    function getActiveValidatorSet() external view returns (bytes32[] memory);
-
-    /// @notice Get the total weight of the current L1 validator set
-    function l1TotalWeight() external view returns (uint64);
-
-    /// @notice Get the list of message IDs associated with an L1 validator
-    function getValidatorValidations(
-        bytes memory nodeID
-    ) external view returns (bytes32[] memory);
+    /// @notice Returns the total weight of the current L1 validator set.
+    function l1TotalWeight() public view virtual returns (uint64 weight);
 
     /**
-     * @notice Set the address of the security module attached to this manager
-     * @param securityModule_ The address of the security module
-     */
-    function setSecurityModule(
-        address securityModule_
-    ) external;
-
-    /**
-     * @notice Verifies and sets the initial validator set for the chain through a P-Chain
-     * SubnetToL1ConversionMessage.
+     * @notice Verifies and sets the initial validator set for the chain by consuming a
+     * SubnetToL1ConversionMessage from the P-Chain.
+     *
+     * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
+     *
      * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
-     * @param messsageIndex The index that contains the SubnetToL1ConversionMessage Warp message containing the ConversionID to be verified against the provided {conversionData}
+     * @param messsageIndex The index that contains the SubnetToL1ConversionMessage ICM message containing the
+     * ConversionID to be verified against the provided {conversionData}.
      */
     function initializeValidatorSet(
         ConversionData calldata conversionData,
         uint32 messsageIndex
-    ) external;
+    ) public virtual;
 
     /**
-     * @notice Initiate a validator registration by issuing a RegisterL1ValidatorTx Warp message
-     * @param nodeID The ID of the node to add to the L1
-     * @param blsPublicKey The BLS public key of the validator
-     * @param registrationExpiry The time after which this message is invalid
-     * @param remainingBalanceOwner The remaining balance owner of the validator
-     * @param disableOwner The disable owner of the validator
-     * @param weight The weight of the node on the L1
+     * @notice Initiates validator registration by issuing a RegisterL1ValidatorMessage. The validator should
+     * not be considered active until completeValidatorRegistration is called.
+     *
+     * Emits an {InitiatedValidatorRegistration} event on success.
+     *
+     * @param nodeID The ID of the node to add to the L1.
+     * @param blsPublicKey The BLS public key of the validator.
+     * @param registrationExpiry The time after which this message is invalid.
+     * @param remainingBalanceOwner The remaining balance owner of the validator.
+     * @param disableOwner The disable owner of the validator.
+     * @param weight The weight of the node on the L1.
+     * @return validationID The ID of the registered validator.
      */
-    function initiateValidatorRegistration(
+    function _initiateValidatorRegistration(
         bytes memory nodeID,
         bytes memory blsPublicKey,
         uint64 registrationExpiry,
         PChainOwner memory remainingBalanceOwner,
         PChainOwner memory disableOwner,
         uint64 weight
-    ) external returns (bytes32);
-
-    /**
-     * @notice Resubmits a validator registration message to be sent to P-Chain.
-     * Only necessary if the original message can't be delivered due to validator churn.
-     * @param validationID The validationID attached to the registration message
-     */
-    function resendValidatorRegistrationMessage(
-        bytes32 validationID
-    ) external returns (bytes32);
+    ) internal virtual returns (bytes32 validationID);
 
     /**
      * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
-     * validationID from the P-Chain.
-     * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
+     *
+     * Emits a {CompletedValidatorRegistration} event on success.
+     *
+     * @param messageIndex The index of the L1ValidatorRegistrationMessage to be received providing the acknowledgement.
+     * @return validationID The ID of the registered validator.
      */
-    function completeValidatorRegistration(
-        uint32 messageIndex
-    ) external;
+    function completeValidatorRegistration(uint32 messageIndex)
+        public
+        virtual
+        returns (bytes32 validationID);
 
     /**
-     * @notice Updates the uptime of a validator for a given validation ID
-     * @param nodeID The ID of the node to update the uptime for
-     * @param messageIndex The index of the Warp message to be received providing the uptime proof
+     * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
+     * The validator should be considered inactive as soon as this function is called.
+     *
+     * Emits an {InitiatedValidatorRemoval} on success.
+     *
+     * @param validationID The ID of the validator to remove.
      */
-    function updateUptime(
-        bytes memory nodeID,
-        uint32 messageIndex
-    ) external returns (ValidatorUptimeInfo memory);
+    function _initiateValidatorRemoval(bytes32 validationID) internal virtual;
 
     /**
-     * @notice Initiate a validator weight update by issuing a SetL1ValidatorWeightTx Warp message.
-     * If the weight is 0, this initiates the removal of the validator from the L1. An uptime proof can be
-     * included. This proof might be required to claim validator rewards (handled by the security module).
-     * @param nodeID The ID of the node to modify
-     * @param weight The new weight of the node on the L1
-     * @param includesUptimeProof Whether the uptime proof is included in the message
-     * @param messageIndex The index of the Warp message containing the uptime proof
+     * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
+     * that the validator has been removed.
+     *
+     * Emits a {CompletedValidatorRemoval} on success.
+     *
+     * @param messageIndex The index of the RegisterL1ValidatorMessage.
      */
-    function initiateValidatorWeightUpdate(
-        bytes memory nodeID,
-        uint64 weight,
-        bool includesUptimeProof,
-        uint32 messageIndex
-    ) external;
+    function completeValidatorRemoval(uint32 messageIndex)
+        public
+        virtual
+        returns (bytes32 validationID);
 
     /**
-     * @notice Completes the validator weight update process by returning an acknowledgement of the weight update of a
-     * validationID from the P-Chain.
-     * @param messageIndex The index of the Warp message to be received providing the acknowledgement.
+     * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
+     * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
+     *
+     * Emits an {InitiatedValidatorWeightUpdate} event on success.
+     *
+     * @param validationID The ID of the validator to modify.
+     * @param weight The new weight of the validator.
+     * @return nonce The validator nonce associated with the weight change.
+     * @return messageID The ID of the L1ValidatorWeightMessage used to update the validator's weight.
      */
-    function completeValidatorWeightUpdate(
-        uint32 messageIndex
-    ) external;
+    function _initiateValidatorWeightUpdate(
+        bytes32 validationID,
+        uint64 weight
+    ) internal virtual returns (uint64 nonce, bytes32 messageID);
+
+    /**
+     * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
+     * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
+     *
+     * Emits a {CompletedValidatorWeightUpdate} event on success.
+     *
+     * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
+     * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
+     * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
+     */
+    function completeValidatorWeightUpdate(uint32 messageIndex)
+        public
+        virtual
+        returns (bytes32 validationID, uint64 nonce);
 }
 ```
 
-**Note:** The NodeIDs are stored as `bytes32` in the `ACP99Manager` interface to simplify the implementation.
+#### Internal Functions
 
-#### About `Validation`s
+Most of the methods described above are `public`, with the exception of `_initiateValidatorRegistration`, `_initiateValidatorRemoval`, and `_initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as checking uptime attested to via ICM message, or transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
 
-A `Validation` represents the continuous time frame during which a node is part of the validator set and can be composed of multiple periods. A new period starts every time the validator weight changes during the same validation.
+#### Returning Active Validators
 
-Each `Validation` is identified by its `validationID` which is the SHA256 of the Payload of the `AddressedCall` in the `RegisterL1ValidatorTx` adding the validator to the Subnet's validator set, as defined in ACP-77.
+While `ACP99Manager` does provide a way to fetch a `Validator` based on its `validationID`, it does not include a method to return all active validators. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
 
 #### About `DisableL1ValidatorTx`
 
-This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validation of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
+This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validator of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
 
-### IACP99SecurityModule
+## Backwards Compatibility
 
-Here is the proposed interface for the `IACP99SecurityModule` contract:
+`ACP99Manager` is a reference specification. As such, it doesn't have any impact on the current behavior of the Avalanche protocol.
 
-```solidity
-/**
- * @notice Information about a validator registration
- * @param nodeID The NodeID of the validator node
- * @param validationID The ValidationID of the validation
- * @param weight The initial weight assigned to the validator
- * @param startTime The timestamp when the validation started
- */
-struct ValidatorRegistrationInfo {
-    bytes32 nodeID;
-    bytes32 validationID;
-    uint64 weight;
-    uint64 startTime;
-}
+## Reference Implementation
 
-/**
- * @notice Information about a change in a validator's weight
- * @param nodeID The NodeID of the validator node
- * @param validationID The ValidationID of the validation
- * @param nonce A sequential number to order weight changes
- * @param newWeight The new weight assigned to the validator
- * @param uptime The uptime information for the validator
- */
-struct ValidatorWeightChangeInfo {
-    bytes32 nodeID;
-    bytes32 validationID;
-    uint64 nonce;
-    uint64 newWeight;
-    ValidatorUptimeInfo uptimeInfo;
-}
+A reference implementation will be provided in Ava Labs' [ICM Contracts](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager) repository. This reference implementation will need to be updated to conform to `ACP99Manager` before this ACP may be marked `Implementable`.
 
-/*
- * @title IACP99SecurityModule
- * @author ADDPHO
- * @notice The IACP99SecurityModule interface is the interface for the ACP99 security modules.
- * @custom:security-contact security@suzaku.network
- */
-interface IACP99SecurityModule {
-    error ACP99SecurityModule__ZeroAddressManager();
-    error ACP99SecurityModule__OnlyManager(address sender, address manager);
+### Example Integrations
 
-    /// @notice Get the address of the ACP99Manager contract secured by this module
-    function getManagerAddress() external view returns (address);
+`ACP99Manager` is designed to be easily incorporated into any architecture. Two example integrations are included in this ACP, each of which uses a different architecture.
 
-    /**
-     * @notice Handle a validator registration
-     * @param validatorInfo The information about the validator
-     */
-    function handleValidatorRegistration(
-        ValidatorRegistrationInfo memory validatorInfo
-    ) external;
+#### Multi-contract Design
 
-    /**
-     * @notice Handle a validator weight change
-     * @param weightChangeInfo The information about the validator weight change
-     */
-    function handleValidatorWeightChange(
-        ValidatorWeightChangeInfo memory weightChangeInfo
-    ) external;
-}
-```
+The multi-contract design consists of a contract that implements `ACP99Manager`, and separate "security module" contracts that implement security models, such as PoS or PoA. Each `ACP99Manager` implementation contract is associated with one or more "security modules" that are the only contracts allowed to call the `ACP99Manager` functions that initiate validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Every time a validator is added/removed or a weight change is initiated, the `ACP99Manager` implementation will, in turn, call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security modules" reference an immutable `ACP99Manager` contract address for security reasons.
 
-### Reference Architecture
-
-Each `ACP99Manager` contract will be associated with one "security module" that must implement the `IACP99SecurityModule` interface and is the only contract allowed to call the `ACP99Manager` functions related to validator set changes (`initiateValidatorRegistration`, and `initiateValidatorWeightUpdate`). Every time a validator is added/removed or a weight change is initiated, the `ACP99Manager` will in turn call the corresponding function of the "security module" (`handleValidatorRegistration` or `handleValidatorWeightChange`). We recommend that the "security module" reference an immutable `ACP99Manager` contract address for security reasons.
-
-It is up to the "security module" to decide what action to take when a validator is added/removed or a weight change is confirmed by the P-Chain. Such actions could be starting the withdrawal period and allocating rewards in a PoS Subnet.
+It is up to the "security module" to decide what action to take when a validator is added/removed or a weight change is confirmed by the P-Chain. Such actions could be starting the withdrawal period and allocating rewards in a PoS L1.
 
 ```mermaid
 ---
-title: ACP-99 Architecture with a PoA Security Module
+title: ACP-99 Multi-contract Architecture with a PoA Security Module
 ---
 graph LR
   Safe(Safe multisig)
@@ -394,36 +326,55 @@ graph LR
 
 "Security modules" could implement PoS, Liquid PoS, etc. The specification of such smart contracts is out of the scope of this ACP.
 
-## Backwards Compatibility
+A work in progress implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/main/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
 
-The `IACP99Manager` and `IACP99SecurityModule` interfaces are only a reference interface, they don’t have any impact on the current behavior of the Avalanche protocol.
+#### Single-contract Design
 
-## Reference Implementation
+The single-contract design consists of a class hierarchy with the base class implementing `ACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS. 
 
-A work in progress reference implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/acp-99-implementation/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
+```mermaid
+---
+title: ACP-99 Single-Contract Architecture implementing PoA
+---
+  classDiagram
+  class ACP99Manager {
+    initializeValidatorSet
+    initiateValidatorRegistration
+    completeValidatorRegistration
+    initiateValidatorWeightUpdate
+    completeValidatorWeightUpdate
+  }
+  <<abstract>> ACP99Manager
+
+  class ValidatorManager {
+    completeValidatorRegistration
+  }
+  <<abstract>> ValidatorManager
+  class PoAValidatorManager {
+    initiateValidatorRegistration
+    initiateEndValidation
+    completeEndValidation
+  }
+
+  ACP99Manager <|--ValidatorManager
+  ValidatorManager <|-- PoAValidatorManager
+```
+
+This implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager).
 
 ## Security Considerations
 
-The audit process of the `ACP99Manager` contract is of the utmost importance for the future of the Avalanche ecosystem as most Subnets would rely upon it to secure their Subnet.
+The audit process of `ACP99Manager` and reference implementations is of the utmost importance for the future of the Avalanche ecosystem as most L1s would rely upon it to secure their L1.
 
 ## Open Questions
 
 ### Is there an interest to keep historical information about the validator set on the manager chain?
 
-The functions `getValidation` and `getValidatorValidations` would allow to retrieve historical information about the validator set directly from state, notably each validator's performance (uptime) during past validations.
-If we don't keep track of the historical information in the `ACP99Manager` contract, this information will still be available in archive nodes and offchain tools (e.g. explorers).
+It is left to the implementor to decide if `getValidator` should return information about historical validators. Information about past validator performance may not be relevant for all applications (e.g. PoA has no need to know about past validator's uptimes). This information will still be available in archive nodes and offchain tools (e.g. explorers), but it is not enforced at the contract level.
 
-### Is an upgradeable architecture more appropriate?
+### Should `ACP99Manager` include a churn control mechanism?
 
-The Teleporter team has been working on its own implementation of a `ValidatorManager` contract in the [teleporter](https://github.com/ava-labs/teleporter/blob/main/contracts/validator-manager/ValidatorManager.sol) repository that is based on abstract and upgradeable contracts.
-
-### Should the `ACP99Manager` include a churn control mechanism?
-
-The Teleporter team implentation of the `ValidatorManager` contract includes a churn control mechanism that prevents too much weight from being added or removed from the validator set in a short amount of time.
-
-### How could we name “Security Modules”?
-
-I don’t really like this name but cannot come up with anything else.
+The Ava Labs [implementation](https://github.com/ava-labs/icm-contracts/blob/main/contracts/validator-manager/ValidatorManager.sol) of the `ValidatorManager` contract includes a churn control mechanism that prevents too much weight from being added or removed from the validator set in a short amount of time. Excessive churn can cause consensus failures, so it may be appropriate to require that churn tracking is implemented in some capacity.
 
 ## Acknowledgments
 
