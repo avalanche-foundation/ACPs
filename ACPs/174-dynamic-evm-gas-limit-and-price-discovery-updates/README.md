@@ -46,15 +46,15 @@ Prior to the activation of this mechanism, $T$ is initialized to a prior estimat
 
 After the execution of block $b$, $T$ can be adjusted up or down:
 
-$$\frac{-T}{D} \le target\_change \le \frac{T}{D}$$
-$$T = max(P, T + target\_change)$$
+$$\frac{-T}{D} \le targetChange \le \frac{T}{D}$$
+$$T = max(P, T + targetChange)$$
 
 Where:
  - $D$ is the target gas consumption rate bound divisor
  - $P$ is the global minimum allowed target gas consumption rate for the network, which must be at least $D$.
- - $target\_change$ is set by the builder of block $b$ within the valid range. 
+ - $targetChange$ is set by the builder of block $b$ within the valid range. 
  
- If $|target\_change| > \frac{T}{D}$, block $b$ is considered invalid. Block builders (i.e. validators), may set their desired value for $T$ (i.e. `desired_rate`) in their configuration, and $target\_change$ can then be calculated for blocks that they build according to:
+ If $|targetChange| > \frac{T}{D}$, block $b$ is considered invalid. Block builders (i.e. validators), may set their desired value for $T$ (i.e. `desired_rate`) in their configuration, and $targetChange$ can then be calculated for blocks that they build according to:
 
   ```python
   # Calculates the amount by which to adjust the target gas consumed per second
