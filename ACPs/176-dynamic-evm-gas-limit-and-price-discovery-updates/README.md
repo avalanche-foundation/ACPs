@@ -136,6 +136,7 @@ Thanks to the following non-exhaustive list of individuals for input, discussion
 - [Luigi D'Onorio DeMeo](https://x.com/luigidemeo)
 - [Darioush Jalali](https://github.com/darioush)
 - [Aaron Buchwald](https://github.com/aaronbuchwald)
+- [Geoff Stuart](https://github.com/geoff-vball)
 
 ## Copyright
 
