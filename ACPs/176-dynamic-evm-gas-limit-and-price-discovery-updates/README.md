@@ -68,19 +68,23 @@ Where:
 
 As the value of $T$ dynamically adjusts after the execution of each block, the value of $R$ (capacity added per second) is also updated such that:
 
-$$R = T*2$$
+$$R = T \cdot 2$$
 
 This ensures that the gas price remains equally reactive in either direction depending on how far the actual gas consumption rate is from the target, whether it is above or below.
 
 The value of $C$ must also adjust proportionately, so we set:
 
-$$C = R*10$$
+$$C = R \cdot 10$$
 
 This means that the maximum stored gas capacity would be reached after 10 seconds where no blocks have been accepted.
 
 Note that the values of $T$, $R$, and $C$ are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transaction included in block $b$ itself.
 
 Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should loosely converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
+
+As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased different, the maximum amount of gas that can be consumed by any given block $b$ is:
+
+$$gasLimt_{b} = min(r + R \cdot \Delta{t}, C)$$ 
 
 Currently, it is not valid for a block to contain zero transactions since it would not have any effect and would be a waste of resources to accept into the blockchain. However, with this change, it is possible for blocks with zero transactions to still effect value of $T$. To ensure that validators are able to help influence the value of $T$ even if there are no transactions to be included at the time they are proposing a block, blocks with no transactions that alter the value of $T$ will now be considered valid. This makes it such that validators would not need to create and include a no-op transaction just be able to produce a block to alter the current value of $T$ if there are no pending transactions when it is their turn to propose a block.
 
