@@ -121,7 +121,7 @@ A full reference implementation has not been provided yet. It will be provided o
 
 ## Security Considerations
 
-This ACP changes the mechanism for determining the gas price on Avalanche EVM chains. The gas price is meant to adopt dynamically to respond to changes in demand for using the chain. If it does not react as expected, the chain could be at risk for a DOS attack (if the usage price is too low), or over charge users during period of low activity. This price discovery mechanism has already been employed on the P-Chain, but should again be thouroughly tested for use on the C-Chain prior to activation on the Avalanche Mainnet.
+This ACP changes the mechanism for determining the gas price on Avalanche EVM chains. The gas price is meant to adapt dynamically to respond to changes in demand for using the chain. If it does not react as expected, the chain could be at risk for a DOS attack (if the usage price is too low), or over charge users during period of low activity. This price discovery mechanism has already been employed on the P-Chain, but should again be thoroughly tested for use on the C-Chain prior to activation on the Avalanche Mainnet.
 
 Further, this ACP also introduces a mechanism for validators to change the gas limit of the C-Chain. If this limit is set too high, it is possible that validator nodes will not be able to keep up in the processing of blocks. An upper bound on the maximum possible gas limit could be considered to try to mitigate this risk, though it would then take further required network upgrades to scale the network past that limit. 
 
