@@ -103,7 +103,7 @@ Parameters at activation on the C-Chain are:
 
 $T$ was chosen as the current target gas consumption rate on the C-Chain. Avalanche L1s may change this value to match their current gas consumption rate if they would like.
 
-$M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correct react to any increase in network usage in order to prevent a DOS attack.
+$M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correctly react to any increase in network usage in order to prevent a DOS attack.
 
 $K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~30 seconds.
 
