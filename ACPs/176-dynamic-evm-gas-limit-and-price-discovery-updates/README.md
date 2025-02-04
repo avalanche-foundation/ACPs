@@ -98,6 +98,7 @@ $$gasLimt_{b} = min(r + R \cdot \Delta{t}, C)$$
 Currently, it is not valid for a block to contain zero transactions since it would not have any effect and would be a waste of resources to accept into the blockchain. However, with this change, it is possible for blocks with zero transactions to still effect value of $T$. To ensure that validators are able to help influence the value of $T$ even if there are no transactions to be included at the time they are proposing a block, blocks with no transactions that alter the value of $T$ will now be considered valid. This makes it such that validators would not need to create and include a no-op transaction just be able to produce a block to alter the current value of $T$ if there are no pending transactions when it is their turn to propose a block.
 
 ### Configuration Parameters
+
 As noted above, the gas price determination mechanism depends on the values of $T$, $M$, $K$, $C$, and $R$ to be set as parameters. $T$ is adjusted dynamically from its initial value based on $D$ and $P$, and the values of $R$ and $C$ are derived from $T$. 
 
 Parameters at activation on the C-Chain are:
@@ -121,6 +122,12 @@ $D$ and $Q$ were chosen to give each block builder the ability to adjust the val
 $M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correctly react to any increase in network usage in order to prevent a DOS attack.
 
 $K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~29.8 seconds.
+
+### Choosing a desired value for $T$
+
+As mentioned above, this new mechanism allows for validators to specify their desired target gas consumption rate ($T$) in their configuration, and the value that they set impacts the effective target gas consumption rate of the network over time. The higher the value of $T$, the more resources (storage, compute, etc) that are able to be used by the network. When choosing what value makes sense for them, validators should consider the resources that are required to properly support that level of gas consumption, the utility the network provides by having higher transaction per second throughput, and the stability of network should it reach that level of utilization.
+
+While Avalanche Network Clients can set default configuration values for the desired target gas consumption rate, each validator can choose to set this value independent based on their own considerations.
 
 ## Backwards Compatibility
 
