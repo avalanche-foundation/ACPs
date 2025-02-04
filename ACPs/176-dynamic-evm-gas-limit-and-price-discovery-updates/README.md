@@ -48,7 +48,7 @@ $$T = P \cdot e^{q/D}$$
 
 where $P$ is the global minimum allowed target gas consumption rate for the network, and $D$ is a constant that helps control the rate of change of the target gas consumption.
 
-After the execution of transactions in block $b$, the values $q$ can be increased or decreased up to $Q$. It must be the case that $q_{b-1} - Q \leq q_{b} \leq q_{b-1} + Q$, or block $b$ is considered invalid. The amount by which $q$ changes after executing block $b$ is specified by the block builder.
+After the execution of transactions in block $b$, the value of $q$ can be increased or decreased up to $Q$. It must be the case that $q_{b-1} - Q \leq q_{b} \leq q_{b-1} + Q$, or block $b$ is considered invalid. The amount by which $q$ changes after executing block $b$ is specified by the block builder.
 
 Block builders (i.e. validators), may set their desired value for $T$ (i.e. their desired gas consumption rate) in their configuration, and their desired value for $q$ can then be calculated as:
 
