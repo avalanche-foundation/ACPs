@@ -1,7 +1,7 @@
 | ACP | 176 |
 | :- | :- |
 | **Title** | Dynamic EVM Gas Limits and Price Discovery Updates |
-| **Author(s)** | Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
+| **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
 | **Status** | Proposed ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
 | **Track** | Standards |
 
@@ -42,31 +42,32 @@ The full specification of this mechanism can be found [here](../103-dynamic-fees
 
 As noted above, the gas price determination mechanism relies on a target gas consumption per second, $T$, in order to calculate the gas price for a given block. $T$ will be adjusted dynamically according to the following specification.
 
-Prior to the activation of this mechanism, $T$ is initialized to a prior estimate of the network's desired target gas consumption per second, which must be a positive integer.
+Let $q$ be a non-negative integer that is initialized to 0 upon activation of this mechanism. Let the target gas consumption per second be expressed as:
 
-After the execution of block $b$, $T$ can be adjusted up or down:
+$$T = P \cdot e^{q/D}$$
 
-$$\frac{-T}{D} \le targetChange \le \frac{T}{D}$$
-$$T = max(P, T + targetChange)$$
+where $P$ is the global minimum allowed target gas consumption rate for the network, and $D$ is a constant that helps control the rate of change of the target gas consumption.
 
-Where:
- - $D$ is the target gas consumption rate bound divisor
- - $P$ is the global minimum allowed target gas consumption rate for the network, which must be at least $D$.
- - $targetChange$ is set by the builder of block $b$ within the valid range. 
- 
- If $|targetChange| > \frac{T}{D}$, block $b$ is considered invalid. Block builders (i.e. validators), may set their desired value for $T$ (i.e. `desired_rate`) in their configuration, and $targetChange$ can then be calculated for blocks that they build according to:
+After the execution of transactions in block $b$, the values $q$ can be increased or decreased up to $Q$. It must be the case that $q_{b-1} - Q \leq q_{b} \leq q_{b-1} + Q$, or block $b$ is considered invalid. The amount by which $q$ changes after executing block $b$ is specified by the block builder.
+
+Block builders (i.e. validators), may set their desired value for $T$ (i.e. their desired gas consumption rate) in their configuration, and their desired value for $q$ can then be calculated as:
+
+$$q_{desired} = D \cdot ln(\frac{T}{P})$$
+
+Note that since $q_{desired}$ is only used locally and can be different for each node, it is safe for implementations to approximate the value of $ln(\frac{T}{P})$, and round the resulting value to the nearest integer.
+
+When building a block, builders can calculate their next preferred value for $q$ according to:
 
   ```python
-  # Calculates the amount by which to adjust the target gas consumed per second
-  def calc_gas_consumption_rate_change(current_rate: int, desired_rate: int) -> int:
-    max_change = current_rate / target_gas_consumption_rate_bound_divisor
-    if desired_rate > current_rate:
-        return min(desired_rate - current_rate, max_change)
+  # Calculates a node's new desired value for q given for a given block
+  def calc_next_q(q_current: int, q_desired: int, max_change: int) -> int:
+    if q_desired > q_current:
+        return q_current + min(q_desired - q_current, max_change)
     else:
-        return -1 * min(current_rate - desired_rate, max_change)
+        return q_current - min(q_current - q_desired, max_change)
   ```
 
-As the value of $T$ dynamically adjusts after the execution of each block, the value of $R$ (capacity added per second) is also updated such that:
+As $q$ is updated after the execution of transactions within the block, $T$ is also updated such that $T = P \cdot e^{q/D}$ at all times. As the value of $T$ adjusts, the value of $R$ (capacity added per second) is also updated such that:
 
 $$R = T \cdot 2$$
 
@@ -78,9 +79,17 @@ $$C = R \cdot 10$$
 
 This means that the maximum stored gas capacity would be reached after 10 seconds where no blocks have been accepted.
 
-Note that the values of $T$, $R$, and $C$ are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transaction included in block $b$ itself.
+In order to keep roughly constant the time it takes for the gas price to double at sustained maximum network capacity usage, the value of $K$ used in the gas price determination mechanism must be updated proportionatly to $T$. When updating $T$ from $T_{n}$ to $T_{n+1}$, we update $K$ such that:
 
-Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should loosely converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
+$$K_{n+1} = K_{n} \cdot \frac{T_{n+1}}{T_{n}}$$
+
+In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ proportionatly. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
+
+$$x_{n+1} = (x + G) \cdot \frac{K_{n+1}}{K_{n}}$$
+
+Note that the value of $q$ (and thus also $T$, $R$, $C$, $K$, and $x$) are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transaction included in block $b$ itself.
+
+Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
 
 As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased different, the maximum amount of gas that can be consumed by any given block $b$ is:
 
@@ -97,23 +106,21 @@ Parameters at activation on the C-Chain are:
 
 | Parameter | Description | P-Chain Configuration|
 | - | - | - |
-| $T$ | initial target gas consumed per second | $1,500,000$ |
+| $P$ | minimum target gas consumption per second | $1,000,000$ |
+| $D$ | target gas consumption rate update constant | $2^{25}$ |
+| $Q$ | target gas consumption rate update factor change limit | $2^{15}$ |
 | $M$ | minimum gas price | $1*10^{-18}$ AVAX  |
-| $K$ | gas price update constant | $2,164,043$ |
-| $D$ | target change bound divisor | $1024$ |
-| $P$ | minimum target gas consumption per second | $1,000,000$
+| $K$ | initial gas price update factor | $64,500,000$ |
 
 </div>
 
-$T$ was chosen as the current target gas consumption rate on the C-Chain. Avalanche L1s may change this value to match their current gas consumption rate if they would like.
+$P$ was chosen as a safe bound on the minimum target gas usage on the C-Chain. The current gas target of the C-Chain is $1,500,000$ per second. The target gas consumption rate will only stay at $P$ if the majority of stake weight of the network specifies $P$ as their desired gas consumption rate target. 
+
+$D$ and $Q$ were chosen to give each block builder the ability to adjust the value of $T$ by roughly $\frac{1}{1024}$ of its current value, which matches the [gas limit bound divisor that Ethereum currently uses](https://github.com/ethereum/go-ethereum/blob/52766bedb9316cd6cddacbb282809e3bdfba143e/params/protocol_params.go#L26) to limit the amount that validators can change the execution layer gas limit in a single block. $D$ and $Q$ were scaled up by a factor of $2^{15}$ to block builders more granularity in the adjustments to $T$ that they would like to make.
 
 $M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correctly react to any increase in network usage in order to prevent a DOS attack.
 
-$K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~30 seconds.
-
-$D$ was chosen to match the [gas limit bound divisor that Ethereum currently uses](https://github.com/ethereum/go-ethereum/blob/52766bedb9316cd6cddacbb282809e3bdfba143e/params/protocol_params.go#L26) to limit the amount that validators can change their execution layer gas limit.
-
-$P$ was chosen as a safe bound on the minimum target gas usage that is lower than the current target gas consumption rate on the C-Chain today. The target gas consumption rate will not move towards $P$ unless the majority of stake weight of the network specifies $P$ as their desired gas consumption rate target.
+$K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~29.8 seconds.
 
 ## Backwards Compatibility
 
