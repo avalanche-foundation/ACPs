@@ -83,7 +83,7 @@ In order to keep roughly constant the time it takes for the gas price to double 
 
 $$K_{n+1} = K_{n} \cdot \frac{T_{n+1}}{T_{n}}$$
 
-In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ proportionatly. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
+In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ (excess gas consumption) proportionally. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
 
 $$x_{n+1} = (x + G) \cdot \frac{K_{n+1}}{K_{n}}$$
 
