@@ -83,11 +83,11 @@ In order to keep roughly constant the time it takes for the gas price to double 
 
 $$K_{n+1} = K_{n} \cdot \frac{T_{n+1}}{T_{n}}$$
 
-In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ proportionatly. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
+In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ (excess gas consumption) proportionally. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
 
 $$x_{n+1} = (x + G) \cdot \frac{K_{n+1}}{K_{n}}$$
 
-Note that the value of $q$ (and thus also $T$, $R$, $C$, $K$, and $x$) are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transaction included in block $b$ itself.
+Note that the value of $q$ (and thus also $T$, $R$, $C$, $K$, and $x$) are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transactions included in block $b$ itself.
 
 Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
 
