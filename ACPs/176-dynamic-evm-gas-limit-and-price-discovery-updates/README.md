@@ -93,7 +93,7 @@ Allowing block builders to adjust the target gas consumption rate in blocks that
 
 As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased different, the maximum amount of gas that can be consumed by any given block $b$ is:
 
-$$gasLimt_{b} = min(r + R \cdot \Delta{t}, C)$$ 
+$$gasLimit_{b} = min(r + R \cdot \Delta{t}, C)$$ 
 
 Currently, it is not valid for a block to contain zero transactions since it would not have any effect and would be a waste of resources to accept into the blockchain. However, with this change, it is possible for blocks with zero transactions to still effect value of $T$. To ensure that validators are able to help influence the value of $T$ even if there are no transactions to be included at the time they are proposing a block, blocks with no transactions that alter the value of $T$ will now be considered valid. This makes it such that validators would not need to create and include a no-op transaction just be able to produce a block to alter the current value of $T$ if there are no pending transactions when it is their turn to propose a block.
 
