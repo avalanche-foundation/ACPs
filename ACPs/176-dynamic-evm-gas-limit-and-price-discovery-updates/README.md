@@ -89,7 +89,7 @@ $$x_{n+1} = (x + G) \cdot \frac{K_{n+1}}{K_{n}}$$
 
 Note that the value of $q$ (and thus also $T$, $R$, $C$, $K$, and $x$) are updated **after** the execution of block $b$, which means they only take effect in determining the gas price of block $b+1$. The change to each of these values in block $b$ does not effect the gas price for transactions included in block $b$ itself.
 
-Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
+Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effective target gas consumption rate should converge over time to the point where 50% of the voting stake weight wants it increased and 50% of the voting stake weight wants it decreased. This is because the number of blocks each validator produces is proportional to their stake weight.
 
 As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased differently, the maximum amount of gas that can be consumed by any given block $b$ is:
 
