@@ -54,7 +54,7 @@ Block builders (i.e. validators), may set their desired value for $T$ (i.e. thei
 
 $$q_{desired} = D \cdot ln\left(\frac{T}{P}\right)$$
 
-Note that since $q_{desired}$ is only used locally and can be different for each node, it is safe for implementations to approximate the value of $ln\left(\frac{T}{P}\right)$, and round the resulting value to the nearest integer.
+Note that since $q_{desired}$ is only used locally and can be different for each node, it is safe for implementations to approximate the value of $ln\left(\frac{T_{desired}}{P}\right)$, and round the resulting value to the nearest integer.
 
 When building a block, builders can calculate their next preferred value for $q$ according to:
 
