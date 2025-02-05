@@ -56,7 +56,7 @@ $$q_{desired} = D \cdot ln\left(\frac{T_{desired}}{P}\right)$$
 
 Note that since $q_{desired}$ is only used locally and can be different for each node, it is safe for implementations to approximate the value of $ln\left(\frac{T_{desired}}{P}\right)$, and round the resulting value to the nearest integer.
 
-When building a block, builders can calculate their next preferred value for $q$ according to:
+When building a block, builders can calculate their next preferred value for $q$ based on the network's current value (`q_current`) according to:
 
   ```python
   # Calculates a node's new desired value for q given for a given block
@@ -111,7 +111,7 @@ Parameters at activation on the C-Chain are:
 | $D$ | target gas consumption rate update constant | $2^{25}$ |
 | $Q$ | target gas consumption rate update factor change limit | $2^{15}$ |
 | $M$ | minimum gas price | $1*10^{-18}$ AVAX  |
-| $K$ | initial gas price update factor | $64,500,000$ |
+| $K$ | initial gas price update factor | $43,000,000$ |
 
 </div>
 
