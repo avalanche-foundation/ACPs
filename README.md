@@ -125,6 +125,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph (https://github.com/StephenButtolph), Darioush Jalali (https://github.com/darioush)|Standards|
 |[131](./ACPs/131-cancun-eips/README.md)|Activate Cancun EIPs on C-Chain and Subnet-EVM chains|Darioush Jalali (https://github.com/darioush), Ceyhun Onur (https://github.com/ceyonur)|Standards|
 |[151](./ACPs/151-use-current-block-pchain-height-as-context/README.md)|Use current block P-Chain height as context for state verification|Ian Suvak (https://github.com/iansuvak)|Standards|
+|[176](./ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md)|Dynamic EVM Gas Limits and Price Discovery Updates|Stephen Buttolph (https://github.com/StephenButtolph), Michael Kaplan (https://github.com/michaelkaplan13)|Standards|
 
 ## Contributing
 
