@@ -67,7 +67,7 @@ When building a block, builders can calculate their next preferred value for $q$
         return q_current - min(q_current - q_desired, max_change)
   ```
 
-As $q$ is updated after the execution of transactions within the block, $T$ is also updated such that $T = P \cdot e^{q/D}$ at all times. As the value of $T$ adjusts, the value of $R$ (capacity added per second) is also updated such that:
+As $q$ is updated after the execution of transactions within the block, $T$ is also updated such that $T = P \cdot e^{\frac{q}{D}}$ at all times. As the value of $T$ adjusts, the value of $R$ (capacity added per second) is also updated such that:
 
 $$R = T \cdot 2$$
 
