@@ -44,7 +44,7 @@ As noted above, the gas price determination mechanism relies on a target gas con
 
 Let $q$ be a non-negative integer that is initialized to 0 upon activation of this mechanism. Let the target gas consumption per second be expressed as:
 
-$$T = P \cdot e^{q/D}$$
+$$T = P \cdot e^{\frac{q}{D}}$$
 
 where $P$ is the global minimum allowed target gas consumption rate for the network, and $D$ is a constant that helps control the rate of change of the target gas consumption.
 
