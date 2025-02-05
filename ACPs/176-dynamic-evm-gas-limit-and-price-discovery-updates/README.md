@@ -52,7 +52,7 @@ After the execution of transactions in block $b$, the value of $q$ can be increa
 
 Block builders (i.e. validators), may set their desired value for $T$ (i.e. their desired gas consumption rate) in their configuration, and their desired value for $q$ can then be calculated as:
 
-$$q_{desired} = D \cdot ln(\frac{T}{P})$$
+$$q_{desired} = D \cdot ln\left(\frac{T}{P}\right)$$
 
 Note that since $q_{desired}$ is only used locally and can be different for each node, it is safe for implementations to approximate the value of $ln(\frac{T}{P})$, and round the resulting value to the nearest integer.
 
