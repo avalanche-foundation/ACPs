@@ -105,7 +105,7 @@ Parameters at activation on the C-Chain are:
 
 <div align="center">
 
-| Parameter | Description | P-Chain Configuration|
+| Parameter | Description | C-Chain Configuration|
 | - | - | - |
 | $P$ | minimum target gas consumption per second | $1,000,000$ |
 | $D$ | target gas consumption rate update constant | $2^{25}$ |
