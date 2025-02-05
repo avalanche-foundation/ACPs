@@ -91,7 +91,7 @@ Note that the value of $q$ (and thus also $T$, $R$, $C$, $K$, and $x$) are updat
 
 Allowing block builders to adjust the target gas consumption rate in blocks that they produce makes it such that the effect target gas consumption rate should converge over time around the stake-weighted average value set by validators of the network. This is because the number of blocks each validator produces is proportional to their stake weight. This means that an individual validator's effect on the resulting target gas consumption for the network is proportional to their stake weight.
 
-As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased different, the maximum amount of gas that can be consumed by any given block $b$ is:
+As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased differently, the maximum amount of gas that can be consumed by any given block $b$ is:
 
 $$gasLimit_{b} = min(r + R \cdot \Delta{t}, C)$$ 
 
