@@ -79,9 +79,9 @@ $$C = R \cdot 10$$
 
 This means that the maximum stored gas capacity would be reached after 10 seconds where no blocks have been accepted.
 
-In order to keep roughly constant the time it takes for the gas price to double at sustained maximum network capacity usage, the value of $K$ used in the gas price determination mechanism must be updated proportionatly to $T$. When updating $T$ from $T_{n}$ to $T_{n+1}$, we update $K$ such that:
+In order to keep roughly constant the time it takes for the gas price to double at sustained maximum network capacity usage, the value of $K$ used in the gas price determination mechanism must be updated proportionally to $T$ such that:
 
-$$K_{n+1} = K_{n} \cdot \frac{T_{n+1}}{T_{n}}$$
+$$K = T \cdot 43$$
 
 In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ (excess gas consumption) proportionally. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
 
