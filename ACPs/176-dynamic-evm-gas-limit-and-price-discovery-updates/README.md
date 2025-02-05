@@ -71,7 +71,7 @@ As $q$ is updated after the execution of transactions within the block, $T$ is a
 
 $$R = T \cdot 2$$
 
-This ensures that the gas price remains equally reactive in either direction depending on how far the actual gas consumption rate is from the target, whether it is above or below.
+This ensures that the gas price can increase and decrease at the same rate.
 
 The value of $C$ must also adjust proportionately, so we set:
 
