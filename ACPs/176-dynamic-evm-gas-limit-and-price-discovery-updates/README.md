@@ -123,9 +123,9 @@ $M$ was chosen as the minimum possible denomination of the native EVM asset, suc
 
 $K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~29.8 seconds.
 
-### Choosing a desired value for $T$
+### Choosing $T_{desired}$
 
-As mentioned above, this new mechanism allows for validators to specify their desired target gas consumption rate ($T$) in their configuration, and the value that they set impacts the effective target gas consumption rate of the network over time. The higher the value of $T$, the more resources (storage, compute, etc) that are able to be used by the network. When choosing what value makes sense for them, validators should consider the resources that are required to properly support that level of gas consumption, the utility the network provides by having higher transaction per second throughput, and the stability of network should it reach that level of utilization.
+As mentioned above, this new mechanism allows for validators to specify their desired target gas consumption rate ($T_{desired}$) in their configuration, and the value that they set impacts the effective target gas consumption rate of the network over time. The higher the value of $T$, the more resources (storage, compute, etc) that are able to be used by the network. When choosing what value makes sense for them, validators should consider the resources that are required to properly support that level of gas consumption, the utility the network provides by having higher transaction per second throughput, and the stability of network should it reach that level of utilization.
 
 While Avalanche Network Clients can set default configuration values for the desired target gas consumption rate, each validator can choose to set this value independently based on their own considerations.
 
