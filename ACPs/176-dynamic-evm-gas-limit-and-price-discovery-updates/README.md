@@ -81,7 +81,7 @@ This means that the maximum stored gas capacity would be reached after 10 second
 
 In order to keep roughly constant the time it takes for the gas price to double at sustained maximum network capacity usage, the value of $K$ used in the gas price determination mechanism must be updated proportionally to $T$ such that:
 
-$$K = T \cdot 43$$
+$$K = T \cdot 87$$
 
 In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ (excess gas consumption) proportionally. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
 
@@ -111,7 +111,7 @@ Parameters at activation on the C-Chain are:
 | $D$ | target gas consumption rate update constant | $2^{25}$ |
 | $Q$ | target gas consumption rate update factor change limit | $2^{15}$ |
 | $M$ | minimum gas price | $1*10^{-18}$ AVAX  |
-| $K$ | initial gas price update factor | $43,000,000$ |
+| $K$ | initial gas price update factor | $87,000,000$ |
 
 </div>
 
@@ -121,7 +121,7 @@ $D$ and $Q$ were chosen to give each block builder the ability to adjust the val
 
 $M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correctly react to any increase in network usage in order to prevent a DOS attack.
 
-$K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~29.8 seconds.
+$K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~60.3 seconds. For comparison, EIP-1559 can double about ~70 seconds, and the C-Chain's current implementation can double about every ~50 seconds, depending on the time between blocks.
 
 ### Choosing $T_{desired}$
 
