@@ -152,6 +152,7 @@ Thanks to the following non-exhaustive list of individuals for input, discussion
 - [Aaron Buchwald](https://github.com/aaronbuchwald)
 - [Geoff Stuart](https://github.com/geoff-vball)
 - [Meag FitzGerald](https://github.com/meaghanfitzgerald)
+- [Austin Larson](https://github.com/alarso16)
 
 ## Copyright
 
