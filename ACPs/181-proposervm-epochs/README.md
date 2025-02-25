@@ -19,10 +19,10 @@ ProposerVM epochs during which the P-Chain height is fixed would widen this wind
 
 ### Epoch Definition
 
-An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. Any block with timestamp $t$ is included in epoch $E_n$ if $T_{start}^n <= t < T_{end}^n$. The first block whose timestamp is greater than or equal to $T_{end}^n$ and whose *parent's* timestamp is less than $t_{start}^n$ will be the final block in $E_n$. Formally, for a block with timestamp $t$ and parent timestamp $t_{parent}, the block *seals* $E_n$ if 
+An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. Any block with timestamp $t$ is included in epoch $E_n$ if $T_{start}^n <= t < T_{end}^n$. The first block whose timestamp is greater than or equal to $T_{end}^n$ and whose *parent's* timestamp is less than $T_{end}^n$ will be the final block in $E_n$. Formally, for a block with timestamp $t$ and parent timestamp $t_{parent}$, the block *seals* $E_n$ if 
 
 $$
-t >= T_{end}^n \: \text{ and } \: t_{parent} < T_{start}^n
+t_{parent} < T_{end}^n <= t
 $$
 
 The next block after the block that seals $E_n$ is the first block of epoch $E_{n+1}$.
@@ -39,7 +39,7 @@ $D$ is hardcoded into the ProposerVM source code, and may only be changed by a r
 
 #### Changing the Epoch Duration
 
-Future network upgrades may change the value of $D$ to some new duration $D'$. $D'$ should not take effect until the end of the current epoch, rather than the activation time of the network upgrade that defines $D'$. This ensures an in progress epoch at the upgrade activation time cannot be less than both $D$ and $D'$.
+Future network upgrades may change the value of $D$ to some new duration $D'$. $D'$ should not take effect until the end of the current epoch, rather than the activation time of the network upgrade that defines $D'$. This ensures an in progress epoch at the upgrade activation time cannot have a realized duration less than both $D$ and $D'$.
 
 ### Epoch Number
 
