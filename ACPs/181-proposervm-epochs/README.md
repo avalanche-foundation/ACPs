@@ -19,7 +19,7 @@ ProposerVM epochs during which the P-Chain height is fixed would widen this wind
 
 ### Epoch Definition
 
-An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. A block $b_m$ with timestamp $t_m$ *seals* $E_n$ if:
+An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. A block $b_m$ with timestamp $t_m$ *seals* $E_n$ if both of the following are true:
 - $t_{m-1} < T_{end}^n <= t_m$
 - $b_{m-1} \in E_n$ 
 
