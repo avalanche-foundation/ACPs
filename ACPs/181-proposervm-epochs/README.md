@@ -19,13 +19,13 @@ ProposerVM epochs during which the P-Chain height is fixed would widen this wind
 
 ### Epoch Definition
 
-An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. Any block with timestamp $t$ is included in epoch $E_n$ if $T_{start}^n <= t < T_{end}^n$. The first block whose timestamp is greater than or equal to $T_{end}^n$ and whose *parent's* timestamp is less than $T_{end}^n$ will be the final block in $E_n$. Formally, for a block with timestamp $t$ and parent timestamp $t_{parent}$, the block *seals* $E_n$ if 
+An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. A block $b_m$ with timestamp $t_m$ *seals* $E_n$ if:
+- $t_{m-1} < T_{end}^n <= t_m$
+- $b_{m-1} \in E_n$ 
 
-$$
-t_{parent} < T_{end}^n <= t
-$$
+In other words, $b$ seals $E_n$ if it's the first block to cross the epoch boundary, and its parent is in $E_n$.
 
-The next block after the block that seals $E_n$ is the first block of epoch $E_{n+1}$.
+A sealing block is a member of the epoch it seals: $b_m \in E_n$.
 
 ### Epoch Duration
 
@@ -51,27 +51,49 @@ As discussed above, the main [motivation](#motivation) for introducing epochs to
 
 This approach ensures that at any given height, the validator set to be used for the next block is known (this is a basic requirement for light clients). Put another way, within an epoch, the next block will use the current block's `PChainEpochHeight`, and at the boundary of the next epoch, the next block will use the current block's `PChainHeight`.
 
+### Low Traffic Chain Edge Cases
+
+The epoch sealing [definition](#epoch-definition) produces a couple of interesting edge cases worth considering. In each of the below diagrams, **bold** block numbers indicate sealing blocks, and the rectangles denote epoch membership.
+
+1. What happens if there is only a single block with a timestamp in an epoch's range?
+
+    Let $b_m$ be the only block with a timestamp in $E_{n+1}$'s range, meaning that $b_m$ seals $E_n$. $b_{m+1}$ must therefore seal $E_{n+1}$, meaning that it would be the only block in $E_{n+1}$, even though its timestamp does not fall with $E_{n+1}$'s range.
+
+    <p align="center">
+      <img src=./edge_case_1.png />
+    </p>
+
+2. What happens if there are no blocks with a timestamp in an epoch's range?
+
+    The next block that is produced will seal the epoch that its parent belonged to, even if there are entire epoch(s) that have since elapsed. This can result in a scenario in which the the sealing block's `PChainEpochHeight` is behind its `PChainHeight` by an arbitrary amount.
+
+    <p align="center">
+      <img src=./edge_case_2.png />
+    </p>
+
 ## Backwards Compatibility
 
 This change requires a network upgrade and is therefore not backwards compatible.
 
 ## Reference Implementation
 
-A reference implementation will be provided in [AvalancheGo](https://github.com/ava-labs/avalanchego), which must be merged before this ACP may be considered `Implementable`.
+A draft reference implementation is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
 
 ## Security Considerations
 
 ### Excessive Validator Churn
 
-The introduction of epochs concentrates validator set changes over the epoch's duration into a single block at the epoch's boundary. Excessive validator churn can cause consensus failures and other dangerous behavior, so it is imperative that the amount of validator weight change at the epoch boundary is limited. One strategy to accomplish this is to queue validator set changes and spread them out over multiple epochs. Another strategy is to batch updates to the same validator together such that increases and decreases to that validator's weight cancel each other out. Mechanisms to mitigate against this are outside the scope of this ACP and left to validator managers to implement. 
+The introduction of epochs concentrates validator set changes over the epoch's duration into a single block at the epoch's boundary. Excessive validator churn can cause consensus failures and other dangerous behavior, so it is imperative that the amount of validator weight change at the epoch boundary is limited. One strategy to accomplish this is to queue validator set changes and spread them out over multiple epochs. Another strategy is to batch updates to the same validator together such that increases and decreases to that validator's weight cancel each other out. Mechanisms to mitigate against this are outside the scope of this ACP and left to validator managers to implement.
 
 ## Open Questions
 
-What should the epoch duration $D$ be set to?
+- What should the epoch duration $D$ be set to?
 
-Should the epoch numbering scheme be defined in this ACP?
+- Should the epoch numbering scheme be defined in this ACP?
 
-Should validator churn limits be implemented for the primary network to mitigate against [excessive validator churn](#excessive-validator-churn)?
+- Should validator churn limits be implemented for the primary network to mitigate against [excessive validator churn](#excessive-validator-churn)?
+
+- Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, as described [above](#low-traffic-chain-edge-cases)?
 
 ## Acknowledgements
 
