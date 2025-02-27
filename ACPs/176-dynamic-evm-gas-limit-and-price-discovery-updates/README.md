@@ -22,7 +22,7 @@ To better position Avalanche EVM chains, including the C-Chain, to be able to ha
 
 ### Gas Price Determination
 
-The mechanism to determine the base fee of a block is the same as the one used in ACP-103 to determine the gas price of a block on the P-Chain. This mechanism calculates the gas price for a given block $b$ based on the following parameters:
+The mechanism to determine the base fee of a block is the same as the one used in [ACP-103](../103-dynamic-fees/README.md) to determine the gas price of a block on the P-Chain. This mechanism calculates the gas price for a given block $b$ based on the following parameters:
 
 <div align="center">
 
@@ -35,8 +35,6 @@ The mechanism to determine the base fee of a block is the same as the one used i
 | $R$ | gas capacity added per second |
 
 </div>
-
-The full specification of this mechanism can be found [here](../103-dynamic-fees/README.md).
 
 ### Making $T$ Dynamic
 
@@ -69,19 +67,19 @@ When building a block, builders can calculate their next preferred value for $q$
 
 As $q$ is updated after the execution of transactions within the block, $T$ is also updated such that $T = P \cdot e^{\frac{q}{D}}$ at all times. As the value of $T$ adjusts, the value of $R$ (capacity added per second) is also updated such that:
 
-$$R = T \cdot 2$$
+$$R = 2 \cdot T$$
 
 This ensures that the gas price can increase and decrease at the same rate.
 
 The value of $C$ must also adjust proportionately, so we set:
 
-$$C = R \cdot 10$$
+$$C = 5 \cdot R$$
 
-This means that the maximum stored gas capacity would be reached after 10 seconds where no blocks have been accepted.
+This means that the maximum stored gas capacity would be reached after 5 seconds where no blocks have been accepted.
 
 In order to keep roughly constant the time it takes for the gas price to double at sustained maximum network capacity usage, the value of $K$ used in the gas price determination mechanism must be updated proportionally to $T$ such that:
 
-$$K = T \cdot 87$$
+$$K = 87 \cdot T$$
 
 In order to have the gas price not be directly impacted by the change in $K$, we also update $x$ (excess gas consumption) proportionally. When updating $x$ after executing a block, instead of setting $x = x + G$ as specified in ACP-103, we set:
 
@@ -94,8 +92,6 @@ Allowing block builders to adjust the target gas consumption rate in blocks that
 As noted in ACP-103, the maximum gas consumed in a given period of time $\Delta{t}$, is $r + R \cdot \Delta{t}$, where $r$ is the remaining gas capacity at the end of previous block execution. The upper bound across all $\Delta{t}$ is $C + R \cdot \Delta{t}$. Phrased differently, the maximum amount of gas that can be consumed by any given block $b$ is:
 
 $$gasLimit_{b} = min(r + R \cdot \Delta{t}, C)$$ 
-
-Currently, it is not valid for a block to contain zero transactions since it would not have any effect and would be a waste of resources to accept into the blockchain. However, with this change, it is possible for blocks with zero transactions to still effect value of $T$. To ensure that validators are able to help influence the value of $T$ even if there are no transactions to be included at the time they are proposing a block, blocks with no transactions that alter the value of $T$ will now be considered valid. This makes it such that validators would not need to create and include a no-op transaction just be able to produce a block to alter the current value of $T$ if there are no pending transactions when it is their turn to propose a block.
 
 ### Configuration Parameters
 
@@ -122,6 +118,10 @@ $D$ and $Q$ were chosen to give each block builder the ability to adjust the val
 $M$ was chosen as the minimum possible denomination of the native EVM asset, such that the gas price will be more likely to consistently be in a range of price discovery. The price discovery mechanism has already been battle tested on the P-Chain (and prior to that on Ethereum for blob gas prices as defined by EIP-4844), giving confidence that it will correctly react to any increase in network usage in order to prevent a DOS attack.
 
 $K$ was chosen such that at sustained maximum capacity ($T*2$ gas/second), the fee rate will double every ~60.3 seconds. For comparison, EIP-1559 can double about ~70 seconds, and the C-Chain's current implementation can double about every ~50 seconds, depending on the time between blocks.
+
+The maximum instantaneous price multiplier is:
+
+$$e^\frac{C}{K} = e^\frac{10 \cdot T}{87 \cdot T} = e^\frac{10}{87} \simeq 1.12$$
 
 ### Choosing $T_{desired}$
 
