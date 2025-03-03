@@ -19,13 +19,11 @@ ProposerVM epochs during which the P-Chain height is fixed would widen this wind
 
 ### Epoch Definition
 
-An epoch $E_n$ is defined by its start time $T_{start}^n$ and its end time $T_{end}^n$. A block $b_m$ with timestamp $t_m$ *seals* $E_n$ if both of the following are true:
-- $t_{m-1} < T_{end}^n <= t_m$
-- $b_{m-1} \in E_n$ 
+An epoch $E_n$ is defined by its start time $T_{start}^n$, inclusive and its end time $T_{end}^n$, exclusive.
 
-In other words, $b$ seals $E_n$ if it's the first block to cross the epoch boundary, and its parent is in $E_n$.
-
-A sealing block is a member of the epoch it seals: $b_m \in E_n$.
+$$
+E_n \coloneqq [ T_{start}^n,T_{end}^n )
+$$
 
 ### Epoch Duration
 
@@ -44,6 +42,16 @@ Future network upgrades may change the value of $D$ to some new duration $D'$. $
 ### Epoch Number
 
 Each epoch is associated with a monotonically increasing number, with $E_0$ being the epoch beginning at the activation time of the network upgrade that activates this ACP, and subsequent epochs incrementing the epoch number. Note that validators do not need to agree on epoch numbers, only the transition points between epochs, so no numbering scheme is provided in this ACP.
+
+### Sealing
+
+An epoch $E_n$ with end time $T_{end}^n$ is *sealed* by the first block that reaches the epoch boundary. For example, a block $b_m$ with timestamp $t_m$ seals $E_n$ if it is the first block for which the following is true:
+
+$$
+t_{m-1} < T_{end}^n <= t_m
+$$
+
+The sealing block is defined to be a member of the epoch it seals. In this example, $b_m \in E_n$.
 
 ### P-Chain Height
 
@@ -97,7 +105,7 @@ func GetPChainEpochHeight(parent, grandParent Block) uint64 {
 		return parent.PChainHeight()
 	}
 	// Otherwise, the parent did not seal the previous epoch, so the child should use the same
-Thanks to [@iansuvak](https://github.com/iansuvak),  [@geoff-vball](https://github.com/geoff-vball), [@yacovm](https://github.com/yacovm), [@michaelkaplan13](https://github.com/michaelkaplan13), [@StephenButtolph](https://github.com/StephenButtolph), and [@aaronbuchwald](https://github.com/aaronbuchwald) for discussion and feedback on this ACP.
+	// epoch height. This is true even if the child crosses the epoch boundary, since sealing
 	// blocks are considered to be part of the epoch they seal.
 	return parent.PChainEpochHeight()
 }
