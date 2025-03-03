@@ -77,7 +77,44 @@ This change requires a network upgrade and is therefore not backwards compatible
 
 ## Reference Implementation
 
-A draft reference implementation is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
+The following pseudocode illustrates how the specified epoch definition may be used to select a block's `PChainEpochHeight`:
+
+```go
+type Block interface {
+    Timestamp() time.Time
+    PChainHeight() uint64
+    PChainEpochHeight() uint64
+}
+
+// Returns the epoch number that the provided timestamp maps into.
+func GetEpoch(timestamp time.Time) uint64
+
+// [grandParent] is [parent]'s parent
+func GetPChainEpochHeight(parent, grandParent Block) uint64 {
+    if GetEpoch(parent.Timestamp()) != GetEpoch(grandParent.Timestamp()) {
+		// If the parent crossed the epoch boundary, then it sealed the previous epoch. The child
+		// is the first block of the new epoch, so should use the parent's P-Chain height.
+		return parent.PChainHeight()
+	}
+	// Otherwise, the parent did not seal the previous epoch, so the child should use the same
+Thanks to [@iansuvak](https://github.com/iansuvak),  [@geoff-vball](https://github.com/geoff-vball), [@yacovm](https://github.com/yacovm), [@michaelkaplan13](https://github.com/michaelkaplan13), [@StephenButtolph](https://github.com/StephenButtolph), and [@aaronbuchwald](https://github.com/aaronbuchwald) for discussion and feedback on this ACP.
+	// blocks are considered to be part of the epoch they seal.
+	return parent.PChainEpochHeight()
+}
+```
+
+- `GetEpoch(timestamp time.Tim)` divides the time axis into intervals of length $D$, and returns the [epoch number](#epoch-number) of the interval that `timestamp` falls within.
+- The comparison
+
+    ```go
+    if GetEpoch(parent.Timestamp()) != GetEpoch(grandParent.Timestamp())
+    ```
+
+    checks if the block's parent [sealed](#epoch-definition) its epoch.
+- If the parent sealed its epoch, the current block advances the epoch, [refreshing the epoch height](#p-chain-height).
+- Otherwise, the current block uses the current epoch height, regardless of whether it seals the epoch.
+
+A full reference implementation is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
 
 ## Security Considerations
 
@@ -97,7 +134,7 @@ The introduction of epochs concentrates validator set changes over the epoch's d
 
 ## Acknowledgements
 
-Thanks to [@iansuvak](https://github.com/iansuvak),  [@geoff-vball](https://github.com/geoff-vball), [@yacovm](https://github.com/yacovm), [@michaelkaplan13](https://github.com/michaelkaplan13), and [@StephenButtolph](https://github.com/StephenButtolph) for discussion and feedback on this ACP.
+Thanks to [@iansuvak](https://github.com/iansuvak),  [@geoff-vball](https://github.com/geoff-vball), [@yacovm](https://github.com/yacovm), [@michaelkaplan13](https://github.com/michaelkaplan13), [@StephenButtolph](https://github.com/StephenButtolph), and [@aaronbuchwald](https://github.com/aaronbuchwald) for discussion and feedback on this ACP.
 
 ## Copyright
 
