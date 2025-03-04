@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Dynamic EVM Gas Limits and Price Discovery Updates |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/178)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/178)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -135,7 +135,7 @@ The changes proposed in this ACP require a required network upgrade in order to 
 
 ## Reference Implementation
 
-A full reference implementation has not been provided yet. It will be provided once this ACP is considered Implementable.
+This ACP was implemented and merged into Coreth behind the `Fortuna` upgrade flag. The full implementation can be found in [coreth@v0.14.1-acp-176.1](https://github.com/ava-labs/coreth/releases/tag/v0.14.1-acp-176.1).
 
 ## Security Considerations
 
