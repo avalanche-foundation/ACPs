@@ -1,4 +1,4 @@
-| ACP           | 185                                                 |
+| ACP           | 186                                                 |
 | :------------ | :-------------------------------------------------- |
 | **Title**     | Update Validator Manager                            |
 | **Author(s)** | [Martin Eckardt](https://github.com/martineckardt)  |
