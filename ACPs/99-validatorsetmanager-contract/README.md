@@ -249,6 +249,7 @@ abstract contract ACP99Manager {
      * Emits a {CompletedValidatorRemoval} on success.
      *
      * @param messageIndex The index of the RegisterL1ValidatorMessage.
+     * @return validationID The ID of the validator that was removed.
      */
     function completeValidatorRemoval(uint32 messageIndex)
         public
