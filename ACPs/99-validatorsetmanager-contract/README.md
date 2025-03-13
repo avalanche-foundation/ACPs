@@ -120,15 +120,34 @@ For a full implementation, please see the [Reference Implementation](#reference-
  * validator management, as specified in ACP-77.
  */
 abstract contract ACP99Manager {
-    /// @notice Emitted when an initial validator is registered.
-    event RegisteredInitialValidator(bytes32 indexed validationID, bytes20 indexed nodeID, uint64 weight);
-    /// @notice Emitted when a validator registration to the L1 is initiated.
+    /**
+     * @notice Emitted when an initial validator is registered.
+     * @notice The field index is the index of the initial validator in the conversion data.
+     * This is used along with the subnetID as the ACP-118 justification for
+     * signature requests from P-Chain validators over a L1ValidatorRegistrationMessage
+     * when removing the validator
+     */
+    event RegisteredInitialValidator(
+        bytes32 indexed validationID,
+        bytes20 indexed nodeID,
+        bytes32 indexed subnetID,
+        uint64 weight,
+        uint32 index
+    );
+    /**
+     * @notice Emitted when a validator registration to the L1 is initiated.
+     * @notice The field registerL1ValidatorMessage is the serialized RegisterL1ValidatorMessage
+     * used to register the validator on the P-Chain. This is also used as the
+     * ACP-118 justification for signature requests from P-Chain validators
+     * over a L1ValidatorRegistrationMessage when removing the validator.
+     */
     event InitiatedValidatorRegistration(
         bytes32 indexed validationID,
         bytes20 indexed nodeID,
         bytes32 registrationMessageID,
         uint64 registrationExpiry,
-        uint64 weight
+        uint64 weight,
+        bytes registerL1ValidatorMessage
     );
     /// @notice Emitted when a validator registration to the L1 is completed.
     event CompletedValidatorRegistration(bytes32 indexed validationID, uint64 weight);
