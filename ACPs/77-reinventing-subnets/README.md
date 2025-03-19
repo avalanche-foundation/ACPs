@@ -286,7 +286,7 @@ The `validationID` of validators added via `RegisterL1ValidatorTx` is defined as
 
 When a `RegisterL1ValidatorTx` is accepted on the P-Chain, the validator is added to the L1's validator set. A `minNonce` field corresponding to the `validationID` will be stored on addition to the validator set (initially set to `0`). This field will be used when validating the `SetL1ValidatorWeightTx` defined below.
 
-This `validationID` will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterL1ValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` of the `RegisterL1ValidatorMessage` is required to be no more than 48 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
+This `validationID` will be used for replay protection. Used `validationID`s will be stored on the P-Chain. If a `RegisterL1ValidatorTx`'s `validationID` has already been used, the transaction will be considered invalid. To prevent storing an unbounded number of `validationID`s, the `expiry` of the `RegisterL1ValidatorMessage` is required to be no more than 24 hours in the future of the time the transaction is issued on the P-Chain. Any `validationIDs` corresponding to an expired timestamp can be flushed from the P-Chain's state.
 
 L1s are responsible for defining the procedure on how to retrieve the above information from prospective validators.
 
@@ -577,7 +577,7 @@ This ACP introduces Avalanche Layer 1s, a new network type that costs significan
 
 With the sovereignty L1s have from the P-Chain, L1 staking tokens are not locked on the P-Chain. This poses a security consideration for L1 validators: Malicious chains can choose to remove validators at will and take any funds that the validator has locked on the L1. The P-Chain only provides the guarantee that L1 validators can retrieve the remaining $AVAX Balance for their validator via a `DisableL1ValidatorTx`. Any assets on the L1 is entirely under the purview of the L1. The onus is on L1 validators to vet the L1's security for any assets transferred onto the L1.
 
-With a long window of expiry (48 hours) for the Warp message in `RegisterL1ValidatorTx`, spam of validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 48 hours proves to be a problem.
+With a long window of expiry (24 hours) for the Warp message in `RegisterL1ValidatorTx`, spam of validator registration could lead to high memory pressure on the P-Chain. A future ACP can reduce the window of expiry if 24 hours proves to be a problem.
 
 NodeIDs can be added to an L1's validator set involuntarily. However, it is important to note that any stake/rewards are _not_ at risk. For a node operator who was added to a validator set involuntarily, they would only need to generate a new NodeID via key rotation as there is no lock-up of any stake to create a NodeID. This is an explicit tradeoff for easier on-boarding of NodeIDs. This mirrors the Primary Network validators guarantee of no stake/rewards at risk.
 
