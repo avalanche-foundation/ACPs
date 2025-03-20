@@ -8,14 +8,14 @@
 
 ## Abstract
 
-This ACP proposes an extension to ACP-77 by introducing a new transaction type `UpdateValidatorManagerTx` to facilitate validator manager migration and upgrading without requiring proxy contracts or network upgrades. This enhancement allows L1s to:
+This ACP proposes an extension to [ACP-77](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/77-reinventing-subnets/README.md)  by introducing a new transaction type `UpdateValidatorManagerTx` to facilitate validator manager migration and upgrading without requiring proxy contracts or network upgrades. This enhancement allows L1s to:
 
 - Migrate validator management between different chains (e.g., from C-Chain to a native L1)
 - Recover from misconfigurations where validator managers were set to inaccessible chains
 - Avoid the need for proxy contracts and their associated security concerns
 - Implement smooth upgrade paths without requiring network upgrades
 
-By providing a flexible mechanism for validator manager migration, this proposal significantly enhances the sovereignty and adaptability of Avalanche L1s.
+By providing a flexible mechanism for validator manager migration, this proposal significantly enhances the sovereignty, security, and adaptability of Avalanche L1s.
 
 ## Motivation
 
@@ -58,7 +58,7 @@ To address these challenges, this ACP proposes a new transaction type `UpdateVal
 
 #### `UpdateValidatorManagerTx`
 
-The `UpdateValidatorManagerTx` will allow an L1 to update its validator manager contract address and chain ID:
+The `UpdateValidatorManagerTx` will allow an L1 to update its validator manager contract `Address` and `ChainID`:
 
 ```golang
 type UpdateValidatorManagerTx struct {
@@ -71,7 +71,7 @@ type UpdateValidatorManagerTx struct {
     SubnetID ids.ID `json:"subnetID"`
     // New BlockchainID where the validator manager will live
     // Restrictions:
-    // - Cannot be the P-Chain chain ID
+    // - Cannot be the P-Chain ChainID
     ChainID ids.ID `json:"chainID"`
     // New Address of the validator manager
     Address []byte `json:"address"`
