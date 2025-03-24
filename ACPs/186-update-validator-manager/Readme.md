@@ -138,7 +138,7 @@ type L1ValidatorManagerUpdatedMessage struct {
     // NewAddress is the address of the new validator manager
     NewAddress []byte `json:"newAddress"`
     // ValidatorList is the serialized list of validators at the time of update
-    ValidatorList []ValidatorData `json:"validatorList"`
+    Validators []SubnetToL1ConversionValidatorData `json:"validators"`
 }
 ```
 
@@ -147,7 +147,7 @@ type L1ValidatorManagerUpdatedMessage struct {
 - `subnetID` identifies the L1 whose validator manager was updated
 - `oldChainID` and `oldAddress` identify the previous validator manager
 - `newChainID` and `newAddress` identify the new validator manager
-- `validatorList` contains the list of validators at the time of the update, using the same `ValidatorData` structure from ACP-77
+- `validators` contains the list of validators at the time of the update, using the same `SubnetToL1ConversionValidatorData` structure from the [SubnetToL1ConversionData](https://github.com/ava-labs/avalanchego/blob/d36f7d392bdae99a68ced5c4f6ef345ff3ce25da/vms/platformvm/warp/message/subnet_to_l1_conversion.go#L25C19-L25C52)
 
 ### Transaction Validation and Processing
 
