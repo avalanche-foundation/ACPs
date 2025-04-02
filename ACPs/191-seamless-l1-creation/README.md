@@ -7,13 +7,13 @@
 
 ## Abstract
 
-This ACP introduces a new P-Chain transaction type called `CreateL1Tx` that simplifies the creation of Avalanche L1s. It consolidates three existing transaction types (`CreateSubnetTx`, `CreateChainTx`, and `ConvertSubnetToL1Tx`) into a single atomic operation. This streamlines the L1 creation process, removes the need for the intermediary Subnet creation step, and eliminates the management of temporary SubnetAuth credentials.
+This ACP introduces a new P-Chain transaction type called `CreateL1Tx` that simplifies the creation of Avalanche L1s. It consolidates three existing transaction types (`CreateSubnetTx`, `CreateChainTx`, and `ConvertSubnetToL1Tx`) into a single atomic operation. This streamlines the L1 creation process, removes the need for the intermediary Subnet creation step, and eliminates the management of temporary `SubnetAuth` credentials.
 
 ## Motivation
 
 [ACP-77](../77-reinventing-subnets/README.md) introduced Avalanche L1s, providing greater sovereignty and flexibility compared to Subnets. However, creating an L1 currently requires a three-step process:
 
-1. `CreateSubnetTx`: Create the Subnet record on the P-Chain and specify the `SubnetAuth `
+1. `CreateSubnetTx`: Create the Subnet record on the P-Chain and specify the `SubnetAuth`
 2. `CreateChainTx`: Add a blockchain to the Subnet (can be called multiple times)  
 3. `ConvertSubnetToL1Tx`: Convert the Subnet to an L1, specifying the initial validator set and the validator manager location
 
@@ -26,7 +26,7 @@ This process has several drawbacks:
 
 By introducing a single `CreateL1Tx` transaction, we can simplify the process, reduce overhead, and improve the developer experience for creating L1s.
 
-## **Specification**
+## Specification
 
 ### New Transaction Type
 
