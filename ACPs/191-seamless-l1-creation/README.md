@@ -103,7 +103,7 @@ The existing transactions `CreateSubnetTx`, `CreateChainTx` and `ConvertSubnetTo
 
 ## Reference Implementation
 
-A reference implementation will be developed following the patterns established in ACP-77, with appropriate modifications to support the new transaction type.
+A reference implementation must be provided in order for this ACP to be considered implementable.
 
 ## Security Considerations
 
