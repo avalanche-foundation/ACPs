@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Dynamic EVM Gas Limits and Price Discovery Updates |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/178)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/178)) |
 | **Track** | Standards |
 
 ## Abstract
