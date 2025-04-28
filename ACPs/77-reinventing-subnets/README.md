@@ -44,8 +44,6 @@ At a high-level, L1s can manage their validator sets externally to the P-Chain b
 
 To enable management of an L1's validator set externally to the P-Chain, Warp message verification will be added to the [`PlatformVM`](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm). For a Warp message to be considered valid by the P-Chain, at least 67% of the `sourceChainID`'s weight must have participated in the aggregate BLS signature. This is equivalent to the threshold set for the C-Chain. A future ACP may be proposed to support modification of this threshold on a per-L1 basis.
 
-For messages produced by the P-Chain for a given L1, only that L1's validators must be willing to provide signatures, rather than the entire Primary Network validator set. This optimization is possible because all validators will still sync the P-Chain.
-
 The following Warp message payloads are introduced on the P-Chain:
 
 - `SubnetToL1ConversionMessage`
