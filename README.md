@@ -105,27 +105,27 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 | Number | Title |  Author(s) | Type |
 |:-------|:------|:-------|:-----|
 |[13](./ACPs/13-subnet-only-validators/README.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
-|[20](./ACPs/20-ed25519-p2p/README.md)|Ed25519 p2p|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[23](./ACPs/23-p-chain-native-transfers/README.md)|P-Chain Native Transfers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[24](./ACPs/24-shanghai-eips/README.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali (https://github.com/darioush)|Standards|
-|[25](./ACPs/25-vm-application-errors/README.md)|Virtual Machine Application Errors|Joshua Kim (https://github.com/joshua-kim)|Standards|
+|[20](./ACPs/20-ed25519-p2p/README.md)|Ed25519 p2p|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[23](./ACPs/23-p-chain-native-transfers/README.md)|P-Chain Native Transfers|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[24](./ACPs/24-shanghai-eips/README.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali ([@darioush](https://github.com/darioush))|Standards|
+|[25](./ACPs/25-vm-application-errors/README.md)|Virtual Machine Application Errors|Joshua Kim ([@joshua-kim](https://github.com/joshua-kim))|Standards|
 |[30](./ACPs/30-avalanche-warp-x-evm/README.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
-|[31](./ACPs/31-enable-subnet-ownership-transfer/README.md)|Enable Subnet Ownership Transfer|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[41](./ACPs/41-remove-pending-stakers/README.md)|Remove Pending Stakers|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim (https://github.com/joshua-kim)|Standards|
-|[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu (https://github.com/dhrubabasu)|Standards|
-|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo (https://github.com/abi87)|Standards|
-|[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard (https://github.com/Nuttymoon)|Meta|
-|[99](./ACPs/99-validatorsetmanager-contract/README.md)|Validator Manager Solidity Standard|Gauthier Leonard (https://github.com/Nuttymoon)|Best Practices|
-|[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu (https://github.com/dhrubabasu), Alberto Benegiamo (https://github.com/abi87), Stephen Buttolph (https://github.com/StephenButtolph)|Standards|
-|[108](./ACPs/108-evm-event-importing/README.md)|EVM Event Importing|Michael Kaplan (https://github.com/mkaplan13)|Best Practices|
-|[113](./ACPs/113-provable-randomness/README.md)|Provable Virtual Machine Randomness|Tsachi Herman (http://github.com/tsachiherman)|Standards|
-|[118](./ACPs/118-warp-signature-request/README.md)|Standardized P2P Warp Signature Request Interface|Cam Schultz (https://github.com/cam-schultz)|Best Practices|
-|[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph (https://github.com/StephenButtolph), Darioush Jalali (https://github.com/darioush)|Standards|
-|[131](./ACPs/131-cancun-eips/README.md)|Activate Cancun EIPs on C-Chain and Subnet-EVM chains|Darioush Jalali (https://github.com/darioush), Ceyhun Onur (https://github.com/ceyonur)|Standards|
-|[151](./ACPs/151-use-current-block-pchain-height-as-context/README.md)|Use current block P-Chain height as context for state verification|Ian Suvak (https://github.com/iansuvak)|Standards|
-|[176](./ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md)|Dynamic EVM Gas Limits and Price Discovery Updates|Stephen Buttolph (https://github.com/StephenButtolph), Michael Kaplan (https://github.com/michaelkaplan13)|Standards|
+|[31](./ACPs/31-enable-subnet-ownership-transfer/README.md)|Enable Subnet Ownership Transfer|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[41](./ACPs/41-remove-pending-stakers/README.md)|Remove Pending Stakers|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim ([@joshua-kim](https://github.com/joshua-kim))|Standards|
+|[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
+|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo ([@abi87](https://github.com/abi87))|Standards|
+|[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))|Meta|
+|[99](./ACPs/99-validatorsetmanager-contract/README.md)|Validator Manager Solidity Standard|Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon)), Cam Schultz ([@cam-schultz](https://github.com/cam-schultz))|Best Practices|
+|[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
+|[108](./ACPs/108-evm-event-importing/README.md)|EVM Event Importing|Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Best Practices|
+|[113](./ACPs/113-provable-randomness/README.md)|Provable Virtual Machine Randomness|Tsachi Herman ([@tsachiherman](https://github.com/tsachiherman))|Standards|
+|[118](./ACPs/118-warp-signature-request/README.md)|Standardized P2P Warp Signature Request Interface|Cam Schultz ([@cam-schultz](https://github.com/cam-schultz))|Best Practices|
+|[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Darioush Jalali ([@darioush](https://github.com/darioush))|Standards|
+|[131](./ACPs/131-cancun-eips/README.md)|Activate Cancun EIPs on C-Chain and Subnet-EVM chains|Darioush Jalali ([@darioush](https://github.com/darioush)), Ceyhun Onur ([@ceyonur](https://github.com/ceyonur))|Standards|
+|[151](./ACPs/151-use-current-block-pchain-height-as-context/README.md)|Use current block P-Chain height as context for state verification|Ian Suvak ([@iansuvak](https://github.com/iansuvak))|Standards|
+|[176](./ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md)|Dynamic EVM Gas Limits and Price Discovery Updates|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 
 ## Contributing
 
