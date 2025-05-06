@@ -1,19 +1,19 @@
 | ACP | 181 |
 | :--- | :--- |
-| **Title** | ProposerVM Epochs |
+| **Title** | P-Chain Epoched Views |
 | **Author(s)** | Cam Schultz [@cam-schultz](https://github.com/cam-schultz) |
 | **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
 | **Track** | Standards |
 
 ## Abstract
 
-Proposes the introduction of epochs to the ProposerVM, such that a consistent view of the P-Chain may be provided to inner VMs for a known duration of time. This would enable VMs to optimize validator set retrievals, which currently must be done as often as every P-Chain block.
+Proposes a standard P-Chain epoching scheme such that any VM that implements it has consistent view of the P-Chain for a known duration of time. This would enable VMs to optimize validator set retrievals, which currently must be done as often as every P-Chain block. This standard does *not* introduce epochs to the P-Chain's VM directly. Instead, it provides a standard that may be implemented by layers that inject P-Chain state into VMs, such as the ProposerVM.
 
 ## Motivation
 
 The P-Chain maintains a registry of L1 and Subnet validators (including Primary Network validators). Validators are added, removed, or their weights changed by issuing P-Chain transactions that are included in P-Chain blocks. When describing an L1 or Subnet's validator set, what is really being described are the weights, BLS keys, and Node IDs of the active validators at a particular P-Chain height. Use cases that require on-demand views of L1 or Subnet validator sets need to fetch validator sets at arbitrary P-Chain heights, while use cases that require up-to-date views need to fetch them as often as every P-Chain block.
 
-ProposerVM epochs during which the P-Chain height is fixed would widen this window to a predictable epoch duration, allowing these use cases to implement optimizations such as pre-fetching validator sets once per epoch, or allowing more efficient backwards traversal of the P-Chain to fetch historical validator sets.
+Epochs during which the P-Chain height is fixed would widen this window to a predictable epoch duration, allowing these use cases to implement optimizations such as pre-fetching validator sets once per epoch, or allowing more efficient backwards traversal of the P-Chain to fetch historical validator sets.
 
 ## Specification
 
@@ -51,7 +51,7 @@ Note that due the edge case discussed [below](#what-happens-if-there-are-no-bloc
 
 #### P-Chain Height
 
-As discussed above, the main [motivation](#motivation) for introducing epochs to the ProposerVM is to provide a fixed view of the P-Chain for the duration of the epoch. To achieve this, ProposerVM blocks are extended to include the current epoch's fixed P-Chain height, `PChainEpochHeight`, in addition to the latest P-Chain height, `PChainHeight`. The validator set at `PChainEpochHeight` should be used by the ProposerVM and the inner VM for the duration of the epoch. The first block of a new epoch will set the epoch's `PChainEpochHeight` to its parent's `PChainHeight`.
+As discussed above, the main [motivation](#motivation) for P-Chain epoched views is to provide VMs a fixed view of the P-Chain for the duration of the epoch. To achieve this, VM blocks are extended to include the current epoch's fixed P-Chain height, `PChainEpochHeight`, in addition to the latest P-Chain height, `PChainHeight`. The validator set at `PChainEpochHeight` should be used by the VM for the duration of the epoch. The first block of a new epoch will set the epoch's `PChainEpochHeight` to its parent's `PChainHeight`.
 
 This approach ensures that at any given height, the validator set to be used for the next block is known (this is a basic requirement for light clients). Put another way, within an epoch, the next block will use the current block's `PChainEpochHeight`, and at the boundary of the next epoch, the next block will use the current block's `PChainHeight`.
 
@@ -113,11 +113,11 @@ func GetPChainEpoch(parent, grandParent Block) (height, number uint64) {
 - If the parent sealed its epoch, the current block advances the epoch, [refreshing the epoch height](#p-chain-height), and [incrementing the epoch number](#epoch-number).
 - Otherwise, the current block uses the current epoch height and number, regardless of whether it seals the epoch.
 
-A full reference implementation is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
+A full reference implementation that implements this ACP in the ProposerVM is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
 
 ### Setting the Epoch Duration
 
-The epoch duration $D$ is hardcoded into the ProposerVM source code, and may only be changed by a required network upgrade.
+The epoch duration $D$ is hardcoded in the upgrade configuration, and may only be changed by a required network upgrade.
 
 #### Changing the Epoch Duration
 
@@ -137,7 +137,7 @@ The introduction of epochs concentrates validator set changes over the epoch's d
 
 - Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, as described [above](#low-traffic-chain-edge-cases)?
 
-- Is there a better mechanism than a hardcoded network upgrade parameter that can be used to set $D$? The current approach imposes uniform $D$ across all ProposerVM instances, even though that is not a functional requirement of this proposal.
+- Is there a better mechanism than a hardcoded network upgrade parameter that can be used to set $D$? The current approach imposes uniform $D$ across all VM instances, even though that is not a functional requirement of this proposal.
 
 ## Acknowledgements
 
