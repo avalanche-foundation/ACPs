@@ -17,63 +17,43 @@ Epochs during which the P-Chain height is fixed would widen this window to a pre
 
 ## Specification
 
+### Assumptions
+
+In the following specification, we assume that a block $b_m$ has timestamp $t_m$ and P-Chain height $p_m$.
+
 ### Epoch Definition
 
-Let $T_{start}^0$ be the activation time of the network upgrade that activates this ACP. The time axis is divided into _epochs_ of duration $D$ such that an epoch $E_n$ is defined by its start and end times:
+An epoch is defined as a contiguous range of blocks that share the same three values:
+- An Epoch Number
+- An Epoch P-Chain Height
+- An Epoch Start Time
 
-$$
-E_n \coloneqq [ T_{start}^n,T_{end}^n )
-$$
+Let $E_N$ denote an epoch with epoch number $N$. $E_N$'s start time is denoted as $T_{start}^N$, and its P-Chain height as $P_N$. 
 
-and the difference between $T_{end}^n$ and $T_{start}^n$ is $D$ for any $n$:
+$E_0$ is defined as the epoch whose start time $T_{start}^N$ is the activation time of the network upgrade that activates this ACP.
 
-$$
-T_{end}^n - T_{start}^n = D
-$$ 
+### Epoch Sealing
 
-### Mapping Blocks to Epochs
+An epoch $E_N$ is *sealed* by the first block with a timestamp greater than or equal to $T_{start}^N + D$, where $D$ is a constant defined in the network upgrade that activates this ACP. Let $B_{S_N}$ denote the block that sealed $E_N$.
 
-#### Sealing
+The sealing block is defined to be a member of the epoch it seals. This guarantees that every epoch will contain at least one block. 
 
-An epoch $E_n$ with end time $T_{end}^n$ is *sealed* by the first block that reaches the epoch boundary. For example, a block $b_m$ with timestamp $t_m$ seals $E_n$ if it is the first block for which the following is true:
+### Advancing an Epoch
 
-$$
-t_{m-1} < T_{end}^n <= t_m
-$$
+We advance from the current epoch $E_N$ to the next epoch $E_{N+1}$ when the next block after $B_{S_N}$ is produced. This block will be a member of $E_{N+1}$, and will have the values:
+- $P_{N+1}$ equal to the P-Chain height of $B_{S_N}$
+- $T_{start}^{N+1}$ equal to the new block's timestamp
+- The epoch number, $N+1$ increments the previous epoch's epoch number by exactly $1$
 
-The sealing block is defined to be a member of the epoch it seals. In this example, $b_m \in E_n$.
+## Properties and Use Cases
 
-#### Epoch Number
+### Epoch Duration Bounds
 
-Blocks are mapped to epochs using an `EpochNumber`. The `EpochNumber`is constant for all blocks in an epoch, and is incremented by one in the next block after the epoch's sealing block. The first block produced after $T_{start}^0$ will be assigned `EpochNumber = 0`. The block that seals an epoch is given the same `EpochNumber` as the blocks in that epoch.
+Since an epoch's start time is set to the [timestamp of the first block in the epoch](#advancing-an-epoch), all epochs are guaranteed to have a duration of at least $D$. However, since a sealing block is [defined](#epoch-sealing) to be a member of the epoch it seals, there is no upper bound on an epoch's duration, since that sealing block may be produced at any point in the future beyond $T_{start}^N + D$.
 
-Note that due the edge case discussed [below](#what-happens-if-there-are-no-blocks-with-a-timestamp-in-an-epochs-range), a block's `EpochNumber` is not expected to be equal to the number of epoch durations that have elapsed since $T_{start}^0$.
+### Fixing the P-Chain Height
 
-#### P-Chain Height
-
-As discussed above, the main [motivation](#motivation) for P-Chain epoched views is to provide VMs a fixed view of the P-Chain for the duration of the epoch. To achieve this, VM blocks are extended to include the current epoch's fixed P-Chain height, `PChainEpochHeight`, in addition to the latest P-Chain height, `PChainHeight`. The validator set at `PChainEpochHeight` should be used by the VM for the duration of the epoch. The first block of a new epoch will set the epoch's `PChainEpochHeight` to its parent's `PChainHeight`.
-
-This approach ensures that at any given height, the validator set to be used for the next block is known (this is a basic requirement for light clients). Put another way, within an epoch, the next block will use the current block's `PChainEpochHeight`, and at the boundary of the next epoch, the next block will use the current block's `PChainHeight`.
-
-#### Low Traffic Chain Edge Cases
-
-The epoch sealing [definition](#epoch-definition) produces a couple of interesting edge cases worth considering. In each of the below diagrams, **bold** block numbers indicate sealing blocks, and the rectangles denote epoch membership.
-
-##### What happens if there is only a single block with a timestamp in an epoch's range?
-
-Let $b_m$ be the only block with a timestamp in $E_{n+1}$'s range, meaning that $b_m$ seals $E_n$. $b_{m+1}$ must therefore seal $E_{n+1}$, meaning that it would be the only block in $E_{n+1}$, even though its timestamp does not fall with $E_{n+1}$'s range.
-
-<p align="center">
-  <img src=./edge_case_1.png />
-</p>
-
-##### What happens if there are no blocks with a timestamp in an epoch's range?
-
-The next block that is produced will seal the epoch that its parent belonged to, even if there are entire epoch(s) that have since elapsed. This can result in a scenario in which the the sealing block's `PChainEpochHeight` is behind its `PChainHeight` by an arbitrary amount.
-
-<p align="center">
-  <img src=./edge_case_2.png />
-</p>
+When building a block, Avalanche blockchains use the P-Chain height [embedded in the block](#assumptions) to determine the validator set. If instead the epoch P-Chain height is used, then we can ensure that when a block is built, the validator set to be used for the next block is known. To see this, suppose block $b_m$ seals epoch $E_N$. Then the next block, $b_{m+1}$ will begin a new epoch, $E_{N+1}$ with $P_{N+1}$ equal to $b_m$'s P-Chain height, $p_m$. If instead $b_m$ does not seal $E_N$, then $b_{m+1}$ will continue to use $P_{N}$. Both candidates for $b_{m+1}$'s P-Chain height ($p_m$ and $P_N$) are known at $b_m$ build time.
 
 ## Backwards Compatibility
 
@@ -81,37 +61,50 @@ This change requires a network upgrade and is therefore not backwards compatible
 
 ## Reference Implementation
 
-The following pseudocode illustrates how the specified epoch definition may be used to select a block's `PChainEpochHeight` and `EpochNumber`:
+The following pseudocode illustrates how an epoch may be calculated for a block:
 
 ```go
+// Epoch Duration
+const D time.Duration
+
+type Epoch struct {
+	PChainHeight uint64
+	Number uint64
+	StartTime time.Time
+}
+
 type Block interface {
     Timestamp() time.Time
     PChainHeight() uint64
-    PChainEpochHeight() uint64
-    EpochNumber() uint64
+    Epoch() Epoch
 }
 
-// Returns true if timestamp1 and timestamp2 are in different epochs
-func CrossedEpochBoundary(timestamp1, timestamp2 time.Time) bool
-
-// [grandParent] is [parent]'s parent
-func GetPChainEpoch(parent, grandParent Block) (height, number uint64) {
-    if CrossedEpochBoundary(parent.Timestamp(), grandParent.Timestamp()) {
-		// If the parent crossed the epoch boundary, then it sealed the previous epoch. The child
-		// is the first block of the new epoch, so should use the parent's P-Chain height.
-		return parent.PChainHeight(), parent.EpochNumber() + 1
+func GetPChainEpoch(childTimestamp time.Time, parent Block) Epoch {
+	if parent.Timestamp().After(time.Add(parent.Epoch().StartTime, D)) {
+		// If the parent crossed its epoch boundary, then it sealed its epoch.
+		// The child is the first block of the new epoch, so it should use the parent's
+		// P-Chain height as the new epoch's height, and its timestamp as the new
+		// epoch's starting time
+		return Epoch{
+			PChainHeight: parent.PChainHeight()
+			Number: parent.Epoch().Number + 1
+			StartTime: childTimestamp
+		}
 	}
-	// Otherwise, the parent did not seal the previous epoch, so the child should use the same
-	// epoch height. This is true even if the child crosses the epoch boundary, since sealing
+
+	// Otherwise, the parent did not seal its epoch, so the child should use the same
+	// epoch height. This is true even if the child seals its epoch, since sealing
 	// blocks are considered to be part of the epoch they seal.
-	return parent.PChainEpochHeight(), parent.EpochNumber()
+	return Epoch{
+		PChainHeight: parent.Epoch().PChainHeight
+		Number: parent.Epoch().Number
+		StartTime: parent.Epoch().StartTime
+	}
 }
 ```
 
-- `func CrossedEpochBoundary(timestamp1, timestamp2 time.Time) bool` divides the time axis into intervals of length $D$, starting from $T_{start}^0$ and returns `true` if the two timestamps are in different intervals. Its usage here checks if the block's parent [sealed](#epoch-definition) its epoch.
-
-- If the parent sealed its epoch, the current block advances the epoch, [refreshing the epoch height](#p-chain-height), and [incrementing the epoch number](#epoch-number).
-- Otherwise, the current block uses the current epoch height and number, regardless of whether it seals the epoch.
+- If the parent sealed its epoch, the current block [advances the epoch](#advancing-an-epoch), refreshing the epoch height, incrementing the epoch number, and setting the epoch starting time.
+- Otherwise, the current block uses the current epoch height, number, and starting time, regardless of whether it seals the epoch.
 
 A full reference implementation that implements this ACP in the ProposerVM is available in [AvalancheGo](https://github.com/ava-labs/avalanchego/pull/3746), and must be merged before this ACP may be considered `Implementable`.
 
@@ -135,7 +128,7 @@ The introduction of epochs concentrates validator set changes over the epoch's d
 
 - Should validator churn limits be implemented for the primary network to mitigate against [excessive validator churn](#excessive-validator-churn)?
 
-- Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, as described [above](#low-traffic-chain-edge-cases)?
+- Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, due to [unbounded epoch duration](#epoch-duration-bounds)?
 
 - Is there a better mechanism than a hardcoded network upgrade parameter that can be used to set $D$? The current approach imposes uniform $D$ across all VM instances, even though that is not a functional requirement of this proposal.
 
