@@ -68,9 +68,9 @@ The following pseudocode illustrates how an epoch may be calculated for a block:
 const D time.Duration
 
 type Epoch struct {
-	PChainHeight uint64
-	Number uint64
-	StartTime time.Time
+    PChainHeight uint64
+    Number uint64
+    StartTime time.Time
 }
 
 type Block interface {
@@ -80,26 +80,26 @@ type Block interface {
 }
 
 func GetPChainEpoch(childTimestamp time.Time, parent Block) Epoch {
-	if parent.Timestamp().After(time.Add(parent.Epoch().StartTime, D)) {
-		// If the parent crossed its epoch boundary, then it sealed its epoch.
-		// The child is the first block of the new epoch, so it should use the parent's
-		// P-Chain height as the new epoch's height, and its timestamp as the new
-		// epoch's starting time
-		return Epoch{
-			PChainHeight: parent.PChainHeight()
-			Number: parent.Epoch().Number + 1
-			StartTime: childTimestamp
-		}
-	}
+    if parent.Timestamp().After(time.Add(parent.Epoch().StartTime, D)) {
+        // If the parent crossed its epoch boundary, then it sealed its epoch.
+        // The child is the first block of the new epoch, so it should use the parent's
+        // P-Chain height as the new epoch's height, and its timestamp as the new
+        // epoch's starting time
+        return Epoch{
+            PChainHeight: parent.PChainHeight()
+            Number: parent.Epoch().Number + 1
+            StartTime: childTimestamp
+        }
+    }
 
-	// Otherwise, the parent did not seal its epoch, so the child should use the same
-	// epoch height. This is true even if the child seals its epoch, since sealing
-	// blocks are considered to be part of the epoch they seal.
-	return Epoch{
-		PChainHeight: parent.Epoch().PChainHeight
-		Number: parent.Epoch().Number
-		StartTime: parent.Epoch().StartTime
-	}
+    // Otherwise, the parent did not seal its epoch, so the child should use the same
+    // epoch height. This is true even if the child seals its epoch, since sealing
+    // blocks are considered to be part of the epoch they seal.
+    return Epoch{
+        PChainHeight: parent.Epoch().PChainHeight
+        Number: parent.Epoch().Number
+        StartTime: parent.Epoch().StartTime
+    }
 }
 ```
 
