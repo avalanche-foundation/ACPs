@@ -5,13 +5,12 @@
 | **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
 | **Track** | Standards |
 
-**Note on the preamble:** The `Discussion` link is only needed for ACPs in `Proposed` and `Implementable` status.
 
 ## Abstract
 
 Streaming Asynchronous Execution (SAE) decouples consensus and execution by introducing a (theoretically unbounded) transaction queue upon which consensus is performed.
 A concurrent execution stream is responsible for clearing the queue and reporting a delayed state root for recording by later rounds of consensus.
-Validation of transactions to be pushed to the queue is light-weight but guarantees eventual execution.
+Validation of transactions to be pushed to the queue is lightweight but guarantees eventual execution.
 
 ## Motivation
 
