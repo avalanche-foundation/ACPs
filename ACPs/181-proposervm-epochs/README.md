@@ -42,14 +42,14 @@ The sealing block is defined to be a member of the epoch it seals. This guarante
 
 We advance from the current epoch $E_N$ to the next epoch $E_{N+1}$ when the next block after $B_{S_N}$ is produced. This block will be a member of $E_{N+1}$, and will have the values:
 - $P_{N+1}$ equal to the P-Chain height of $B_{S_N}$
-- $T_{start}^{N+1}$ equal to the new block's timestamp
+- $T_{start}^{N+1}$ equal to $B_{S_N}$'s timestamp
 - The epoch number, $N+1$ increments the previous epoch's epoch number by exactly $1$
 
 ## Properties and Use Cases
 
 ### Epoch Duration Bounds
 
-Since an epoch's start time is set to the [timestamp of the first block in the epoch](#advancing-an-epoch), all epochs are guaranteed to have a duration of at least $D$. However, since a sealing block is [defined](#epoch-sealing) to be a member of the epoch it seals, there is no upper bound on an epoch's duration, since that sealing block may be produced at any point in the future beyond $T_{start}^N + D$.
+Since an epoch's start time is set to the [timestamp of the sealing block of the previous epoch](#advancing-an-epoch), all epochs are guaranteed to have a duration of at least $D$, as measured from the epoch's starting time to the timestamp of the epoch's sealing block. However, since a sealing block is [defined](#epoch-sealing) to be a member of the epoch it seals, there is no upper bound on an epoch's duration, since that sealing block may be produced at any point in the future beyond $T_{start}^N + D$.
 
 ### Fixing the P-Chain Height
 
@@ -79,16 +79,16 @@ type Block interface {
     Epoch() Epoch
 }
 
-func GetPChainEpoch(childTimestamp time.Time, parent Block) Epoch {
+func GetPChainEpoch(parent Block) Epoch {
     if parent.Timestamp().After(time.Add(parent.Epoch().StartTime, D)) {
         // If the parent crossed its epoch boundary, then it sealed its epoch.
         // The child is the first block of the new epoch, so it should use the parent's
-        // P-Chain height as the new epoch's height, and its timestamp as the new
+        // P-Chain height as the new epoch's height, and its parent's timestamp as the new
         // epoch's starting time
         return Epoch{
             PChainHeight: parent.PChainHeight()
             Number: parent.Epoch().Number + 1
-            StartTime: childTimestamp
+            StartTime: parent.Timestamp()
         }
     }
 
