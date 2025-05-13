@@ -8,7 +8,7 @@
 
 ## Abstract
 
-Streaming Asynchronous Execution (SAE) decouples consensus and execution by introducing a (theoretically unbounded) transaction queue upon which consensus is performed.
+Streaming Asynchronous Execution (SAE) decouples consensus and execution by introducing a queue upon which consensus is performed.
 A concurrent execution stream is responsible for clearing the queue and reporting a delayed state root for recording by later rounds of consensus.
 Validation of transactions to be pushed to the queue is lightweight but guarantees eventual execution.
 
@@ -19,12 +19,21 @@ Validation of transactions to be pushed to the queue is lightweight but guarante
 1. Concurrent consensus and execution streams eliminate node context switching, reducing latency caused by each waiting on the other.
 In particular, "VM time" (akin to CPU time) more closely aligns with wall time since it is no longer eroded by consensus.
 This increases gas per wall-second even without an increase in gas per VM-second.
-2.  Lean, execution-only clients can rapidly execute the queue agreed upon by consensus, providing accelerated receipt issuance and state computation.
+2. Lean, execution-only clients can rapidly execute the queue agreed upon by consensus, providing accelerated receipt issuance and state computation.
 Without the need to compute state _roots_, such clients can eschew expensive Merkle data structures.
 End users see expedited but identical transaction results.
 3. Irregular stop-the-world events like database compaction are amortised over multiple blocks.
-4. EOA-to-EOA transfers of value can be considered settled immediately upon being pushed to the queue by consensus.
-5. Introduces bursty throughput under temporary high load, preemptively accepting transactions that may take marginally longer to execute, without a reduction in security guarantees.
+4. Introduces additional bursty throughput by eagerly accepting transactions, without a reduction in security guarantees.
+5. Non-data-dependent transactions, such as EOA-to-EOA transfers of value, can be observed prior to execution.
+
+### Future features
+
+Performing transaction execution after consensus sequencing allows the usage of consensus artifacts in execution. This unblocks some additional future improvements:
+
+1. Exposing a realtime VRF during transaction execution.
+2. Using an encrypted mempool to reduce front-running.
+
+This ACP does not introduce these, but some form of asynchronous execution is required to correctly implement them.
 
 ### User stories
 
@@ -153,21 +162,20 @@ Other than the _earliest_ (genesis) named block, which MUST be interpreted in th
 > The finality guarantees of Snowman consensus remove any distinction between _safe_ and _finalized_. 
 > Furthermore, the _latest_ block is not at risk of re-org, only of a negligible risk of data corruption local to the API node.
 
-
-### Optimal block building
-
-As EOA-to-EOA transfers of value are entirely guaranteed upon _acceptance_, block builders SHOULD prioritise other transactions for earlier execution.
-A reliable marker of such transactions is a gas limit of 21,000 as this is an indication from the sender that they do not intend to execute bytecode.
-
-Checking for code at the destination address is both unnecessary and unreliable as the address might be that of a contract created earlier in the queue.
-
 ## Backwards Compatibility
 
-All ACPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The ACP should provide recommendations for dealing with these incompatibilities.
+This ACP modifies the meaning of multiple fields in the block. A comprehensive list of changes will be produced once a reference implementation is available.
+
+Likely fields to change include:
+- `stateRoot`
+- `receiptsRoot`
+- `logsBloom`
+- `gasUsed`
+- `extraData`
 
 ## Reference Implementation
 
-A reference/example implementation that people can use to assist in understanding or implementing this specification. If the implementation is too large to reasonably be included inline, then consider adding it to the ACP subdirectory or linking to a PR in an external repository.
+A reference implementation is still a work-in-progress. This ACP will be updated to include a reference implementation once one is available.
 
 ## Security Considerations
 
@@ -182,7 +190,7 @@ We can prove that, for every transaction, this would result in the greatest poss
 1. Consumption of gas units (by definition of the gas limit); and
 2. Gas excess $x$ (and therefore gas price) at the time of execution.
 
-For a queue of transactions $Q = \\{i\\}_ {i \ge 0}$ the gas excess $x_j$ immediately prior to execution of transaction $j \in Q$ is a monotonic, non-decreasing function of the gas usage of all preceding transactions in the queue; i.e. $x_j~:=~f(\\{g_i\\}_{i<j})$.
+For a queue of transactions $Q = \{i\}_{i \ge 0}$ the gas excess $x_j$ immediately prior to execution of transaction $j \in Q$ is a monotonic, non-decreasing function of the gas usage of all preceding transactions in the queue; i.e. $x_j~:=~f(\{g_i\}_{i<j})$.
 
 To see this, consider transaction $0 \le k<j$ consuming gas $g_k$.
 A decrease in $g_k$ reduces the immediate increase of $x$.
@@ -224,7 +232,7 @@ $$
 
 where $\lambda$ enforces a lower bound on the charge.
 
-The actual gas excess $x_A$ has an upper bound of the worst-case excess $x_W$, both of which can be used  to calculate respective base fees $f_A$ and $f_W$ (the variable element of gas prices) from the existing exponential function:
+The actual gas excess $x_A$ has an upper bound of the worst-case excess $x_W$, both of which can be used to calculate respective base fees $f_A$ and $f_W$ (the variable element of gas prices) from the existing exponential function:
 
 $$
 f := M \cdot \exp\left( \frac{x}{K} \right).
