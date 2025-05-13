@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Streaming Asynchronous Execution |
 | **Author(s)** | Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
+| **Status** | Proposed |
 | **Track** | Standards |
 
 
@@ -38,7 +38,7 @@ End users see expedited but identical transaction results.
 #### Pushing transactions
 
 Standard, synchronous execution couples a block to the ordered set of transactions to be executed in said block.
-Let there instead be a FIFO queue of all known, valid transactions—the specifics of "validity" will be addressed later.
+Instead, let there be a FIFO queue of all known, valid transactions—the specifics of "validity" will be addressed later.
 Under SAE, a block's ordered transactions instead constitute those to be pushed to the queue
 A transaction is said to be _included_ when a block builder adds it to a block and _accepted_ once consensus, performed over blocks, agrees to add it to the queue.
 We refer to the ordered set of enqueued transactions as a _tranche_.
@@ -136,7 +136,7 @@ Although asynchronous execution decouples the transactions and receipts recorded
 In particular, the API method `eth_getBlockReceipts` MUST return the receipts corresponding to the block's transactions, not the receipts settled in the block.
 
 To achieve this, we first define the _executed_ and _settled_ states for blocks.
-A block is initially _accepted_ by consensus, enqueing its tranche of transactions.
+A block is initially _accepted_ by consensus, enqueuing its tranche of transactions.
 Once the last transaction in the tranche has been executed, the block itself is considered to be executed.
 When the same transaction is settled then so too is the block considered settled.
 
