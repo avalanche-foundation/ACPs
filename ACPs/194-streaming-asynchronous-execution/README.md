@@ -24,13 +24,13 @@ Without the need to compute state _roots_, such clients can eschew expensive Mer
 End users see expedited but identical transaction results.
 3. Irregular stop-the-world events like database compaction are amortised over multiple blocks.
 4. Introduces additional bursty throughput by eagerly accepting transactions, without a reduction in security guarantees.
-5. Non-data-dependent transactions, such as EOA-to-EOA transfers of value, can be observed prior to execution.
+5. Third-party accounting of non-data-dependent transactions, such as EOA-to-EOA transfers of value, can be performed prior to execution.
 
 ### Future features
 
 Performing transaction execution after consensus sequencing allows the usage of consensus artifacts in execution. This unblocks some additional future improvements:
 
-1. Exposing a realtime VRF during transaction execution.
+1. Exposing a real-time VRF during transaction execution.
 2. Using an encrypted mempool to reduce front-running.
 
 This ACP does not introduce these, but some form of asynchronous execution is required to correctly implement them.
