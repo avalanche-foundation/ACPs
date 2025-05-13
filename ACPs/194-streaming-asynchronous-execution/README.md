@@ -190,7 +190,7 @@ We can prove that, for every transaction, this would result in the greatest poss
 1. Consumption of gas units (by definition of the gas limit); and
 2. Gas excess $x$ (and therefore gas price) at the time of execution.
 
-For a queue of transactions $Q = \\{i\\}_{i \ge 0}$ the gas excess $x_j$ immediately prior to execution of transaction $j \in Q$ is a monotonic, non-decreasing function of the gas usage of all preceding transactions in the queue; i.e. $x_j~:=~f(\\{g_i\\}_{i<j})$.
+For a queue of transactions $Q = \\{i\\}_ {i \ge 0}$ the gas excess $x_j$ immediately prior to execution of transaction $j \in Q$ is a monotonic, non-decreasing function of the gas usage of all preceding transactions in the queue; i.e. $x_j~:=~f(\\{g_i\\}_{i<j})$.
 
 To see this, consider transaction $0 \le k<j$ consuming gas $g_k$.
 A decrease in $g_k$ reduces the immediate increase of $x$.
