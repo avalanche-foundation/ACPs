@@ -30,7 +30,7 @@ End users see expedited but identical transaction results.
 
 Performing transaction execution after consensus sequencing allows the usage of consensus artifacts in execution. This unblocks some additional future improvements:
 
-1. Exposing a realtime VRF during transaction execution.
+1. Exposing a real-time VRF during transaction execution.
 2. Using an encrypted mempool to reduce front-running.
 
 This ACP does not introduce these, but some form of asynchronous execution is required to correctly implement them.
