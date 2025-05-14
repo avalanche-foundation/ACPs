@@ -116,12 +116,12 @@ For a full implementation, please see the [Reference Implementation](#reference-
 
 ```solidity
 /**
-  * @notice Emitted when an initial validator is registered.
-  * @notice The field index is the index of the initial validator in the conversion data.
-  * This is used along with the subnetID as the ACP-118 justification in
-  * signature requests to P-Chain validators over a L1ValidatorRegistrationMessage
-  * when removing the validator
-  */
+ * @notice Emitted when an initial validator is registered.
+ * @notice The field index is the index of the initial validator in the conversion data.
+ * This is used along with the subnetID as the ACP-118 justification in
+ * signature requests to P-Chain validators over a L1ValidatorRegistrationMessage
+ * when removing the validator
+ */
 event RegisteredInitialValidator(
     bytes32 indexed validationID,
     bytes20 indexed nodeID,
