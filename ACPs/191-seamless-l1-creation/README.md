@@ -78,8 +78,10 @@ When a `CreateL1Tx` transaction is processed, the P-Chain performs the following
 ### IDs
 
 * `subnetID`: The `subnetID` of the L1 is the transaction hash.
-* `blockchainID`: the `blockchainID` for each blockchain is is defined as the SHA256 hash of the 37 bytes resulting from concatenating the 32 byte subnetID with the `0x00` byte and the 4 byte chainIndex (index in the `Chains` array within the transaction)
-* `validationID`: The `validationID` for the initial validators added through CreateL1Tx is defined as the SHA256 hash of the 37 bytes resulting from concatenating the 32 byte subnetID with the `0x01` byte and 4 byte validatorIndex (index in the `Validators` array within the transaction).
+* `blockchainID`: the `blockchainID` for each blockchain is is defined as the SHA256 hash of the 37 bytes resulting from concatenating the 32 byte `subnetID` with the `0x00` byte and the 4 byte `chainIndex` (index in the `Chains` array within the transaction)
+* `validationID`: The `validationID` for the initial validators added through `CreateL1Tx` is defined as the SHA256 hash of the 36 bytes resulting from concatenating the 32 byte `subnetID` with the 4 byte `validatorIndex` (index in the `Validators` array within the transaction).
+
+Note: Even with this updated definition of the `blockchainID`s for chains created using this new flow, the `validationID`s of the L1s initial set of validators is still compatible with the existing reference validator manager contracts as defined [here](https://github.com/ava-labs/icm-contracts/blob/4a897ba913958def3f09504338a1b9cd48fe5b2d/contracts/validator-manager/ValidatorManager.sol#L247).
 
 ### Restrictions and Validation
 
