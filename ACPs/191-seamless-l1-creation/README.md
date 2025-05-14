@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Seamless L1 Creations (CreateL1Tx) |
 | **Author(s)** | Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Aaron Buchwald ([@aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)) |
-| **Status** | Proposed |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/197))|
 | **Track** | Standards |
 
 ## Abstract
