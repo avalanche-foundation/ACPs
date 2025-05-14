@@ -160,55 +160,55 @@ function getValidator(bytes32 validationID)
 function l1TotalWeight() public view returns (uint64 weight);
 
 /**
-    * @notice Verifies and sets the initial validator set for the chain by consuming a
-    * SubnetToL1ConversionMessage from the P-Chain.
-    *
-    * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
-    *
-    * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
-    * @param messsageIndex The index that contains the SubnetToL1ConversionMessage ICM message containing the
-    * ConversionID to be verified against the provided {conversionData}.
-    */
+ * @notice Verifies and sets the initial validator set for the chain by consuming a
+ * SubnetToL1ConversionMessage from the P-Chain.
+ *
+ * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
+ *
+ * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
+ * @param messsageIndex The index that contains the SubnetToL1ConversionMessage ICM message containing the
+ * ConversionID to be verified against the provided {conversionData}.
+ */
 function initializeValidatorSet(
     ConversionData calldata conversionData,
     uint32 messsageIndex
 ) public;
 
 /**
-    * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
-    * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
-    *
-    * Emits a {CompletedValidatorRegistration} event on success.
-    *
-    * @param messageIndex The index of the L1ValidatorRegistrationMessage to be received providing the acknowledgement.
-    * @return validationID The ID of the registered validator.
-    */
+ * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
+ * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
+ *
+ * Emits a {CompletedValidatorRegistration} event on success.
+ *
+ * @param messageIndex The index of the L1ValidatorRegistrationMessage to be received providing the acknowledgement.
+ * @return validationID The ID of the registered validator.
+ */
 function completeValidatorRegistration(uint32 messageIndex)
     public
     returns (bytes32 validationID);
 
 /**
-    * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
-    * that the validator has been removed.
-    *
-    * Emits a {CompletedValidatorRemoval} on success.
-    *
-    * @param messageIndex The index of the RegisterL1ValidatorMessage.
-    */
+ * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
+ * that the validator has been removed.
+ *
+ * Emits a {CompletedValidatorRemoval} on success.
+ *
+ * @param messageIndex The index of the RegisterL1ValidatorMessage.
+ */
 function completeValidatorRemoval(uint32 messageIndex)
     public
     returns (bytes32 validationID);
 
 /**
-    * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
-    * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
-    *
-    * Emits a {CompletedValidatorWeightUpdate} event on success.
-    *
-    * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
-    * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
-    * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
-    */
+ * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
+ * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
+ *
+ * Emits a {CompletedValidatorWeightUpdate} event on success.
+ *
+ * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
+ * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
+ * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
+ */
 function completeValidatorWeightUpdate(uint32 messageIndex)
     public
     returns (bytes32 validationID, uint64 nonce);
@@ -222,18 +222,18 @@ The following methods are specified as `internal` to account for different seman
 
 ```solidity
 /**
-    * @notice Initiates validator registration by issuing a RegisterL1ValidatorMessage. The validator should
-    * not be considered active until completeValidatorRegistration is called.
-    *
-    * Emits an {InitiatedValidatorRegistration} event on success.
-    *
-    * @param nodeID The ID of the node to add to the L1.
-    * @param blsPublicKey The BLS public key of the validator.
-    * @param remainingBalanceOwner The remaining balance owner of the validator.
-    * @param disableOwner The disable owner of the validator.
-    * @param weight The weight of the node on the L1.
-    * @return validationID The ID of the registered validator.
-    */
+ * @notice Initiates validator registration by issuing a RegisterL1ValidatorMessage. The validator should
+ * not be considered active until completeValidatorRegistration is called.
+ *
+ * Emits an {InitiatedValidatorRegistration} event on success.
+ *
+ * @param nodeID The ID of the node to add to the L1.
+ * @param blsPublicKey The BLS public key of the validator.
+ * @param remainingBalanceOwner The remaining balance owner of the validator.
+ * @param disableOwner The disable owner of the validator.
+ * @param weight The weight of the node on the L1.
+ * @return validationID The ID of the registered validator.
+ */
 function _initiateValidatorRegistration(
     bytes memory nodeID,
     bytes memory blsPublicKey,
@@ -243,26 +243,26 @@ function _initiateValidatorRegistration(
 ) internal returns (bytes32 validationID);
 
 /**
-    * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
-    * The validator should be considered inactive as soon as this function is called.
-    *
-    * Emits an {InitiatedValidatorRemoval} on success.
-    *
-    * @param validationID The ID of the validator to remove.
-    */
+ * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
+ * The validator should be considered inactive as soon as this function is called.
+ *
+ * Emits an {InitiatedValidatorRemoval} on success.
+ *
+ * @param validationID The ID of the validator to remove.
+ */
 function _initiateValidatorRemoval(bytes32 validationID) internal;
 
 /**
-    * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
-    * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
-    *
-    * Emits an {InitiatedValidatorWeightUpdate} event on success.
-    *
-    * @param validationID The ID of the validator to modify.
-    * @param weight The new weight of the validator.
-    * @return nonce The validator nonce associated with the weight change.
-    * @return messageID The ID of the L1ValidatorWeightMessage used to update the validator's weight.
-    */
+ * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
+ * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
+ *
+ * Emits an {InitiatedValidatorWeightUpdate} event on success.
+ *
+ * @param validationID The ID of the validator to modify.
+ * @param weight The new weight of the validator.
+ * @return nonce The validator nonce associated with the weight change.
+ * @return messageID The ID of the L1ValidatorWeightMessage used to update the validator's weight.
+ */
 function _initiateValidatorWeightUpdate(
     bytes32 validationID,
     uint64 weight
