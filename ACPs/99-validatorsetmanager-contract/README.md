@@ -218,7 +218,7 @@ function completeValidatorWeightUpdate(uint32 messageIndex)
 
 #### Private Methods
 
-The following methods are specified as `internal` to account for different semantics of initiating validator set changes, such as checking uptime attested to via ICM message, or transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
+The following methods are specified as `internal` to account for different semantics of initiating validator set changes, such as checking uptime attested to via ICM message, or transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally.
 
 ```solidity
 /**
