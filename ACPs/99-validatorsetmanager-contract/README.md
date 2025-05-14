@@ -1,10 +1,10 @@
-| ACP          | 99                                                                                   |
-| :----------- | :----------------------------------------------------------------------------------- |
-| Title        | Validator Manager Solidity Standard                                                  |
-| Author(s)    | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))                        |
-| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/165)) |
-| Track        | Best Practices                                                                       |
-| Dependencies | [ACP-77](../77-reinventing-subnets/README.md)                                        |
+| ACP          | 99                                                                                                                          |
+| :----------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| Title        | Validator Manager Solidity Standard                                                                                         |
+| Author(s)    | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon)), Cam Schultz ([@cam-schultz](https://github.com/cam-schultz)) |
+| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/165))                                       |
+| Track        | Best Practices                                                                                                              |
+| Dependencies | [ACP-77](../77-reinventing-subnets/README.md)                                                                               |
 
 ## Abstract
 
@@ -32,7 +32,6 @@ Once deployed, the `ACP99Manager` implementation contract can be used as the `Ad
 ## Specification
 
 > **Note:**: The naming convention followed for the interfaces and contracts are inspired from the way [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/5.x/) are named after ERC standards, using `ACP` instead of `ERC`.
-
 
 ### Type Definitions
 
@@ -109,7 +108,7 @@ Each `Validator` is identified by its `validationID`. If a validator was added a
 
 ### Contract Specification
 
-The following abstract contract describes the standard `ACP99Manager` functionality. 
+The following abstract contract describes the standard `ACP99Manager` functionality.
 
 For a full implementation, please see the [Reference Implementation](#reference-implementation)
 
@@ -330,7 +329,7 @@ A work in progress implementation is available in the [Suzaku Contracts Library]
 
 #### Single-contract Design
 
-The single-contract design consists of a class hierarchy with the base class implementing `ACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS. 
+The single-contract design consists of a class hierarchy with the base class implementing `ACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS.
 
 ```mermaid
 ---
