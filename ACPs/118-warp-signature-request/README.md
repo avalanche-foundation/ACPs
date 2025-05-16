@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Warp Signature Interface Standard |
 | **Author(s)** | Cam Schultz ([@cam-schultz](https://github.com/cam-schultz)) |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/123)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/123)) |
 | **Track** | Best Practices Track |
 
 ## Abstract
@@ -82,8 +82,6 @@ VMs have full latitude when implementing `SignatureRequest` handlers, and should
 This change is backwards compatible for VMs, as nodes running older versions that do not support the new message types will simply drop incoming messages.
 
 ## Reference Implementation
-
-A full reference implementation has not been provided yet. It must be provided prior to this ACP being considered "Implementable".
 
 A reference implementation containing the Protobuf types and the canonical handler ID can be found [here](https://github.com/ava-labs/avalanchego/pull/3218).
 
