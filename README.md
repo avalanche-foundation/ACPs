@@ -127,6 +127,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[151](./ACPs/151-use-current-block-pchain-height-as-context/README.md)|Use current block P-Chain height as context for state verification|Ian Suvak ([@iansuvak](https://github.com/iansuvak))|Standards|
 |[176](./ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md)|Dynamic EVM Gas Limits and Price Discovery Updates|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 |[191](./ACPs/191-seamless-l1-creation/README.md)|Seamless L1 Creations (CreateL1Tx)|Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)), Meag FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|Standards|
+|[194](./ACPs/194-streaming-asynchronous-execution/README.md)|Streaming Asynchronous Execution|Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
 
 ## Contributing
 
