@@ -366,11 +366,7 @@ title: ACP-99 Single-Contract Architecture implementing PoA
   ValidatorManager <|-- PoAValidatorManager
 ```
 
-<<<<<<< HEAD
-Ava Labs' V1 Validator Manager implements this architecture, and is available in their [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/validator-manager-v1.0.0/contracts/validator-manager).
-=======
 No reference implementation is provided for this architecture in particular, but Ava Labs' V1 [Validator Manager](https://github.com/ava-labs/icm-contracts/tree/validator-manager-v1.0.0/contracts/validator-manager) implements much of the functional behavior described by the specification. It predates the specification, however, so there are some deviations. It should at most be treated as a model of an approximate implementation of this standard.
->>>>>>> main
 
 ## Security Considerations
 
