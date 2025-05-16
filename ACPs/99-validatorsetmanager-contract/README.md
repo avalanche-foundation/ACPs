@@ -108,177 +108,170 @@ Each `Validator` is identified by its `validationID`. If a validator was added a
 
 ### Contract Specification
 
-The following abstract contract describes the standard `ACP99Manager` functionality.
+The standard `ACP99Manager` functionality is defined by a set of events, public methods, and private methods that must be included by a compliant implementation.
 
 For a full implementation, please see the [Reference Implementation](#reference-implementation)
 
+#### Events
+
 ```solidity
-/*
- * @title ACP99Manager
- * @notice The ACP99Manager interface represents the functionality for sovereign L1
- * validator management, as specified in ACP-77.
- */
-abstract contract ACP99Manager {
-    /// @notice Emitted when an initial validator is registered.
-    event RegisteredInitialValidator(bytes32 indexed validationID, bytes20 indexed nodeID, uint64 weight);
-    /// @notice Emitted when a validator registration to the L1 is initiated.
-    event InitiatedValidatorRegistration(
-        bytes32 indexed validationID,
-        bytes20 indexed nodeID,
-        bytes32 registrationMessageID,
-        uint64 registrationExpiry,
-        uint64 weight
-    );
-    /// @notice Emitted when a validator registration to the L1 is completed.
-    event CompletedValidatorRegistration(bytes32 indexed validationID, uint64 weight);
-    /// @notice Emitted when removal of an L1 validator is initiated.
-    event InitiatedValidatorRemoval(
-        bytes32 indexed validationID,
-        bytes32 validatorWeightMessageID,
-        uint64 weight,
-        uint64 endTime
-    );
-    /// @notice Emitted when removal of an L1 validator is completed.
-    event CompletedValidatorRemoval(bytes32 indexed validationID);
-    /// @notice Emitted when a validator weight update is initiated.
-    event InitiatedValidatorWeightUpdate(
-        bytes32 indexed validationID, uint64 nonce, bytes32 weightUpdateMessageID, uint64 weight
-    );
-    /// @notice Emitted when a validator weight update is completed.
-    event CompletedValidatorWeightUpdate(bytes32 indexed validationID, uint64 nonce, uint64 weight);
-
-    /// @notice Returns the SubnetID of the L1 tied to this manager
-    function subnetID() public view virtual returns (bytes32 id);
-
-    /// @notice Returns the validator details for a given validation ID.
-    function getValidator(bytes32 validationID)
-        public
-        view
-        virtual
-        returns (Validator memory validator);
-
-    /// @notice Returns the total weight of the current L1 validator set.
-    function l1TotalWeight() public view virtual returns (uint64 weight);
-
-    /**
-     * @notice Verifies and sets the initial validator set for the chain by consuming a
-     * SubnetToL1ConversionMessage from the P-Chain.
-     *
-     * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
-     *
-     * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
-     * @param messsageIndex The index that contains the SubnetToL1ConversionMessage ICM message containing the
-     * ConversionID to be verified against the provided {conversionData}.
-     */
-    function initializeValidatorSet(
-        ConversionData calldata conversionData,
-        uint32 messsageIndex
-    ) public virtual;
-
-    /**
-     * @notice Initiates validator registration by issuing a RegisterL1ValidatorMessage. The validator should
-     * not be considered active until completeValidatorRegistration is called.
-     *
-     * Emits an {InitiatedValidatorRegistration} event on success.
-     *
-     * @param nodeID The ID of the node to add to the L1.
-     * @param blsPublicKey The BLS public key of the validator.
-     * @param registrationExpiry The time after which this message is invalid.
-     * @param remainingBalanceOwner The remaining balance owner of the validator.
-     * @param disableOwner The disable owner of the validator.
-     * @param weight The weight of the node on the L1.
-     * @return validationID The ID of the registered validator.
-     */
-    function _initiateValidatorRegistration(
-        bytes memory nodeID,
-        bytes memory blsPublicKey,
-        uint64 registrationExpiry,
-        PChainOwner memory remainingBalanceOwner,
-        PChainOwner memory disableOwner,
-        uint64 weight
-    ) internal virtual returns (bytes32 validationID);
-
-    /**
-     * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
-     * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
-     *
-     * Emits a {CompletedValidatorRegistration} event on success.
-     *
-     * @param messageIndex The index of the L1ValidatorRegistrationMessage to be received providing the acknowledgement.
-     * @return validationID The ID of the registered validator.
-     */
-    function completeValidatorRegistration(uint32 messageIndex)
-        public
-        virtual
-        returns (bytes32 validationID);
-
-    /**
-     * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
-     * The validator should be considered inactive as soon as this function is called.
-     *
-     * Emits an {InitiatedValidatorRemoval} on success.
-     *
-     * @param validationID The ID of the validator to remove.
-     */
-    function _initiateValidatorRemoval(bytes32 validationID) internal virtual;
-
-    /**
-     * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
-     * that the validator has been removed.
-     *
-     * Emits a {CompletedValidatorRemoval} on success.
-     *
-     * @param messageIndex The index of the RegisterL1ValidatorMessage.
-     */
-    function completeValidatorRemoval(uint32 messageIndex)
-        public
-        virtual
-        returns (bytes32 validationID);
-
-    /**
-     * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
-     * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
-     *
-     * Emits an {InitiatedValidatorWeightUpdate} event on success.
-     *
-     * @param validationID The ID of the validator to modify.
-     * @param weight The new weight of the validator.
-     * @return nonce The validator nonce associated with the weight change.
-     * @return messageID The ID of the L1ValidatorWeightMessage used to update the validator's weight.
-     */
-    function _initiateValidatorWeightUpdate(
-        bytes32 validationID,
-        uint64 weight
-    ) internal virtual returns (uint64 nonce, bytes32 messageID);
-
-    /**
-     * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
-     * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
-     *
-     * Emits a {CompletedValidatorWeightUpdate} event on success.
-     *
-     * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
-     * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
-     * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
-     */
-    function completeValidatorWeightUpdate(uint32 messageIndex)
-        public
-        virtual
-        returns (bytes32 validationID, uint64 nonce);
-}
+/// @notice Emitted when an initial validator is registered.
+event RegisteredInitialValidator(bytes32 indexed validationID, bytes20 indexed nodeID, uint64 weight);
+/// @notice Emitted when a validator registration to the L1 is initiated.
+event InitiatedValidatorRegistration(
+    bytes32 indexed validationID,
+    bytes20 indexed nodeID,
+    bytes32 registrationMessageID,
+    uint64 registrationExpiry,
+    uint64 weight
+);
+/// @notice Emitted when a validator registration to the L1 is completed.
+event CompletedValidatorRegistration(bytes32 indexed validationID, uint64 weight);
+/// @notice Emitted when removal of an L1 validator is initiated.
+event InitiatedValidatorRemoval(
+    bytes32 indexed validationID,
+    bytes32 validatorWeightMessageID,
+    uint64 weight,
+    uint64 endTime
+);
+/// @notice Emitted when removal of an L1 validator is completed.
+event CompletedValidatorRemoval(bytes32 indexed validationID);
+/// @notice Emitted when a validator weight update is initiated.
+event InitiatedValidatorWeightUpdate(
+    bytes32 indexed validationID, uint64 nonce, bytes32 weightUpdateMessageID, uint64 weight
+);
+/// @notice Emitted when a validator weight update is completed.
+event CompletedValidatorWeightUpdate(bytes32 indexed validationID, uint64 nonce, uint64 weight);
 ```
 
-#### Internal Functions
+#### Public Methods
 
-Most of the methods described above are `public`, with the exception of `_initiateValidatorRegistration`, `_initiateValidatorRemoval`, and `_initiateValidatorWeightUpdate`, which are `internal`. This is to account for different semantics of initiating validator set changes, such as checking uptime attested to via ICM message, or transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally. This is also why this ACP specifies an `abstract contract` rather than an `interface`.
+```solidity
+/// @notice Returns the SubnetID of the L1 tied to this manager
+    function subnetID() public view returns (bytes32 id);
 
-#### Returning Active Validators
+/// @notice Returns the validator details for a given validation ID.
+function getValidator(bytes32 validationID)
+    public
+    view
+    returns (Validator memory validator);
 
-While `ACP99Manager` does provide a way to fetch a `Validator` based on its `validationID`, it does not include a method to return all active validators. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
+/// @notice Returns the total weight of the current L1 validator set.
+function l1TotalWeight() public view returns (uint64 weight);
 
-#### About `DisableL1ValidatorTx`
+/**
+ * @notice Verifies and sets the initial validator set for the chain by consuming a
+ * SubnetToL1ConversionMessage from the P-Chain.
+ *
+ * Emits a {RegisteredInitialValidator} event for each initial validator in {conversionData}.
+ *
+ * @param conversionData The Subnet conversion message data used to recompute and verify against the ConversionID.
+ * @param messsageIndex The index that contains the SubnetToL1ConversionMessage ICM message containing the
+ * ConversionID to be verified against the provided {conversionData}.
+ */
+function initializeValidatorSet(
+    ConversionData calldata conversionData,
+    uint32 messsageIndex
+) public;
 
-This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validator of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
+/**
+ * @notice Completes the validator registration process by returning an acknowledgement of the registration of a
+ * validationID from the P-Chain. The validator should not be considered active until this method is successfully called.
+ *
+ * Emits a {CompletedValidatorRegistration} event on success.
+ *
+ * @param messageIndex The index of the L1ValidatorRegistrationMessage to be received providing the acknowledgement.
+ * @return validationID The ID of the registered validator.
+ */
+function completeValidatorRegistration(uint32 messageIndex)
+    public
+    returns (bytes32 validationID);
+
+/**
+ * @notice Completes validator removal by consuming an RegisterL1ValidatorMessage from the P-Chain acknowledging
+ * that the validator has been removed.
+ *
+ * Emits a {CompletedValidatorRemoval} on success.
+ *
+ * @param messageIndex The index of the RegisterL1ValidatorMessage.
+ */
+function completeValidatorRemoval(uint32 messageIndex)
+    public
+    returns (bytes32 validationID);
+
+/**
+ * @notice Completes the validator weight update process by consuming an L1ValidatorWeightMessage from the P-Chain
+ * acknowledging the weight update. The validator weight change should not have any effect until this method is successfully called.
+ *
+ * Emits a {CompletedValidatorWeightUpdate} event on success.
+ *
+ * @param messageIndex The index of the L1ValidatorWeightMessage message to be received providing the acknowledgement.
+ * @return validationID The ID of the validator, retreived from the L1ValidatorWeightMessage.
+ * @return nonce The nonce of the validator, retreived from the L1ValidatorWeightMessage.
+ */
+function completeValidatorWeightUpdate(uint32 messageIndex)
+    public
+    returns (bytes32 validationID, uint64 nonce);
+```
+
+>Note: While `getValidator` provides a way to fetch a `Validator` based on its `validationID`, no method that returns all active validators is specified. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
+
+#### Private Methods
+
+The following methods are specified as `internal` to account for different semantics of initiating validator set changes, such as checking uptime attested to via ICM message, or transferring funds to be locked as stake. Rather than broaden the definitions of these functions to cover all use cases, we leave it to the implementer to define a suitable external interface and call the appropriate `ACP99Manager` function internally.
+
+```solidity
+/**
+ * @notice Initiates validator registration by issuing a RegisterL1ValidatorMessage. The validator should
+ * not be considered active until completeValidatorRegistration is called.
+ *
+ * Emits an {InitiatedValidatorRegistration} event on success.
+ *
+ * @param nodeID The ID of the node to add to the L1.
+ * @param blsPublicKey The BLS public key of the validator.
+ * @param remainingBalanceOwner The remaining balance owner of the validator.
+ * @param disableOwner The disable owner of the validator.
+ * @param weight The weight of the node on the L1.
+ * @return validationID The ID of the registered validator.
+ */
+function _initiateValidatorRegistration(
+    bytes memory nodeID,
+    bytes memory blsPublicKey,
+    PChainOwner memory remainingBalanceOwner,
+    PChainOwner memory disableOwner,
+    uint64 weight
+) internal returns (bytes32 validationID);
+
+/**
+ * @notice Initiates validator removal by issuing a L1ValidatorWeightMessage with the weight set to zero.
+ * The validator should be considered inactive as soon as this function is called.
+ *
+ * Emits an {InitiatedValidatorRemoval} on success.
+ *
+ * @param validationID The ID of the validator to remove.
+ */
+function _initiateValidatorRemoval(bytes32 validationID) internal;
+
+/**
+ * @notice Initiates a validator weight update by issuing an L1ValidatorWeightMessage with a nonzero weight.
+ * The validator weight change should not have any effect until completeValidatorWeightUpdate is successfully called.
+ *
+ * Emits an {InitiatedValidatorWeightUpdate} event on success.
+ *
+ * @param validationID The ID of the validator to modify.
+ * @param weight The new weight of the validator.
+ * @return nonce The validator nonce associated with the weight change.
+ * @return messageID The ID of the L1ValidatorWeightMessage used to update the validator's weight.
+ */
+function _initiateValidatorWeightUpdate(
+    bytes32 validationID,
+    uint64 weight
+) internal returns (uint64 nonce, bytes32 messageID);
+```
+
+##### About `DisableL1ValidatorTx`
+
+In addition to calling `_initiateValidatorRemoval`, a validator may be disabled by issuing a `DisableL1ValidatorTx` on the P-Chain. This transaction allows the `DisableOwner` of a validator to disable it directly from the P-Chain to claim the unspent `Balance` linked to the validator of a failed L1. Therefore it is not meant to be called in the `Manager` contract.
 
 ## Backwards Compatibility
 
@@ -327,6 +320,8 @@ graph LR
 
 A work in progress implementation is available in the [Suzaku Contracts Library](https://github.com/suzaku-network/suzaku-contracts-library/blob/main/README.md#acp99-contracts-library) repository. It will be updated until this ACP is considered `Implementable` based on the outcome of the discussion.
 
+Ava Labs' V2 Validator Manager also implements this architecture for a Proof-of-Stake security module, and is available in their [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/validator-manager-v2.0.0/contracts/validator-manager/StakingManager.sol).
+
 #### Single-contract Design
 
 The single-contract design consists of a class hierarchy with the base class implementing `ACP99Manager`. The `PoAValidatorManager` child class in the below diagram may be swapped out for another class implementing a different security model, such as PoS.
@@ -359,7 +354,7 @@ title: ACP-99 Single-Contract Architecture implementing PoA
   ValidatorManager <|-- PoAValidatorManager
 ```
 
-This implementation is available in Ava Labs' [ICM Contracts Repository](https://github.com/ava-labs/icm-contracts/tree/main/contracts/validator-manager).
+No reference implementation is provided for this architecture in particular, but Ava Labs' V1 [Validator Manager](https://github.com/ava-labs/icm-contracts/tree/validator-manager-v1.0.0/contracts/validator-manager) implements much of the functional behavior described by the specification. It predates the specification, however, so there are some deviations. It should at most be treated as a model of an approximate implementation of this standard.
 
 ## Security Considerations
 
