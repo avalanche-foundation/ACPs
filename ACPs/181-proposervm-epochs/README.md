@@ -30,7 +30,7 @@ An epoch is defined as a contiguous range of blocks that share the same three va
 
 Let $E_N$ denote an epoch with epoch number $N$. $E_N$'s start time is denoted as $T_{start}^N$, and its P-Chain height as $P_N$. 
 
-$E_0$ is defined as the epoch whose start time $T_{start}^N$ is the activation time of the network upgrade that activates this ACP.
+$E_0$ is defined as the epoch whose start time $T_{start}^0$ is the block timestamp of the block that activates this ACP (i.e. the first block at or following this ACP's activation timestamp).
 
 ### Epoch Sealing
 
