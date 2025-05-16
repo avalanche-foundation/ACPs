@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Streaming Asynchronous Execution |
 | **Author(s)** | Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/196)) |
 | **Track** | Standards |
 
 
