@@ -133,6 +133,9 @@ While Avalanche Network Clients can set default configuration values for the des
 
 The changes proposed in this ACP require a required network upgrade in order to take effect. Prior to its activation, the current gas limit and price discovery mechanisms will continue to be used. Its activation should have relatively minor compatibility effects on any developer tooling. Notably, transaction formats, and thus wallets, are not impacted. After its activation, given that the value of $C$ is dynamically adjusted, the maximum possible gas consumed by an individual block, and thus maximum possible consumed by an individual transaction, will also dynamically adjust. The upper bound on the amount of gas consumed by a single transaction fluctuating means that transactions that are considered invalid at one time may be considered valid at a different point in time, and vice versa. While potentially unintuitive, as long as the minimum gas consumption rate is set sufficiently high this should not have significant practical impact, and is also currently the case on the Ethereum mainnet.
 
+> [!NOTE]
+> After the activation of this ACP, concerns were raised around the latency of inclusion for large transactions when the fee is increasing. To address these concerns, block producers SHOULD only produce blocks when there is sufficient capacity to include large transactions. The recommended heuristic is to only produce blocks when there is at least $C - R$ capacity.
+
 ## Reference Implementation
 
 This ACP was implemented and merged into Coreth behind the `Fortuna` upgrade flag. The full implementation can be found in [coreth@v0.14.1-acp-176.1](https://github.com/ava-labs/coreth/releases/tag/v0.14.1-acp-176.1).
