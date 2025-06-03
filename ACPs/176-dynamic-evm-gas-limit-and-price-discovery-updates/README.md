@@ -73,7 +73,7 @@ This ensures that the gas price can increase and decrease at the same rate.
 
 The value of $C$ must also adjust proportionately, so we set:
 
-$$C = 5 \cdot R$$
+$$C = 10 \cdot T$$
 
 This means that the maximum stored gas capacity would be reached after 5 seconds where no blocks have been accepted.
 
@@ -134,7 +134,7 @@ While Avalanche Network Clients can set default configuration values for the des
 The changes proposed in this ACP require a required network upgrade in order to take effect. Prior to its activation, the current gas limit and price discovery mechanisms will continue to be used. Its activation should have relatively minor compatibility effects on any developer tooling. Notably, transaction formats, and thus wallets, are not impacted. After its activation, given that the value of $C$ is dynamically adjusted, the maximum possible gas consumed by an individual block, and thus maximum possible consumed by an individual transaction, will also dynamically adjust. The upper bound on the amount of gas consumed by a single transaction fluctuating means that transactions that are considered invalid at one time may be considered valid at a different point in time, and vice versa. While potentially unintuitive, as long as the minimum gas consumption rate is set sufficiently high this should not have significant practical impact, and is also currently the case on the Ethereum mainnet.
 
 > [!NOTE]
-> After the activation of this ACP, concerns were raised around the latency of inclusion for large transactions when the fee is increasing. To address these concerns, block producers SHOULD only produce blocks when there is sufficient capacity to include large transactions. Prior to this ACP, the maximum size of a transaction was $15$ million gas. Therefore, the recommended heuristic is to only produce blocks when there is at least $\min(C - R, 15 \text{ million})$ capacity.
+> After the activation of this ACP, concerns were raised around the latency of inclusion for large transactions when the fee is increasing. To address these concerns, block producers SHOULD only produce blocks when there is sufficient capacity to include large transactions. Prior to this ACP, the maximum size of a transaction was $15$ million gas. Therefore, the recommended heuristic is to only produce blocks when there is at least $\min(8 \cdot T, 15 \text{ million})$ capacity. This ensures transactions with at least $8$ million gas will be able to bid for block space.
 
 ## Reference Implementation
 
