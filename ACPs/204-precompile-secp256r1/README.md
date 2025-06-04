@@ -63,7 +63,7 @@ Adoption requires a coordinated network upgrade for the C-Chain. Other EVM L1s c
 ### Implementation Security
  
 - Signature verification (vs public-key recovery) approach maximizes compatibility with existing P-256 ecosystem
-- No malleability check included to match NIST specification, but wrapper libraries should add this
+- No malleability check included to match NIST specification, but wrapper libraries may choose to add this
 - Input validation prevents invalid curve points and out-of-range signature components
 
 ### Network Security
