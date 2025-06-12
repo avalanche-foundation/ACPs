@@ -279,7 +279,7 @@ For a queue of blocks $Q = \\{i\\}_ {i \ge 0}$ the gas excess $x_j$ immediately 
 
 To see this, consider block $0 \le k<j$ consuming gas $g_k$.
 A decrease in $g_k$ reduces the immediate increase of $x$.
-Furthermore, this lowered consumption might further reduce $x$ at the start of executing the next block if $t^k_e < t^{k+1}_b$ and therefore $\Delta t > 0$.
+Furthermore, this lowered consumption might further reduce $x$ at the start of executing the next block if $t_e^k < t_b^{k+1}$ and therefore $\Delta t > 0$.
 Hence any decrease of $x$ is $\ge$ predicted.
 The excess, and hence gas price, for every later block $x_{i>k}$ is therefore reduced:
 
