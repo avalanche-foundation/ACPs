@@ -115,8 +115,20 @@ For a full implementation, please see the [Reference Implementation](#reference-
 #### Events
 
 ```solidity
-/// @notice Emitted when an initial validator is registered.
-event RegisteredInitialValidator(bytes32 indexed validationID, bytes20 indexed nodeID, uint64 weight);
+/**
+ * @notice Emitted when an initial validator is registered.
+ * @notice The field index is the index of the initial validator in the conversion data.
+ * This is used along with the subnetID as the ACP-118 justification in
+ * signature requests to P-Chain validators over a L1ValidatorRegistrationMessage
+ * when removing the validator
+ */
+event RegisteredInitialValidator(
+    bytes32 indexed validationID,
+    bytes20 indexed nodeID,
+    bytes32 indexed subnetID,
+    uint64 weight,
+    uint32 index
+);
 /// @notice Emitted when a validator registration to the L1 is initiated.
 event InitiatedValidatorRegistration(
     bytes32 indexed validationID,
