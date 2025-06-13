@@ -59,6 +59,8 @@ When building a block, Avalanche blockchains use the P-Chain height [embedded in
 
 This change requires a network upgrade and is therefore not backwards compatible.
 
+Any downstream entities that depend on a VM's view of the P-Chain will also need to account for epoched P-Chain views. For instance, ICM messages are signed by an L1's validator set at a specific P-Chain height. Currently, the constructor of the signed message can in practice use the validator set at the P-Chain tip, since all deployed Avalanche VMs are at most behind the P-Chain by a fixed number of blocks. With epoching, however, the ICM message constructor must take into account the epoch P-Chain height of the verifying chain, which may be arbitrarily far behind the P-Chain tip.
+
 ## Reference Implementation
 
 The following pseudocode illustrates how an epoch may be calculated for a block:
