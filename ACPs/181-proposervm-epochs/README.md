@@ -7,7 +7,7 @@
 
 ## Abstract
 
-Proposes a standard P-Chain epoching scheme such that any VM that implements it has consistent view of the P-Chain for a known duration of time. This would enable VMs to optimize validator set retrievals, which currently must be done as often as every P-Chain block. This standard does *not* introduce epochs to the P-Chain's VM directly. Instead, it provides a standard that may be implemented by layers that inject P-Chain state into VMs, such as the ProposerVM.
+Proposes a standard P-Chain epoching scheme such that any VM that implements it uses a P-Chain block height known prior to the generation of its next block. This would enable VMs to optimize validator set retrievals, which currently must be done during block execution. This standard does *not* introduce epochs to the P-Chain's VM directly. Instead, it provides a standard that may be implemented by layers that inject P-Chain state into VMs, such as the ProposerVM.
 
 ## Motivation
 
