@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | P-Chain Epoched Views |
 | **Author(s)** | Cam Schultz [@cam-schultz](https://github.com/cam-schultz) |
-| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/211)) |
 | **Track** | Standards |
 
 ## Abstract
