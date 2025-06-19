@@ -403,15 +403,21 @@ In particular, the API method `eth_getBlockReceipts` MUST return the receipts co
 #### Named blocks
 
 The Ethereum Mainnet APIs allow for retrieving blocks by named parameters that the API server resolves based on their consensus mechanism.
-Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are mapped to SAE in terms of the _execution_ status of blocks and MUST be interpreted as follows:
+C-Chain does not currently support _pending_, _safe_, and _finalized_ labels.
+This ACP modifies the meaning of _latest_ and adopts an altered definition of _safe_, which MUST each be resolved as:
 
- * _pending_: the most recently _accepted_ block;
- * _latest_: the block that was most recently _executed_;
- * _safe_ and _finalized_: the block that was most recently _settled_.
+ * _latest_: the block that was most recently _executed_; and
+ * _safe_: the block that was most recently _settled_.
 
-> [!NOTE]
-> The finality guarantees of Snowman consensus remove any distinction between _safe_ and _finalized_. 
-> Furthermore, the _latest_ block is not at risk of re-org, only of a negligible risk of data corruption local to the API node.
+The interpretation of _latest_ with respect to execution instead of consensus creates APIs that give the illusion of synchronous execution.
+This is useful for integration with existing tooling, especially wallets.
+The block number returned by APIs MUST, similarly, correspond to _latest_.
+
+Unlike Ethereum's treatment of the _safe_ label (denoting a degree of safety against re-org) under this ACP, safety is absolute and with respect to hard-drive corruption on a specific node, which could result in invalid state.
+Such corruption is rare, and waiting for a _safe_ block is therefore only necessary for the most sensitive of applications.
+Similar guarantees can also be achieved by comparing a block's post-execution state root across multiple trusted nodes—all would have to be corrupted in the exact same way for such a check to result in a false negative.
+
+The finality guarantees of Snowman consensus obviate the need for a _finalized_ label.
 
 ### Observations around transaction prioritisation
 
