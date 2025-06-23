@@ -7,13 +7,13 @@
 
 ## Abstract
 
-[EIP-7702](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md) was activated on the Ethereum mainnet in May 2025 as part of the Pectra upgrade, and introduced a new "set code transaction" type that allows Externally Owned Accounts (EOAs) to set the code in their account. This enabled several UX improvements, including batching multiple operations into a single atomic transaction, sponsoring transactions on behalf of another account, and privilege de-escalation for EOAs.
+[EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md) was activated on the Ethereum mainnet in May 2025 as part of the Pectra upgrade, and introduced a new "set code transaction" type that allows Externally Owned Accounts (EOAs) to set the code in their account. This enabled several UX improvements, including batching multiple operations into a single atomic transaction, sponsoring transactions on behalf of another account, and privilege de-escalation for EOAs.
 
-This ACP proposes adding a similar transaction type and functionality to Avalanche EVM implementations in order to have them support the same style of UX available on Ethereum. Modifications to the handling of account nonce and balances are required in order for it to be safe when used in conjunction with the streaming asynchronous execution (SAE) mechanism proposed in [ACP-194](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution).
+This ACP proposes adding a similar transaction type and functionality to Avalanche EVM implementations in order to have them support the same style of UX available on Ethereum. Modifications to the handling of account nonce and balances are required in order for it to be safe when used in conjunction with the streaming asynchronous execution (SAE) mechanism proposed in [ACP-194](https://github.com/avalanche-foundation/ACPs/tree/4a9408346ee408d0ab81050f42b9ac5ccae328bb/ACPs/194-streaming-asynchronous-execution).
 
 ## Motivation
 
-The motivation for this ACP is the same as the motivation described in [EIP-7702](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md#motivation). However, EIP-7702 as implemented for Ethereum breaks invariants required for EVM chains that use the ACP-194 SAE mechanism.
+The motivation for this ACP is the same as the motivation described in [EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#motivation). However, EIP-7702 as implemented for Ethereum breaks invariants required for EVM chains that use the ACP-194 SAE mechanism.
 
 There has been strong community feedback in support of ACP-194 for its potential to:
 - Allow for increasing the target gas rate of Avalanche EVM chains, including the C-Chain
@@ -24,7 +24,7 @@ Given the strong support for ACP-194, bringing EIP-7702-style functionality to A
 
 ### Invariants needed for ACP-194
 
-There are [two invariants explicitly broken by EIP-7702](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md#backwards-compatibility) that are required for SAE. They are:
+There are [two invariants explicitly broken by EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#backwards-compatibility) that are required for SAE. They are:
 
 1. An account balance can only decrease as a result of a transaction originating from that account.
 1. An EOA nonce may not increase after transaction execution has begun.
@@ -35,11 +35,11 @@ These invariants are required for SAE in order to be able to statically analyze 
 
 As described in the ACP-194, this lightweight analysis of transactions in blocks allows blocks to be accepted by consensus with the guarantee that they can be executed successfully. Only after block acceptance are the transactions within the block then put into a queue to be executed asynchronously. If the execution of transactions in the queue can decrease an EOA's account balance or change an EOA's current nonce, then block verification is unable to ensure that transactions in the block will be valid when executed. If transactions accepted into blocks can be invalidated prior to their execution, this poses DOS vulnerabilities because the invalidated transactions use up space in the pending execution queue according to their gas limits, but they do not pay any fees.
 
-Notably, EIP-7702's violation of these invariants already presents challenges for mempool verification on Ethereum. As [noted in the security considerations section](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md#transaction-propagation), EIP-7702 makes it "possible to cause transactions from other accounts to become stale" and this "poses some challenges for transaction propagation" because nodes now cannot "statically determine the validity of transactions for that account". In synchronous execution environments such as Ethereum, these issues only pose potential DOS risks to the public transaction mempool. Under an asynchronous execution scheme, the issues pose DOS risks to the chain itself since the invalidated transactions can be included in blocks prior to their execution.
+Notably, EIP-7702's violation of these invariants already presents challenges for mempool verification on Ethereum. As [noted in the security considerations section](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#transaction-propagation), EIP-7702 makes it "possible to cause transactions from other accounts to become stale" and this "poses some challenges for transaction propagation" because nodes now cannot "statically determine the validity of transactions for that account". In synchronous execution environments such as Ethereum, these issues only pose potential DOS risks to the public transaction mempool. Under an asynchronous execution scheme, the issues pose DOS risks to the chain itself since the invalidated transactions can be included in blocks prior to their execution.
 
 ## Specification
 
-The same [set code transaction as specified in EIP-7702](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md?ref=blockhead.co#set-code-transaction) will be added to Avalanche EVM implementations. The behavior of the transaction is the same as specified in EIP-7702. However, in order to keep the guarantee of transaction validity upon inclusion in an accepted block, two modifications are made to the transaction verification and execution rules.
+The same [set code transaction as specified in EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md?ref=blockhead.co#set-code-transaction) will be added to Avalanche EVM implementations. The behavior of the transaction is the same as specified in EIP-7702. However, in order to keep the guarantee of transaction validity upon inclusion in an accepted block, two modifications are made to the transaction verification and execution rules.
 1. Delegated accounts must maintain a "reserved balance" to ensure they can always pay for the transaction fees and transferred balance of transactions sent from the account. The reserved balances are managed via a new `ReservedBalanceManager` precompile, as specified below.
 1. The handling of account nonces during execution is separated from the verification of nonces during block verification, as specified below.
 
@@ -68,7 +68,7 @@ The precompile will maintain a mapping of accounts to their current reserved bal
 During transaction verification, the following rules are applied:
 - If the sender EOA account has not set code via an EIP-7702 transaction, no reserved balance is required.
     - The transaction is confirmed to be able to pay for its worst case transaction fee and transferred balance by looking at the sender account's regular balance and accounting for prior transactions it has sent that are still in the pending execution queue, as specified in ACP-194.
-- Otherwise, if the sender EOA account has previously been delegated via an EIP-7702 transaction (even if that transaction is still in the pending execution queue), then the account's current "[settled](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#settling-blocks)" reserved balance must be sufficient to cover the sum of the worst case transaction fees and balances sent for all of the transactions in the pending execution queue after the set code transaction.
+- Otherwise, if the sender EOA account has previously been delegated via an EIP-7702 transaction (even if that transaction is still in the pending execution queue), then the account's current "[settled](https://github.com/avalanche-foundation/ACPs/tree/4a9408346ee408d0ab81050f42b9ac5ccae328bb/ACPs/194-streaming-asynchronous-execution#settling-blocks)" reserved balance must be sufficient to cover the sum of the worst case transaction fees and balances sent for all of the transactions in the pending execution queue after the set code transaction.
 
 During transaction execution, the following rules are applied:
 - When initially deducting balance from the sender EOA account for the maximum transaction fee and balance sent with the transaction, the account's regular balance is used first. The account's reserved balance is only reduced if the regular balance is insufficient.
@@ -111,7 +111,7 @@ A reference implementation is not yet available and must be provided for this AC
 
 ## Security Considerations
 
-All of the [security considerations from the EIP-7702 specification](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7702.md?ref=blockhead.co#security-considerations) apply here as well, except for the considerations regarding "sponsored transaction relayers" and "transaction propagation". Those two considerations do not apply here, as they are accounted for by the modifications made to introduce reserved balances and separate the handling of nonces in execution from verification.
+All of the [security considerations from the EIP-7702 specification](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md?ref=blockhead.co#security-considerations) apply here as well, except for the considerations regarding "sponsored transaction relayers" and "transaction propagation". Those two considerations do not apply here, as they are accounted for by the modifications made to introduce reserved balances and separate the handling of nonces in execution from verification.
 
 Additionally, given that an account's reserved balance may need be updated in state when a transfer is sent from the account it must be confirmed that 21,000 gas is still a sufficiently high cost for the potential more expensive operation. Charging more gas for basic transfer transactions in this case could otherwise be an option, but would likely cause further backwards compatibility issues for smart contracts and off-chain services.
 
