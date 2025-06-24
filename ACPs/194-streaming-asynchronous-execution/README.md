@@ -429,6 +429,7 @@ Thank you to the following non-exhaustive list of individuals for input, discuss
 
 * [Aaron Buchwald](https://github.com/aaronbuchwald)
 * [Angharad Thomas](https://x.com/divergenceharri)
+* [Martin Eckardt](https://github.com/martineckardt)
 * [Meaghan FitzGerald](https://github.com/meaghanfitzgerald)
 * [Michael Kaplan](https://github.com/michaelkaplan13)
 * [Yacov Manevich](https://github.com/yacovm)
