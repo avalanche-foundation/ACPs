@@ -130,6 +130,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[191](./ACPs/191-seamless-l1-creation/README.md)|Seamless L1 Creations (CreateL1Tx)|Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)), Meag FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|Standards|
 |[194](./ACPs/194-streaming-asynchronous-execution/README.md)|Streaming Asynchronous Execution|Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
 |[204](ACPs/204-precompile-secp256r1/README.md)|Precompile for secp256r1 Curve Support|Santiago Cammi ([@scammi](https://github.com/scammi)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N))|Standards|
+|[209](ACPs/209-eip7702-style-account-abstraction/README.md)|EIP-7702-style Set Code for EOAs|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 
 ## Contributing
 
