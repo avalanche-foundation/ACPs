@@ -156,17 +156,30 @@ where $\lambda$ enforces a lower bound on the gas charged based on the gas limit
 
 In all previous instances where execution referenced gas used, from now on, we will reference gas charged. For example, the gas excess $x$ will be modified by $g_C$ rather than $g_U$.
 
-### Queue size
+### Block size
 
 The constant time delay between block execution and settlement is defined as $\tau$ seconds.
 
-The maximum allowed size of the execution queue is defined as:
+The maximum allowed size of a block is defined as:
 
 $$
-\omega ~:= R \cdot \tau \cdot \lambda
+\omega_B ~:= R \cdot \tau \cdot \lambda
 $$
 
-Any block that could cause the total sum of gas limits for transactions in the execution queue to exceed $\omega$ MUST be considered invalid.
+Any block whose total sum of gas limits for transactions exceed $\omega_B$ MUST be considered invalid.
+
+### Queue size
+
+The maximum allowed size of the execution queue _prior_ to adding a new block is defined as:
+
+$$
+\omega_Q ~:= 2 \cdot \omega_B
+$$
+
+Any block that attempts to be enqueued while the current size of the queue is larger than $\omega_Q$ MUST be considered invalid.
+
+> [!NOTE]
+> By restricting the size of the queue _prior_ to enqueueing the new block, $\omega_B$ is guaranteed to be the only limitation on block size.
 
 ### Block executor
 
@@ -236,7 +249,7 @@ The `baseFeePerGas` field MUST be populated with the gas price based on the wors
 
 ### Configuration Parameters
 
-As noted above, SAE depends on the values of $\tau$ and $\lambda$ to be set as parameters and the value of $\omega$ is derived from $T$. 
+As noted above, SAE depends on the values of $\tau$ and $\lambda$ to be set as parameters and the values of $\omega_B$ and $\omega_Q$ are derived from $T$.
 
 Parameters to specify for the C-Chain are:
 
@@ -342,20 +355,22 @@ $$
 x := x + g \cdot \frac{(R - T)}{R}
 $$
 
-Since we limit the size of the queue to $\omega$, we can derive an upper bound on the difference in the changes to worst-case and actual gas excess caused by the transactions in the queue:
+Since the largest allowed size of the queue when enqueuing a new block is $\omega_Q$, we can derive an upper bound on the difference in the changes to worst-case and actual gas excess caused by the transactions in the queue before the new block is added:
 
 $$
 \begin{align}
-\Delta x_A &\ge \frac{\omega}{\lambda} \cdot \frac{(R - T)}{R} \\
-\Delta x_W &= \omega \cdot \frac{(R - T)}{R} \\
-\Delta x_W - \Delta x_A &\le \omega \cdot \frac{(R - T)}{R} - \frac{\omega}{\lambda} \cdot \frac{(R - T)}{R} \\
-&= \omega \cdot \frac{(R - T)}{R} \cdot \left(1-\frac{1}{\lambda}\right) \\
-&= \omega \cdot \frac{(2 \cdot T - T)}{2 \cdot T} \cdot \left(1-\frac{1}{\lambda}\right) \\
-&= \frac{\omega}{2} \cdot \left(1-\frac{1}{\lambda}\right) \\
-&= \frac{R \cdot \tau \cdot \lambda}{2} \cdot \left(1-\frac{1}{\lambda}\right) \\
-&= \frac{R \cdot \tau}{2} \cdot (\lambda-1) \\
-&= \frac{2 \cdot T \cdot \tau}{2} \cdot (\lambda-1) \\
-&= T \cdot \tau \cdot (\lambda-1) \\
+\Delta x_A &\ge \frac{\omega_Q}{\lambda} \cdot \frac{(R - T)}{R} \\
+\Delta x_W &= \omega_Q \cdot \frac{(R - T)}{R} \\
+\Delta x_W - \Delta x_A &\le \omega_Q \cdot \frac{(R - T)}{R} - \frac{\omega_Q}{\lambda} \cdot \frac{(R - T)}{R} \\
+&= \omega_Q \cdot \frac{(R - T)}{R} \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= \omega_Q \cdot \frac{(2 \cdot T - T)}{2 \cdot T} \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= \omega_Q \cdot \frac{T}{2 \cdot T} \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= \frac{\omega_Q}{2} \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= \frac{2 \cdot \omega_B}{2} \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= \omega_B \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= R \cdot \tau \cdot \lambda \cdot \left(1-\frac{1}{\lambda}\right) \\
+&= R \cdot \tau \cdot (\lambda-1) \\
+&= 2 \cdot T \cdot \tau \cdot (\lambda-1)
 \end{align}
 $$
 
@@ -373,9 +388,9 @@ When the queue is empty (i.e. the execution stream has caught up with accepted t
 
 $$
 \begin{align}
-D &\le \exp \left( \frac{T \cdot \tau \cdot (\lambda-1)}{K} \right)\\
-&= \exp \left( \frac{T \cdot \tau \cdot (\lambda-1)}{87 \cdot T} \right)\\
-&= \exp \left( \frac{\tau \cdot (\lambda-1)}{87} \right)\\
+D &\le \exp \left( \frac{2 \cdot T \cdot \tau \cdot (\lambda-1)}{K} \right)\\
+&= \exp \left( \frac{2 \cdot T \cdot \tau \cdot (\lambda-1)}{87 \cdot T} \right)\\
+&= \exp \left( \frac{2 \cdot \tau \cdot (\lambda-1)}{87} \right)\\
 \end{align}
 $$
 
@@ -383,13 +398,13 @@ Therefore, for the values suggested by this ACP:
 
 $$
 \begin{align}
-D &\le \exp \left( \frac{5 \cdot (2 - 1)}{87} \right)\\
-&= \exp \left( \frac{5}{87} \right)\\
-&\simeq 1.06\\
+D &\le \exp \left( \frac{2 \cdot 5 \cdot (2 - 1)}{87} \right)\\
+&= \exp \left( \frac{10}{87} \right)\\
+&\simeq 1.12\\
 \end{align}
 $$
 
-In summary, Mallory can require users to increase their gas price by at most ~6%. In practice, the gas price often fluctuates more than 6% on a regular basis. Therefore, this does not appear to be a significant attack vector.
+In summary, Mallory can require users to increase their gas price by at most ~12%. In practice, the gas price often fluctuates more than 12% on a regular basis. Therefore, this does not appear to be a significant attack vector.
 
 However, any deviation that dislodges the gas price bidding mechanism from a true bidding mechanism is of note.
 
