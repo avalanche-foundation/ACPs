@@ -176,7 +176,7 @@ Prior to executing a block with timestamp $t_b$, the executor's timestamp and ex
 
 $$
 \begin{align}
-\Delta{t} &~:= \max\left(t_e, t_b\right) - t_e \\
+\Delta{t} &~:= \max\left(0, t_b - t_e\right) \\
 t_e &~:= t_e + \Delta{t} \\
 x &~:= \max\left(x - T \cdot \Delta{t}, 0\right) \\
 \end{align}
@@ -429,6 +429,7 @@ Thank you to the following non-exhaustive list of individuals for input, discuss
 
 * [Aaron Buchwald](https://github.com/aaronbuchwald)
 * [Angharad Thomas](https://x.com/divergenceharri)
+* [Martin Eckardt](https://github.com/martineckardt)
 * [Meaghan FitzGerald](https://github.com/meaghanfitzgerald)
 * [Michael Kaplan](https://github.com/michaelkaplan13)
 * [Yacov Manevich](https://github.com/yacovm)
