@@ -403,8 +403,8 @@ In particular, the API method `eth_getBlockReceipts` MUST return the receipts co
 #### Named blocks
 
 The Ethereum Mainnet APIs allow for retrieving blocks by named parameters that the API server resolves based on their consensus mechanism.
-C-Chain does not currently support _pending_, _safe_, and _finalized_ labels.
-This ACP modifies the meaning of _latest_ and adopts an altered definition of _safe_, which MUST each be resolved as:
+C-Chain does not currently differentiate between _pending_, _safe_, and _finalized_ labels.
+This ACP removes support for _finalized_, and modifies the meanings of _latest_ and _safe_, which MUST each be resolved as:
 
  * _latest_: the block that was most recently _executed_; and
  * _safe_: the block that was most recently _settled_.
