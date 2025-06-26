@@ -355,7 +355,7 @@ $$
 x := x + g \cdot \frac{(R - T)}{R}
 $$
 
-Since the largest allowed size of the queue when enqueuing a new block is $\omega_Q$, we can derive an upper bound on the difference in the changes to worst-case and actual gas excess caused by the transactions in the queue:
+Since the largest allowed size of the queue when enqueuing a new block is $\omega_Q$, we can derive an upper bound on the difference in the changes to worst-case and actual gas excess caused by the transactions in the queue before the new block is added:
 
 $$
 \begin{align}
