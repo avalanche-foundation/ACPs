@@ -66,11 +66,11 @@ With epochs, validator set retrieval occurs at fixed P-Chain heights that increm
 Current ICM VM implementations verify ICM messages against the local P-Chain state, as determined by the P-Chain height set by the ProposerVM. Off-chain relayers perform the following steps to deliver ICM messages:
 1. Fetch the sending chain's validator set at the verifying chain's current proposed height
 1. Collect BLS signatures from that validator set to construct the signed ICM message
-1. Submit the transaction containing the signed message to the verifying chain.
+1. Submit the transaction containing the signed message to the verifying chain
 
-If the validator set changes between steps 1 and 3, the ICM message will not be verified.
+If the validator set changes between steps 1 and 3, the ICM message will fail verification.
 
-Epochs improve upon this by fixing the P-Chain height used to verify ICM messages for a duration of time that is predictable to off-chain relayers. A relayer should be able to derive the epoch boundaries based on the specification above, or that information could be exposed via a node API. Relayers could use that information to decide the validator set to query, knowing that it will be stable for the duration of the epoch. Further, VMs could relax the verification rules to allow ICM messages to be verified against the previous epoch as a fallback, eliminating edge cases around the epoch boundary.
+Epochs improve upon this by fixing the P-Chain height used to verify ICM messages for a duration of time that is predictable to off-chain relayers. A relayer should be able to derive the epoch boundaries based on the specification above, or they could retrieve that information via a node API. Relayers could use that information to decide the validator set to query, knowing that it will be stable for the duration of the epoch. Further, VMs could relax the verification rules to allow ICM messages to be verified against the previous epoch as a fallback, eliminating edge cases around the epoch boundary.
 
 ## Backwards Compatibility
 
