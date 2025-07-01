@@ -45,7 +45,7 @@ We advance from the current epoch $E_N$ to the next epoch $E_{N+1}$ when the nex
 - $T_{start}^{N+1}$ equal to $B_{S_N}$'s timestamp
 - The epoch number, $N+1$ increments the previous epoch's epoch number by exactly $1$
 
-## Properties and Use Cases
+## Properties
 
 ### Epoch Duration Bounds
 
@@ -54,6 +54,8 @@ Since an epoch's start time is set to the [timestamp of the sealing block of the
 ### Fixing the P-Chain Height
 
 When building a block, Avalanche blockchains use the P-Chain height [embedded in the block](#assumptions) to determine the validator set. If instead the epoch P-Chain height is used, then we can ensure that when a block is built, the validator set to be used for the next block is known. To see this, suppose block $b_m$ seals epoch $E_N$. Then the next block, $b_{m+1}$ will begin a new epoch, $E_{N+1}$ with $P_{N+1}$ equal to $b_m$'s P-Chain height, $p_m$. If instead $b_m$ does not seal $E_N$, then $b_{m+1}$ will continue to use $P_{N}$. Both candidates for $b_{m+1}$'s P-Chain height ($p_m$ and $P_N$) are known at $b_m$ build time.
+
+## Use Cases
 
 ### ICM Verification Optimization
 
@@ -136,6 +138,14 @@ The epoch duration $D$ is hardcoded in the upgrade configuration, and may only b
 Future network upgrades may change the value of $D$ to some new duration $D'$. $D'$ should not take effect until the end of the current epoch, rather than the activation time of the network upgrade that defines $D'$. This ensures an in progress epoch at the upgrade activation time cannot have a realized duration less than both $D$ and $D'$.
 
 ## Security Considerations
+
+### Epoch P-Chain Height Skew
+
+Because epochs may have [unbounded duration](#epoch-duration-bounds), it is possible for a block's `PChainEpochHeight` to be arbitrarily far behind the tip of the P-Chain. This does not affect the *validity* of ICM verification within a VM that implements P-Chain epoched views, since the validator set at `PChainEpochHeight` is always known. However, the following considerations should be made under this scenario:
+1. As validators exit the validator set, their physical nodes may be unavailable to serve BLS signature requests, making it more difficult to construct a valid ICM message
+1. A valid ICM message may represent an attestation by a stale validator set. Signatures from validators that have exited the validator set between `PChainEpochHeight` and the current P-Chain tip will not represent active stake.
+
+Both of these scenarios may be mitigated by producing a block that does not verify any ICM messages, which will force the epoch to advance.
 
 ### Excessive Validator Churn
 
