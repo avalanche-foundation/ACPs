@@ -95,7 +95,8 @@ type BidArgs struct {
 	BurnTx      	hexutil.Bytes `json:"burnTx"`
 }
 ```
-For more details, refer to the mev.zone [documentation](https://mevzone.gitbook.io/mevzone)
+For more details, refer to the mev.zone [documentation](https://mevzone.gitbook.io/mevzone).
+
 
 ## Security Considerations
 MEV Zone integrates with AvalancheGo through minimal, isolated modifications that do not affect core consensus or block production. Validators remain fully functional regardless of MEV Zone status. If builders fail or behave incorrectly, validators default to standard block construction using internal logic.
