@@ -3,7 +3,7 @@
 | **Title**     | MEV Zone as Canonical MEV Infrastructure in AvalancheGo                                                  |
 | **Author(s)** | [0x7183](http://github.com/0x7183) [toran777](http://github.com/toran777)                                    |
 | **Status**    |  |
-| **Track**     | Standards       
+| **Track**     | Best Practices |       
 
 
 ## Abstract
