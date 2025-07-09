@@ -9,7 +9,7 @@
 
 ## Abstract
 
-This proposal introduces a precompiled contract that performs signature verifications for the secp256r1 elliptic curve on Avalanche's C-Chain. The precompile will be implemented at address `0x0200000000000000000000000000000000000006` and will enable native verification of P-256 signatures, significantly improving gas efficiency for biometric authentication systems, WebAuthn, and modern device-based signing mechanisms.
+This proposal introduces a precompiled contract that performs signature verifications for the secp256r1 elliptic curve on Avalanche's C-Chain. The precompile will be implemented at address `0x0000000000000000000000000000000000000100` and will enable native verification of P-256 signatures, significantly improving gas efficiency for biometric authentication systems, WebAuthn, and modern device-based signing mechanisms.
 
 ## Motivation
 
@@ -23,11 +23,13 @@ This ACP proposes implementing EIP-7212's secp256r1 precompiled contract to unlo
 - Regulatory compliance: Institutions can utilize their approved device security standards and identity management systems
 - Cost optimization: 100x gas reduction (from 200k-330k to 3,450 gas) makes enterprise-scale applications economically viable
 
-The 100x gas cost reduction makes these use cases economically viable while maintaining the security properties institutions and users expect from their existing devices.
+The 100x gas cost reduction makes these use cases economically viable while maintaining the security properties institutions and users expect from their existing devices. 
+
+Adding the precompiled contract at the same address as used in [RIP-7212](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7212.md) provides consistency across ecosystems, and allows for any libraries that have been developed to interact with the precompile to be used unmodified across ecosystems.
 
 ## Specification
 
-This ACP implements [RIP-7212](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7212.md) for secp256r1 signature verification on Avalanche. The specification follows RIP-7212 exactly, with the precompiled contract deployed at address `0x0200000000000000000000000000000000000006`.
+This ACP implements [RIP-7212](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7212.md) for secp256r1 signature verification on Avalanche. The specification follows RIP-7212 exactly, with the precompiled contract deployed at address `0x0000000000000000000000000000000000000100`.
 
 ### Core Functionality
 
