@@ -15,7 +15,7 @@ This proposal introduces a precompiled contract that performs signature verifica
 
 The secp256r1 (P-256) elliptic curve is the standard cryptographic curve used by modern device security systems, including Apple's Secure Enclave, Android Keystore, WebAuthn, and Passkeys. However, Avalanche currently only supports secp256k1 natively, forcing developers to use expensive Solidity-based verification that costs [200k-330k gas per signature verification](https://hackmd.io/@1ofB8klpQky-YoR5pmPXFQ/SJ0nuzD1T#Smart-Contract-Based-Verifiers).
 
-This ACP proposes implementing EIP-7212's secp256r1 precompiled contract to unlock significant ecosystem benefits:
+This ACP proposes implementing EIP-7951's secp256r1 precompiled contract to unlock significant ecosystem benefits:
 
 ### Enterprise & Institutional Adoption
 
@@ -27,20 +27,20 @@ The 100x gas cost reduction makes these use cases economically viable while main
 
 ## Specification
 
-This ACP implements [RIP-7212](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7212.md) for secp256r1 signature verification on Avalanche. The specification follows RIP-7212 exactly, with the precompiled contract deployed at address `0x0200000000000000000000000000000000000006`.
+This ACP implements [EIP-7951](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7951.md) for secp256r1 signature verification on Avalanche. The specification follows EIP-7951 exactly, with the precompiled contract deployed at address `0x0200000000000000000000000000000000000006`.
 
 ### Core Functionality
 
 - Input: 160 bytes (message hash + signature components r,s + public key coordinates x,y)
 - Output: success: 32 bytes `0x...01`; failure: no data returned
-- Gas Cost: 3,450 gas (based on EIP-7212 benchmarking)
+- Gas Cost: 3,450 gas (based on EIP-7951 benchmarking)
 - Validation: Full compliance with NIST FIPS 186-3 specification
 
 ### Activation
 
 This precompile may be activated as part of Avalanche's next network upgrade. Individual Avalanche L1s and subnets could adopt this enhancement independently through their respective client software updates.
 
-For complete technical specifications, validation requirements, and implementation details, refer to [RIP-7212](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7212.md).
+For complete technical specifications, validation requirements, and implementation details, refer to [EIP-7951](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-7951.md).
 
 ## Backwards Compatibility
 
@@ -75,7 +75,7 @@ Adoption requires a coordinated network upgrade for the C-Chain. Other EVM L1s c
 
 The implementation will build upon existing work:
 
-1. EIP-7212 Reference: The [BOR implementation](https://github.com/maticnetwork/bor/pull/1069) of EIP-7212 provides the foundation
+1. EIP-7951 Reference: The [Go-Ethereum implementation]https://github.com/ethereum/go-ethereum/pull/31991) of EIP-7951 provides the foundation
 2. Coreth Implementation: Integration with Avalanche's C-Chain (Avalanche's fork of go-ethereum)
 3. Cryptographic Library: Implementation utilizes Go's standard library `crypto/ecdsa` and `crypto/elliptic` packages, which implement NIST P-256 per FIPS 186-3 ([Go documentation](https://pkg.go.dev/crypto/elliptic#P256))
 
