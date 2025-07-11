@@ -107,8 +107,8 @@ There will be a new genesis chain configuration to set the parameters for the ch
 ```json
 {
   ...
-  "acp219Timestamp": ...,
-  "acp219FeeConfig": {
+  "acp224Timestamp": ...,
+  "acp224FeeConfig": {
     "targetGas": ...,
     "minGasPrice": ...,
     "maxCapacityFactor": ...,
@@ -180,7 +180,7 @@ The precompile will have a `targetGas` parameter that is used to set the target 
 
 ```mermaid
 flowchart TD
-    A[ACP-219 activated] --> B{Is ACP176FeeManager precompile active?}
+    A[ACP-224 activated] --> B{Is ACP176FeeManager precompile active?}
 
     B -- Yes --> C[Use targetGas from precompile storage]
 
@@ -195,9 +195,9 @@ flowchart TD
 
 ## Backwards Compatibility
 
-ACP-219 will require a network update in order to activate the new fee mechanism. Another activation will also be required to activate the new fee manager precompile. The activation of precompile should never occur before the activation of ACP-219 (the fee mechanism) since the precompile depends on ACP-219’s fee update logic to function correctly.
+ACP-224 will require a network update in order to activate the new fee mechanism. Another activation will also be required to activate the new fee manager precompile. The activation of precompile should never occur before the activation of ACP-224 (the fee mechanism) since the precompile depends on ACP-224’s fee update logic to function correctly.
 
-Activation of ACP-219 mechanism will deactivate the prior fee mechanism and the prior fee manager precompile. This ensures that there is no ambiguity or overlap between legacy and new pricing logic In order to provide a configuration for existing networks, a network upgrade override for both activation time and ACP-176 configuration parameters will be introduced.
+Activation of ACP-224 mechanism will deactivate the prior fee mechanism and the prior fee manager precompile. This ensures that there is no ambiguity or overlap between legacy and new pricing logic In order to provide a configuration for existing networks, a network upgrade override for both activation time and ACP-176 configuration parameters will be introduced.
 
 These upgrades will be optional at the moment. However with introduction of ACP-194 (SAE), it will be required to activate this ACP; otherwise the network will not be able to use ACP-194.
 
@@ -216,7 +216,7 @@ Potentially any misconfiguration of parameters could leave the network vulnerabl
 
 * Similarly does it make sense to dynamically change the `RMult` parameter? Currently it is set to 2, making `R = 2 * T` which means gas price can increase and decrease at the same rate.
 
-* Should we rather name the precompile as `ACP219FeeManager`?
+* Should we rather name the precompile as `ACP224FeeManager`?
 
 ### Target gas in node configuration
 
