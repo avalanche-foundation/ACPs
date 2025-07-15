@@ -176,7 +176,7 @@ interface IACP176FeeManager is IAllowList {
 }
 ```
 
-The precompile will have a `targetGas` parameter that is used to set the target gas consumed per second for ACP-176. This will override the `gas-target` in node config. If the new fee manager precompile is not activated, validators can keep using `gas-target` in node config to set the target gas consumed per second (as in C-Chain).
+The precompile will have a `targetGas` parameter that is used to set the target gas consumed per second for ACP-176. This will override the `gas-target` in chain config json. If the new fee manager precompile is not activated, validators can keep using `gas-target` in chain config json to set the target gas consumed per second (as in C-Chain).
 
 ```mermaid
 flowchart TD
@@ -184,13 +184,15 @@ flowchart TD
 
     B -- Yes --> C[Use targetGas from precompile storage]
 
-    B -- No --> D{Is gas-target set in node config?}
-    D -- Yes --> E[Use gas-target from node config]
+    B -- No --> D{Is gas-target set in chain config file?}
+    D -- Yes --> E[Use gas-target from chain config file]
 
-    D -- No --> F{Is targetGas set in chainConfig.acp176FeeConfig?}
-    F -- Yes --> G[Use targetGas from chain config]
+    D -- No --> F{Is targetGas set in genesis.config.acp176FeeConfig?}
+    F -- Yes --> G[Use targetGas from genesis.config]
 
-    F -- No --> H[Use default targetGas e.g. 2 million]
+    F -- No --> H{Has parent block ACP176 fields i.e activated ACP224}
+    H -- Yes --> I[Use parent block ACP176 gas target]
+    H -- No --> J[Use MinTargetPerSecond // P]
 ```
 
 ## Backwards Compatibility
@@ -218,9 +220,7 @@ Potentially any misconfiguration of parameters could leave the network vulnerabl
 
 * Should we rather name the precompile as `ACP224FeeManager`?
 
-### Target gas in node configuration
-
-`gas-target` in node configuration (json config) will be disabled upon activation of the `ACP176FeeManager` precompile. Should the precompile rather have a function to enable/disable that option? This will
+* Should activation of the `ACP176FeeManager` precompile disable the old precompile itself or should we require it to be disabled as a separate upgrade?
 
 ## Acknowledgements
 
