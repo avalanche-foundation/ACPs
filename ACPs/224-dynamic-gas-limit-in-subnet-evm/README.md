@@ -20,9 +20,9 @@ While both ACP-176 and ACP-194 will be required upgrades for L1s, this ACP aims 
 
 ## Specification
 
-### C-Chain Parameters (ACP-176)
+### ACP-176 Parameters
 
-This ACP aims to use same parameters as in [ACP-176 configuration parameters](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md#configuration-parameters):
+This ACP uses same parameters as in the [ACP-176 specification](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md#configuration-parameters), and allows their values to be configured on a chain-by-chain basis. The parameter list and current values used by the C-Chain are as follows:
 
 | Parameter | Description | C-Chain Configuration |
 | :--- | :--- | :--- |
@@ -37,7 +37,7 @@ This ACP aims to use same parameters as in [ACP-176 configuration parameters](ht
 
 ### Prior Subnet-EVM Fee Configuration Parameters
 
-In the prior (before this ACP) Subnet-EVM fee configuration and in the fee manager precompile, the following parameters are used to control the fee mechanism:
+Prior to this ACP, the Subnet-EVM fee configuration and fee manager precompile used the following parameters to control the fee mechanism:
 
 **GasLimit**:
   Sets the max amount of gas consumed per block.
@@ -49,7 +49,7 @@ In the prior (before this ACP) Subnet-EVM fee configuration and in the fee manag
   The minimum base fee sets a lower bound on the EIP-1559 base fee of a block. Since the block's base fee sets the minimum gas price for any transaction included in that block, this effectively sets a minimum gas price for any transaction.
 
 **TargetGas**:
-  Specifies the targeted amount of gas (including block gas cost) to consume within a rolling 10s window. When the dynamic fee algorithm observes that network activity is above/below the TargetGas, it increases/decreases the base fee proportionally to how far above/below the target actual network activity is.
+  Specifies the targeted amount of gas (including block gas cost) to consume within a rolling 10s window. When the dynamic fee algorithm observes that network activity is above/below the `TargetGas`, it increases/decreases the base fee proportionally to how far above/below the target actual network activity is.
 
 **BaseFeeChangeDenominator**:
   Divides the difference between actual and target utilization to determine how much to increase/decrease the base fee. A larger denominator indicates a slower changing, stickier base fee, while a lower denominator allows the base fee to adjust more quickly.
@@ -62,20 +62,20 @@ In the prior (before this ACP) Subnet-EVM fee configuration and in the fee manag
 
 **BlockGasCostStep**:
   Determines how much to increase/decrease the block gas cost depending on the amount of time elapsed since the previous block. If the block is produced at the target rate, the block gas cost will stay the same as the block gas cost for the parent block. If it is produced faster/slower, the block gas cost will be increased/decreased by the step value for each second faster/slower than the target block rate accordingly.
-  Note: if the BlockGasCostStep is set to a very large number, it effectively requires block production to go no faster than the TargetBlockRate.
-  Ex: if a block is produced two seconds faster than the target block rate, the block gas cost will increase by 2 * BlockGasCostStep.
+  Note: if the `BlockGasCostStep` is set to a very large number, it effectively requires block production to go no faster than the `TargetBlockRate`.
+  Ex: if a block is produced two seconds faster than the target block rate, the block gas cost will increase by `2 * BlockGasCostStep`.
 
 ### ACP-176 Parameters in Subnet-EVM
 
 ACP-176 will make `GasLimit` and `BaseFeeChangeDenominator` configurations obsolete in Subnet-EVM.
 
-`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` can be kept same because ACP-176 still uses block gas cost to control the block production rate and surcharge for producing a block faster than the target rate. Subnet-EVM is configured to use following default values and they will be kept same:
+`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` will be kept same because ACP-176 still uses block gas cost to control the block production rate and surcharge for producing a block faster than the target rate. Subnet-EVM is configured to use following default values, which will be kept same:
 - `TargetBlockRate`: 2 (seconds)
 - `MinBlockGasCost`: 0 (gas)
 - `MaxBlockGasCost`: 1,000,000 (gas)
 - `BlockGasCostStep`: 200,000 (gas)
 
-`MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently default value is 25 * 10^-18^ (25 nAVAX/Gwei) and will be changed to minimum possible denomination of the native EVM asset (1 Wei).
+`MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently default value is `25 * 10^-18^` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei).
 
 `TargetGas` is equivalent to `T` (target gas consumed per second) in ACP-176 and will be used to set the target gas consumed per second for ACP-176.
 
