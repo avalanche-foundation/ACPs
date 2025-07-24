@@ -145,7 +145,7 @@ Because epochs may have [unbounded duration](#epoch-duration-bounds), it is poss
 1. As validators exit the validator set, their physical nodes may be unavailable to serve BLS signature requests, making it more difficult to construct a valid ICM message
 1. A valid ICM message may represent an attestation by a stale validator set. Signatures from validators that have exited the validator set between `PChainEpochHeight` and the current P-Chain tip will not represent active stake.
 
-Both of these scenarios may be mitigated by producing a block that does not verify any ICM messages, which will force the epoch to advance.
+Both of these scenarios may be mitigated by having shorter epoch lengths, which limit the delay in time between when the P-Chain is updated and when those updates are taken into account for ICM verification on a given L1, and by ensuring consistent block production, so that epochs always advance soon after $D$ time has passed.
 
 ### Excessive Validator Churn
 
