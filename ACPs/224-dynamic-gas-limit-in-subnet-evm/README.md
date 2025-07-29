@@ -171,14 +171,14 @@ Block building logic can follow the below diagram for determining the target exc
 flowchart TD
     A[ACP-224 activated] --> B{Is ACP224FeeManager precompile active?}
 
-    B -- Yes --> C[Use `targetExcess` from precompile storage at latest settled root]
+    B -- Yes --> C[Use targetExcess from precompile storage at latest settled root]
 
-    B -- No --> D{Is `gas-target` set in node chain config file?}
-    D -- Yes --> E[Calculate `targetExcess` from configured preference and allowed update bounds]
+    B -- No --> D{Is gas-target set in node chain config file?}
+    D -- Yes --> E[Calculate targetExcess from configured preference and allowed update bounds]
 
     D -- No --> F{Does parent block have ACP176 fields?}
     F -- Yes --> G[Use parent block ACP176 gas target]
-    F -- No --> H[Use `MinTargetPerSecond`]
+    F -- No --> H[Use MinTargetPerSecond]
 ```
 
 ## Backwards Compatibility
