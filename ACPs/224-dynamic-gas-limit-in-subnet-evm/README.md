@@ -1,4 +1,4 @@
-| ACP | PR Number |
+| ACP | 224 |
 | :--- | :--- |
 | **Title** | Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM  |
 | **Author(s)** |Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
@@ -7,22 +7,21 @@
 
 ## Abstract
 
-Proposes implementing `Dynamic EVM Gas Limits and Price Discovery Updates` [ACP-176](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md) in Subnet-EVM,
-along with a precompile that can configure parameters on-chain dynamically.
+Proposes implementing [ACP-176](https://github.com/avalanche-foundation/ACPs/blob/aa3bea24431b2fdf1c79f35a3fd7cc57eeb33108/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md) in Subnet-EVM, along with the addition of a new optional `ACP224FeeManagerPrecompile` that can be used configure fee parameters on-chain dynamically after activation, in the same way that the existing `FeeManagerPrecompile` can be used today prior to ACP-176.
 
 ## Motivation
 
-ACP-176 updated the EVM dynamic fee mechanism to far more accurately achieve the target gas consumption on-chain. It also added a mechanism for the target gas consumption rate to be dynamically updated. Until now, ACP-176 was only added to Coreth(C-chain), primarily because most L1s prefer to control their fees and gas targets through the `FeeManagerPrecompile` and `FeeConfig` in genesis chain configuration.
+ACP-176 updated the EVM dynamic fee mechanism to more accurately achieve the target gas consumption on-chain. It also added a mechanism for the target gas consumption rate to be dynamically updated. Until now, ACP-176 was only added to Coreth (C-Chain), primarily because most L1s prefer to control their fees and gas targets through the `FeeManagerPrecompile` and `FeeConfig` in genesis chain configuration.
 
-ACP-194 (SAE) depends on having a gas target and capacity mechanism aligned with ACP-176 to maintain consistency across Subnet-EVM and Coreth. It would be very difficult to use the existing windower fee mechanism in conjunction with SAE, and this would also require maintaining multiple mechanisms on a go-forwards basis. As such, adding ACP-176 into subnet-evm is (more or less) a requirement for L1s to be able to use SAE in the future.
+[ACP-194](https://github.com/avalanche-foundation/ACPs/blob/aa3bea24431b2fdf1c79f35a3fd7cc57eeb33108/ACPs/194-streaming-asynchronous-execution/README.md) (SAE) depends on having a gas target and capacity mechanism aligned with ACP-176. Specifically, there must be a known gas capacity added per second, and maximum gas capacity. The existing windower fee mechanism employed by Subnet-EVM does not provide these properties because it does not have a fixed capacity rate, making it difficult to calculate worst-case bounds for gas prices. As such, adding ACP-176 into Subnet-EVM is a functional requirement for L1s to be able to use SAE in the future. Adding ACP-176 fee dynamics to Subnet-EVM also has the added benefit of aligning with Coreth such that only a single mechanism needs to be maintained on a go-forwards basis.
 
-While both ACP-176 and ACP-194 will be required upgrades for L1s, this ACP aims to still provide similar controls for chains with a new precompile. To do so, we will add a new dynamic fee configuration and fee manager precompile that maps well into the ACP-176 mechanism, while still allowing admins to adjust the fee parameters dynamically and unilaterally.
+While both ACP-176 and ACP-194 will be required upgrades for L1s, this ACP aims to provide similar controls for chains with a new precompile. A new dynamic fee configuration and fee manager precompile that maps well into the ACP-176 mechanism will be added, optionally allowing admins to adjust fee parameters dynamically.
 
 ## Specification
 
 ### ACP-176 Parameters
 
-This ACP uses same parameters as in the [ACP-176 specification](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md#configuration-parameters), and allows their values to be configured on a chain-by-chain basis. The parameter list and current values used by the C-Chain are as follows:
+This ACP uses same parameters as in the [ACP-176 specification](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md#configuration-parameters), and allows their values to be configured on a chain-by-chain basis. The parameters and their current values used by the C-Chain are as follows:
 
 | Parameter | Description | C-Chain Configuration |
 | :--- | :--- | :--- |
@@ -75,19 +74,19 @@ ACP-176 will make `GasLimit` and `BaseFeeChangeDenominator` configurations obsol
 - `MaxBlockGasCost`: 1,000,000 (gas)
 - `BlockGasCostStep`: 200,000 (gas)
 
-`MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently default value is `25 * 10^-18^` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei).
+`MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently default value is `25 * 10^-18^` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei), which is aligned with the C-Chain.
 
 `TargetGas` is equivalent to `T` (target gas consumed per second) in ACP-176 and will be used to set the target gas consumed per second for ACP-176.
 
-`MaxCapacityFactor` is equivalent to factor in `C` in ACP-176 and controls the maximum gas capacity (i.e block gas limit). This determines the `C` as `C = MaxCapacityFactor * T`. Currently default value is 10 as in C-Chain.
+`MaxCapacityFactor` is equivalent to factor in `C` in ACP-176 and controls the maximum gas capacity (i.e block gas limit). This determines the `C` as `C = MaxCapacityFactor * T`. The default value will be 10, which is aligned with the C-Chain.
 
-`TimeToDouble` will be used to control the speed of the fee adjustment (`K`). This determines the `K` as `K = (RMult-1) * 1/ln2 * TimeToDouble`, where `RMult` is the factor in `R` which is defined as 2. Currently default value for `TimeToDouble` is 60 (seconds), making `K=~87*T` as in C-Chain.
+`TimeToDouble` will be used to control the speed of the fee adjustment (`K`). This determines the `K` as `K = (RMult-1) * 1/ln2 * TimeToDouble`, where `RMult` is the factor in `R` which is defined as 2. The default value for `TimeToDouble` will be 60 (seconds), making `K=~87*T`, which is aligned with the C-Chain.
 
 As a result parameters will be set as follows:
 
-| Parameter | Description | Default Configuration | Is Dynamic |
+| Parameter | Description | Default Value | Is Configurable |
 | :--- | :--- | :--- | :--- |
-| T | target gas consumed per second | 2,000,000 | :white_check_mark: |
+| T | target gas consumed per second | 1,000,000 | :white_check_mark: |
 | R | gas capacity added per second | 2*T | :x:
 | C | maximum gas capacity | 10*T | :white_check_mark: Through `MaxCapacityFactor` (default 10)
 | P | minimum target gas consumption per second | 1,000,000 | :x:
@@ -95,6 +94,8 @@ As a result parameters will be set as follows:
 | Q | target gas consumption rate update factor change limit | 2^15 | :x:
 | M | minimum gas price | 1 Wei | :white_check_mark:
 | K | initial gas price update factor | ~87*T | :white_check_mark: Through `TimeToDouble` (default 60s)
+
+The gas capacity added per second (`R`) always being equal to `2*T` keeps it such that the gas price is capable of increases and decrease at the same rate. The values of `Q` and `D` affect the magnitude of change to `T` that each block can have, and the granularity at which the target gas consumption rate can be updated. The proposed values match the C-Chain, allowing each block to modify the current gas target by roughly $\frac{1}{1024}$ of its current value. This has provided sufficient responsiveness and granularity as is, removing the need to make `D` and `Q` dynamic or configurable. Similarly, 1,000,000 gas/second should be a low enough minimum target gas consumption for any EVM L1. The target gas for a given L1 will be able to be increased from this value dynamically and has no maximum.
 
 #### Adjustment to ACP-176 calculations for price discovery
 
@@ -109,7 +110,6 @@ There will be a new genesis chain configuration to set the parameters for the ch
   ...
   "acp224Timestamp": ...,
   "acp224FeeConfig": {
-    "targetGas": ...,
     "minGasPrice": ...,
     "maxCapacityFactor": ...,
     "timeToDouble": ...,
@@ -122,17 +122,17 @@ There will be a new genesis chain configuration to set the parameters for the ch
 
 ```
 
-### New ACP176 Fee Manager Precompile
+### `ACP224FeeManagerPrecompile`
 
-A new fee manager precompile will be required to dynamically changing the parameters. The precompile will be similar to the existing fee manager precompile. The solidity interface will be as follows:
+A new fee manager precompile will be required to dynamically changing the parameters. The precompile will off similar controls as the existing `FeeManagerPrecompile` implemented in Subnet-EVM [here](https://github.com/ava-labs/subnet-evm/tree/53f5305/precompile/contracts/feemanager). The solidity interface will be as follows:
 
 ```solidity
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 import "./IAllowList.sol";
 
-interface IACP176FeeManager is IAllowList {
-  struct ACP176FeeConfig {
+interface IACP224FeeManager is IAllowList {
+  struct FeeConfig {
     uint256 targetGas;
     uint256 minGasPrice;
     uint256 maxCapacityFactor;
@@ -142,57 +142,43 @@ interface IACP176FeeManager is IAllowList {
     uint256 maxBlockGasCost;
     uint256 blockGasCostStep;
   }
-  event FeeConfigChanged(address indexed sender, ACP176FeeConfig oldFeeConfig, ACP176FeeConfig newFeeConfig);
+  event FeeConfigUpdated(address indexed sender, FeeConfig oldFeeConfig, FeeConfig newFeeConfig);
 
   // Set fee config fields to contract storage
   function setFeeConfig(
-    uint256 targetGas;
-    uint256 minGasPrice;
-    uint256 maxCapacityFactor;
-    uint256 timeToDouble;
-    uint256 targetBlockRate;
-    uint256 minBlockGasCost;
-    uint256 maxBlockGasCost;
-    uint256 blockGasCostStep;
+    FeeConfig calldata config
   ) external;
 
   // Get fee config from the contract storage
   function getFeeConfig()
     external
     view
-    returns (
-      uint256 targetGas;
-      uint256 minGasPrice;
-      uint256 maxCapacityFactor;
-      uint256 timeToDouble;
-      uint256 targetBlockRate;
-      uint256 minBlockGasCost;
-      uint256 maxBlockGasCost;
-      uint256 blockGasCostStep;
-    );
+    returns (FeeConfig memory config);
 
   // Get the last block number changed the fee config from the contract storage
   function getFeeConfigLastChangedAt() external view returns (uint256 blockNumber);
 }
 ```
 
-The precompile will have a `targetGas` parameter that is used to set the target gas consumed per second for ACP-176. This will override the `gas-target` in chain config json. If the new fee manager precompile is not activated, validators can keep using `gas-target` in chain config json to set the target gas consumed per second (as in C-Chain).
+For chains with the precompile activated, `setFeeConfig` can be used to dynamically change each of the values in the fee configurations. Importantly, any updates made via calls to `setFeeConfig` in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are effected by changes to the fee configuration.
 
+Similar to the [desired target excess calculation in Coreth](https://github.com/ava-labs/coreth/blob/0255516f25964cf4a15668946f28b12935a50e0c/plugin/evm/upgrade/acp176/acp176.go#L170), which takes a node's desired gas target and calculates its desired target excess value, the `ACP224FeeManagerPrecompile` will use binary search to determine the resulting dynamic target excess value given the `targetGas` value passed to `setFeeConfig`. All blocks accepted after the settlement of such a call must have the correct target excess value as derived from the binary search result.
+
+For chains without the precompile activated, the target gas consumption will be able to be dynamically updated by validators by setting their `gas-target` configuration values, the same as on the C-Chain.
+
+Block building logic can follow the below diagram for determining the target excess of blocks.
 ```mermaid
 flowchart TD
-    A[ACP-224 activated] --> B{Is ACP176FeeManager precompile active?}
+    A[ACP-224 activated] --> B{Is ACP224FeeManager precompile active?}
 
-    B -- Yes --> C[Use targetGas from precompile storage]
+    B -- Yes --> C[Use `targetExcess` from precompile storage at latest settled root]
 
-    B -- No --> D{Is gas-target set in chain config file?}
-    D -- Yes --> E[Use gas-target from chain config file]
+    B -- No --> D{Is `gas-target` set in node chain config file?}
+    D -- Yes --> E[Calculate `targetExcess` from configured preference and allowed update bounds]
 
-    D -- No --> F{Is targetGas set in genesis.config.acp176FeeConfig?}
-    F -- Yes --> G[Use targetGas from genesis.config]
-
-    F -- No --> H{Has parent block ACP176 fields i.e activated ACP224}
-    H -- Yes --> I[Use parent block ACP176 gas target]
-    H -- No --> J[Use MinTargetPerSecond // P]
+    D -- No --> F{Does parent block have ACP176 fields?}
+    F -- Yes --> G[Use parent block ACP176 gas target]
+    F -- No --> H[Use `MinTargetPerSecond` (i.e. `P`)]
 ```
 
 ## Backwards Compatibility
@@ -214,13 +200,7 @@ Potentially any misconfiguration of parameters could leave the network vulnerabl
 
 ## Open Questions
 
-* Does it make sense dynamically changing the D and Q parameters? Currently they give each block builder the ability to adjust the value of $T$ on the rate of change of by roughly $\frac{1}{1024}$ of its current value.
-
-* Similarly does it make sense to dynamically change the `RMult` parameter? Currently it is set to 2, making `R = 2 * T` which means gas price can increase and decrease at the same rate.
-
-* Should we rather name the precompile as `ACP224FeeManager`?
-
-* Should activation of the `ACP176FeeManager` precompile disable the old precompile itself or should we require it to be disabled as a separate upgrade?
+* Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be disabled as a separate upgrade?
 
 ## Acknowledgements
 
