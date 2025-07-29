@@ -131,32 +131,39 @@ A new fee manager precompile will be required to dynamically changing the parame
 pragma solidity ^0.8.24;
 import "./IAllowList.sol";
 
+/// @title ACP-224 Fee Manager Interface
+/// @notice Interface for managing dynamic gas limit and fee parameters
+/// @dev Inherits from IAllowList for access control
 interface IACP224FeeManager is IAllowList {
-  struct FeeConfig {
-    uint256 targetGas;
-    uint256 minGasPrice;
-    uint256 maxCapacityFactor;
-    uint256 timeToDouble;
-    uint256 targetBlockRate;
-    uint256 minBlockGasCost;
-    uint256 maxBlockGasCost;
-    uint256 blockGasCostStep;
-  }
-  event FeeConfigUpdated(address indexed sender, FeeConfig oldFeeConfig, FeeConfig newFeeConfig);
+    /// @notice Configuration parameters for the dynamic fee mechanism
+    struct FeeConfig {
+        uint256 targetGas;           // Target gas consumption per second
+        uint256 minGasPrice;         // Minimum gas price in wei
+        uint256 maxCapacityFactor;   // Maximum capacity factor (C = factor * T)
+        uint256 timeToDouble;        // Time in seconds for fees to double at max capacity
+        uint256 targetBlockRate;     // Target block production rate
+        uint256 minBlockGasCost;     // Minimum cost for block gas
+        uint256 maxBlockGasCost;     // Maximum cost for block gas  
+        uint256 blockGasCostStep;    // Step size for block gas cost adjustments
+    }
 
-  // Set fee config fields to contract storage
-  function setFeeConfig(
-    FeeConfig calldata config
-  ) external;
+    /// @notice Emitted when fee configuration is updated
+    /// @param sender Address that triggered the update
+    /// @param oldFeeConfig Previous configuration
+    /// @param newFeeConfig New configuration
+    event FeeConfigUpdated(address indexed sender, FeeConfig oldFeeConfig, FeeConfig newFeeConfig);
 
-  // Get fee config from the contract storage
-  function getFeeConfig()
-    external
-    view
-    returns (FeeConfig memory config);
+    /// @notice Set the fee configuration
+    /// @param config New fee configuration parameters
+    function setFeeConfig(FeeConfig calldata config) external;
 
-  // Get the last block number changed the fee config from the contract storage
-  function getFeeConfigLastChangedAt() external view returns (uint256 blockNumber);
+    /// @notice Get the current fee configuration
+    /// @return config Current fee configuration
+    function getFeeConfig() external view returns (FeeConfig memory config);
+
+    /// @notice Get the block number when fee config was last changed
+    /// @return blockNumber Block number of last configuration change
+    function getFeeConfigLastChangedAt() external view returns (uint256 blockNumber);
 }
 ```
 
