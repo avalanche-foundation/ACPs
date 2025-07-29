@@ -178,7 +178,7 @@ flowchart TD
 
     D -- No --> F{Does parent block have ACP176 fields?}
     F -- Yes --> G[Use parent block ACP176 gas target]
-    F -- No --> H[Use `MinTargetPerSecond` (i.e. `P`)]
+    F -- No --> H[Use `MinTargetPerSecond`]
 ```
 
 ## Backwards Compatibility
