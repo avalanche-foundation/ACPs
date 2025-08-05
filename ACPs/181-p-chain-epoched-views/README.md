@@ -45,7 +45,7 @@ We advance from the current epoch $E_N$ to the next epoch $E_{N+1}$ when the nex
 - $T_{start}^{N+1}$ equal to $B_{S_N}$'s timestamp
 - The epoch number, $N+1$ increments the previous epoch's epoch number by exactly $1$
 
-## Properties and Use Cases
+## Properties
 
 ### Epoch Duration Bounds
 
@@ -54,6 +54,25 @@ Since an epoch's start time is set to the [timestamp of the sealing block of the
 ### Fixing the P-Chain Height
 
 When building a block, Avalanche blockchains use the P-Chain height [embedded in the block](#assumptions) to determine the validator set. If instead the epoch P-Chain height is used, then we can ensure that when a block is built, the validator set to be used for the next block is known. To see this, suppose block $b_m$ seals epoch $E_N$. Then the next block, $b_{m+1}$ will begin a new epoch, $E_{N+1}$ with $P_{N+1}$ equal to $b_m$'s P-Chain height, $p_m$. If instead $b_m$ does not seal $E_N$, then $b_{m+1}$ will continue to use $P_{N}$. Both candidates for $b_{m+1}$'s P-Chain height ($p_m$ and $P_N$) are known at $b_m$ build time.
+
+## Use Cases
+
+### ICM Verification Optimization
+
+For a validator to verify an ICM message, the signing L1/Subnet's validator set must be retrieved during block execution by traversing backward from the current P-Chain height to the P-Chain height provided by the ProposerVM. The traversal depth is highly variable, so to account for the worst case, VM implementations charge a large fixed amount of gas to perform this verification.
+
+With epochs, validator set retrieval occurs at fixed P-Chain heights that increment at regular intervals, which provides opportunities to optimize this retrieval. For instance, validator retrieval may be done asynchronously from block execution as soon as $D$ time has passed since the current epoch's start time, allowing the verification gas cost to be safely reduced by a significant amount.
+
+### Improved Relayer Reliability
+
+Current ICM VM implementations verify ICM messages against the local P-Chain state, as determined by the P-Chain height set by the ProposerVM. Off-chain relayers perform the following steps to deliver ICM messages:
+1. Fetch the sending chain's validator set at the verifying chain's current proposed height
+1. Collect BLS signatures from that validator set to construct the signed ICM message
+1. Submit the transaction containing the signed message to the verifying chain
+
+If the validator set changes between steps 1 and 3, the ICM message will fail verification.
+
+Epochs improve upon this by fixing the P-Chain height used to verify ICM messages for a duration of time that is predictable to off-chain relayers. A relayer should be able to derive the epoch boundaries based on the specification above, or they could retrieve that information via a node API. Relayers could use that information to decide the validator set to query, knowing that it will be stable for the duration of the epoch. Further, VMs could relax the verification rules to allow ICM messages to be verified against the previous epoch as a fallback, eliminating edge cases around the epoch boundary.
 
 ## Backwards Compatibility
 
@@ -120,19 +139,23 @@ Future network upgrades may change the value of $D$ to some new duration $D'$. $
 
 ## Security Considerations
 
+### Epoch P-Chain Height Skew
+
+Because epochs may have [unbounded duration](#epoch-duration-bounds), it is possible for a block's `PChainEpochHeight` to be arbitrarily far behind the tip of the P-Chain. This does not affect the *validity* of ICM verification within a VM that implements P-Chain epoched views, since the validator set at `PChainEpochHeight` is always known. However, the following considerations should be made under this scenario:
+1. As validators exit the validator set, their physical nodes may be unavailable to serve BLS signature requests, making it more difficult to construct a valid ICM message
+1. A valid ICM message may represent an attestation by a stale validator set. Signatures from validators that have exited the validator set between `PChainEpochHeight` and the current P-Chain tip will not represent active stake.
+
+Both of these scenarios may be mitigated by having shorter epoch lengths, which limit the delay in time between when the P-Chain is updated and when those updates are taken into account for ICM verification on a given L1, and by ensuring consistent block production, so that epochs always advance soon after $D$ time has passed.
+
 ### Excessive Validator Churn
 
-The introduction of epochs concentrates validator set changes over the epoch's duration into a single block at the epoch's boundary. Excessive validator churn can cause consensus failures and other dangerous behavior, so it is imperative that the amount of validator weight change at the epoch boundary is limited. One strategy to accomplish this is to queue validator set changes and spread them out over multiple epochs. Another strategy is to batch updates to the same validator together such that increases and decreases to that validator's weight cancel each other out. Mechanisms to mitigate against this are outside the scope of this ACP and left to validator managers to implement.
+If an epoched view of the P-Chain is used by the consensus engine, then validator set changes over an epoch's duration will be concentrated into a single block at the epoch's boundary. Excessive validator churn can cause consensus failures and other dangerous behavior, so it is imperative that the amount of validator weight change at the epoch boundary is limited. One strategy to accomplish this is to queue validator set changes and spread them out over multiple epochs. Another strategy is to batch updates to the same validator together such that increases and decreases to that validator's weight cancel each other out. Given the primary use case of ICM verification improvements, which occur at the VM level, mechanisms to mitigate against this are omitted from this ACP.
 
 ## Open Questions
 
 - What should the epoch duration $D$ be set to?
 
-- Should validator churn limits be implemented for the primary network to mitigate against [excessive validator churn](#excessive-validator-churn)?
-
 - Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, due to [unbounded epoch duration](#epoch-duration-bounds)?
-
-- Is there a better mechanism than a hardcoded network upgrade parameter that can be used to set $D$? The current approach imposes uniform $D$ across all VM instances, even though that is not a functional requirement of this proposal.
 
 ## Acknowledgements
 
