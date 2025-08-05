@@ -1,4 +1,4 @@
-| ACP | 2xx |
+| ACP | 226 |
 | :- | :- |
 | **Title** | Dynamic Minimum Block Times |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
