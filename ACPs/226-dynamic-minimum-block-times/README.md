@@ -90,6 +90,10 @@ Based on the 100-millisecond value for $M$, $q$ was chosen such that the effecti
 
 $D$ and $Q$ were chosen such that it takes approximately 3,600 consecutive blocks of the maximum allowed change in $q$ for the effective `minimumBlockDelay` value to either halve or double.
 
+### ProposerVM `MinBlkDelay`
+
+The ProposerVM currently offers a static, configurable `MinBlkDelay` seconds for consecutive blocks. With this ACP enforcing a dynamic minimum block delay time, any EVM instance adopting this ACP that also leverages the ProposerVM should ensure that the ProposerVM `MinBlkDelay` is set to 0.
+
 ### Note on Block Building
 
 While there is no longer a requirement for blocks to burn a minimum block gas cost after the activation of this ACP, block builders should still take priority fees into account when building blocks to allow for transaction prioritization and to maximize the amount of native token (AVAX) burned in the block. 
