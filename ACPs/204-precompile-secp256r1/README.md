@@ -21,7 +21,7 @@ This ACP proposes implementing EIP-7951's secp256r1 precompiled contract to unlo
 
 - Reduced onboarding friction: Enterprises can leverage existing biometric authentication infrastructure instead of managing seed phrases or hardware wallets
 - Regulatory compliance: Institutions can utilize their approved device security standards and identity management systems
-- Cost optimization: 100x gas reduction (from 200k-330k to 3,450 gas) makes enterprise-scale applications economically viable
+- Cost optimization: 100x gas reduction (from 200k-330k to 6,900 gas) makes enterprise-scale applications economically viable
 
 The 100x gas cost reduction makes these use cases economically viable while maintaining the security properties institutions and users expect from their existing devices. 
 
@@ -35,7 +35,7 @@ This ACP implements [EIP-7951](https://github.com/ethereum/EIPs/blob/master/EIPS
 
 - Input: 160 bytes (message hash + signature components r,s + public key coordinates x,y)
 - Output: success: 32 bytes `0x...01`; failure: no data returned
-- Gas Cost: 3,450 gas (based on EIP-7951 benchmarking)
+- Gas Cost: 6,900 gas (based on EIP-7951 benchmarking)
 - Validation: Full compliance with NIST FIPS 186-3 specification
 
 ### Activation
