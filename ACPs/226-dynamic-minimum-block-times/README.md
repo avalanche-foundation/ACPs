@@ -78,7 +78,7 @@ Parameters at activation on the C-Chain are:
 | Parameter | Description | C-Chain Configuration|
 | - | - | - |
 | $M$ | minimum `minimumBlockDelay` value | 100 milliseconds |
-| $q$ | initial target `minimumBlockDelay` excess | 3,293,842,468,476 |
+| $q$ | initial target `minimumBlockDelay` excess | 3,141,253 |
 | $D$ | `minimumBlockDelay` update constant | $2^{20}$ |
 | $Q$ | `minimumBlockDelay` update factor change limit | 200 |
 
