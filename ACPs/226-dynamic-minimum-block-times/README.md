@@ -27,7 +27,7 @@ Upon activation of this ACP, the `blockGasCost` field in block headers will be r
 #### `timeMilliseconds`
 
 The canonical serialization and interpretation of EVM blocks already contains a block timestamp specified in seconds. Altering this would require deep changes to the EVM codebase, as well as cause breaking changes to tooling such as indexers and block explorers. Instead, a new field is added representing the number of milliseconds past the existing block timestamp value denominated in seconds. The valid range of values for this field is 0 to 999. Wherever needed, the block timestamp in milliseconds can be easily constructed as:
-`(time * 1000) + timeMilliseconds`. 
+`(block.time * 1000) + block.timeMilliseconds`. 
 
 Existing tools that do not need millisecond granularity do not need to parse the new field, which limits the amount of breaking changes. 
 
