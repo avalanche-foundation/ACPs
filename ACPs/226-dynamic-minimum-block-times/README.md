@@ -22,6 +22,7 @@ With the prospect of ACP-194 removing block execution from consensus and allowin
 ## Specification
 
 ### Block Header Changes
+
 Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timeMilliseconds` and `minimumBlockDelay`.
 
 #### `timeMilliseconds`
@@ -29,11 +30,15 @@ Upon activation of this ACP, the `blockGasCost` field in block headers will be r
 The canonical serialization and interpretation of EVM blocks already contains a block timestamp specified in seconds. Altering this would require deep changes to the EVM codebase, as well as cause breaking changes to tooling such as indexers and block explorers. Instead, a new field is added representing the number of milliseconds past the existing block timestamp value denominated in seconds. The valid range of values for this field is 0 to 999. Wherever needed, the block timestamp in milliseconds can be easily constructed as:
 `(block.time * 1000) + block.timeMilliseconds`. 
 
-Existing tools that do not need millisecond granularity do not need to parse the new field, which limits the amount of breaking changes. 
+Existing tools that do not need millisecond granularity do not need to parse the new field, which limits the amount of breaking changes.
+
+The `timeMilliseconds` field will be represented in block headers as a `uint16`.
 
 #### `minimumBlockDelay`
 
 The new `minimumBlockDelay` field in the block header encodes the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelay` of $d$, then the effective timestamp of block $B+1$ in milliseconds must be at least $d$ greater than the effective timestamp of block $B$ in milliseconds.
+
+The `minimumBlockDelay` field will be represented in block headers as a `uint64`.
 
 The value of `minimumBlockDelay` can be updated in each block according to a mechanism similar to the one used by ACP-176 to support dynamic gas targets. The mechanism is specified below.
 
