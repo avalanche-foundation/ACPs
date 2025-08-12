@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Dynamic Minimum Block Times |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
-| **Status** | Proposed, Implementable, Activated, Stale ([Discussion](POPULATED BY MAINTAINER, DO NOT SET)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/228)) |
 | **Track** | Standards |
 
 ## Abstract
