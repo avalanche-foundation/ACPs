@@ -230,6 +230,7 @@ Generally, this has the same security considerations as ACP-176. However, due to
 ## Open Questions
 
 * Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be disabled as a separate upgrade?
+* [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/91667d255055e8f71b9717b7475504ba83844525/ACPs/226-dynamic-minimum-block-times/README.md) is proposing to remove block gas cost and target rate, which are included in this proposal.  
 
 ## Acknowledgements
 
