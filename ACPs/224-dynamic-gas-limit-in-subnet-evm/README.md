@@ -74,6 +74,8 @@ ACP-176 will make `GasLimit` and `BaseFeeChangeDenominator` configurations obsol
 - `MaxBlockGasCost`: 1,000,000 (gas)
 - `BlockGasCostStep`: 200,000 (gas)
 
+Note: [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/main/ACPs/226-dynamic-minimum-block-times/README.md) intends to remove these parameters above. 
+
 `MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently the default value is `25 * 10^-18` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei), which is aligned with the C-Chain.
 
 `TargetGas` is equivalent to `T` (target gas consumed per second) in ACP-176 and will be used to set the target gas consumed per second for ACP-176.
