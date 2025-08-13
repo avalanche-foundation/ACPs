@@ -68,7 +68,7 @@ Prior to this ACP, the Subnet-EVM fee configuration and fee manager precompile u
 
 ACP-176 will make `GasLimit` and `BaseFeeChangeDenominator` configurations obsolete in Subnet-EVM.
 
-`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` will be also removed by [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/main/ACPs/226-dynamic-minimum-block-times/README.md).
+`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` will be also removed by [ACP-226](https://github.com/avalanche-foundation/ACPs/tree/ce51dfab/ACPs/226-dynamic-minimum-block-times).
 
 `MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently the default value is `25 * 10^-18` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei), which is aligned with the C-Chain.
 
