@@ -68,13 +68,7 @@ Prior to this ACP, the Subnet-EVM fee configuration and fee manager precompile u
 
 ACP-176 will make `GasLimit` and `BaseFeeChangeDenominator` configurations obsolete in Subnet-EVM.
 
-`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` will be kept the same because ACP-176 still uses block gas cost to control the block production rate and surcharge for producing a block faster than the target rate. Subnet-EVM is configured to use following default values, which will be kept same:
-- `TargetBlockRate`: 2 (seconds)
-- `MinBlockGasCost`: 0 (gas)
-- `MaxBlockGasCost`: 1,000,000 (gas)
-- `BlockGasCostStep`: 200,000 (gas)
-
-Note: [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/main/ACPs/226-dynamic-minimum-block-times/README.md) intends to remove these parameters above. 
+`TargetBlockRate`, `MinBlockGasCost`, `MaxBlockGasCost`, and `BlockGasCostStep` will be also removed by [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/main/ACPs/226-dynamic-minimum-block-times/README.md).
 
 `MinGasPrice` is equivalent to `M` in ACP-176 and will be used to set the minimum gas price for ACP-176. This is similar to `MinBaseFee` in old Subnet-EVM fee configuration, and roughly gives the same effect. Currently the default value is `25 * 10^-18` (25 nAVAX/Gwei). This default will be changed to the minimum possible denomination of the native EVM asset (1 Wei), which is aligned with the C-Chain.
 
@@ -106,15 +100,11 @@ There will be a new genesis chain configuration to set the parameters for the ch
 ```json
 {
   ...
-  "acp224Timestamp": ...,
+  "acp224Timestamp": uint64
   "acp224FeeConfig": {
-    "minGasPrice": ...,
-    "maxCapacityFactor": ...,
-    "timeToDouble": ...,
-    "targetBlockRate": ...,
-    "minBlockGasCost": ...,
-    "maxBlockGasCost": ...,
-    "blockGasCostStep": ...
+    "minGasPrice": uint64
+    "maxCapacityFactor": uint64
+    "timeToDouble": uint64
   }
 }
 
@@ -143,10 +133,6 @@ interface IACP224FeeManager is IAllowList {
         uint256 minGasPrice;         // Minimum gas price in wei
         uint256 maxCapacityFactor;   // Maximum capacity factor (C = factor * T)
         uint256 timeToDouble;        // Time in seconds for gas price to double at max capacity
-        uint256 targetBlockRate;     // Target block production rate
-        uint256 minBlockGasCost;     // Minimum cost for block gas
-        uint256 maxBlockGasCost;     // Maximum cost for block gas  
-        uint256 blockGasCostStep;    // Step size for block gas cost adjustments
     }
 
     /// @notice Emitted when fee configuration is updated
@@ -174,7 +160,7 @@ In addition to storing the latest fee configuration to be returned by `getFeeCon
 
 $$ K = \frac{targetGas \cdot timeToDouble}{ln(2)} $$
 
-However, floating point math may introduce inaccuracies. Instead, a similar approach will be employed using binary search to determine the closest integer solution for $K$.  
+However, floating point math may introduce inaccuracies. Instead, a similar approach will be employed using binary search to determine the closest integer solution for $K$.
 
 Similar to the [desired target excess calculation in Coreth](https://github.com/ava-labs/coreth/blob/0255516f25964cf4a15668946f28b12935a50e0c/plugin/evm/upgrade/acp176/acp176.go#L170), which takes a node's desired gas target and calculates its desired target excess value, the `ACP224FeeManagerPrecompile` will use binary search to determine the resulting dynamic target excess value given the `targetGas` value passed to `setFeeConfig`. All blocks accepted after the settlement of such a call must have the correct target excess value as derived from the binary search result.
 
@@ -231,8 +217,9 @@ Generally, this has the same security considerations as ACP-176. However, due to
 
 ## Open Questions
 
-* Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be disabled as a separate upgrade?
-* [ACP-226](https://github.com/michaelkaplan13/ACPs/blob/91667d255055e8f71b9717b7475504ba83844525/ACPs/226-dynamic-minimum-block-times/README.md) is proposing to remove block gas cost and target rate, which are included in this proposal.  
+* Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be manually disabled as a separate upgrade?
+* Should we use `targetGas` in genesis/chain config as an optional field signaling whether the chain config should have a precedence over the validator preferences?
+* Similarly above, should we have a toggle in `ACP224FeeManager` precompile to give control to validators for `targetGas`?
 
 ## Acknowledgements
 
