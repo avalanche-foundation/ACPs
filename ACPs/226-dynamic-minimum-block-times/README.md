@@ -23,16 +23,15 @@ With the prospect of ACP-194 removing block execution from consensus and allowin
 
 ### Block Header Changes
 
-Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timeMilliseconds` and `minimumBlockDelay`.
+Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelay`.
 
-#### `timeMilliseconds`
+#### `timestampMilliseconds`
 
-The canonical serialization and interpretation of EVM blocks already contains a block timestamp specified in seconds. Altering this would require deep changes to the EVM codebase, as well as cause breaking changes to tooling such as indexers and block explorers. Instead, a new field is added representing the number of milliseconds past the existing block timestamp value denominated in seconds. The valid range of values for this field is 0 to 999. Wherever needed, the block timestamp in milliseconds can be easily constructed as:
-`(block.time * 1000) + block.timeMilliseconds`. 
+The canonical serialization and interpretation of EVM blocks already contains a block timestamp specified in seconds. Altering this would require deep changes to the EVM codebase, as well as cause breaking changes to tooling such as indexers and block explorers. Instead, a new field is added representing the unix timestamp in milliseconds.
 
 Existing tools that do not need millisecond granularity do not need to parse the new field, which limits the amount of breaking changes.
 
-The `timeMilliseconds` field will be represented in block headers as a `uint16`.
+The `timestampMilliseconds` field will be represented in block headers as a `uint64`.
 
 #### `minimumBlockDelay`
 
@@ -107,7 +106,7 @@ From a user (transaction issuer) perspective, this means that a non-zero priorit
 
 ## Backwards Compatibility
 
-While this proposal requires a network upgrade and updates the EVM block header format, it does so in a way that tries to maintain as much backwards compatibility as possible. Specifically, applications that currently parse and use the existing timestamp field that is denominated in seconds can continue to do so. The `timeMilliseconds` header value only needs to be used in cases where more granular timestamps are required.
+While this proposal requires a network upgrade and updates the EVM block header format, it does so in a way that tries to maintain as much backwards compatibility as possible. Specifically, applications that currently parse and use the existing timestamp field that is denominated in seconds can continue to do so. The `timestampMilliseconds` header value only needs to be used in cases where more granular timestamps are required.
 
 ## Reference Implementation
 
