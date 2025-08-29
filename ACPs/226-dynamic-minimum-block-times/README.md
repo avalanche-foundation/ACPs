@@ -35,7 +35,7 @@ The `timestampMilliseconds` field will be represented in block headers as a `uin
 
 #### `minimumBlockDelayExcess`
 
-The new `minimumBlockDelayExcess` field in the block header will be used to derive the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelayExcess` of $q$, then the effective timestamp of block $B+1$ in milliseconds must be at least $ M * e^{\frac{q}{D}} $ greater than the effective timestamp of block $B$ in milliseconds. $M$, $q$, and $D$ are defined below in the mechanism specification.
+The new `minimumBlockDelayExcess` field in the block header will be used to derive the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelayExcess` of $q$, then the effective timestamp of block $B+1$ in milliseconds must be at least $M * e^{\frac{q}{D}}$ greater than the effective timestamp of block $B$ in milliseconds. $M$, $q$, and $D$ are defined below in the mechanism specification.
 
 The `minimumBlockDelayExcess` field will be represented in block headers as a `uint64`.
 
