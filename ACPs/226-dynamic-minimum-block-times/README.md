@@ -75,9 +75,9 @@ As $q$ is updated after the execution of transactions within the block, $m$ is a
 
 ### Gas Accounting Updates
 
-Currently, the amount of gas capacity available is only incremented on a per second basis, as defined by ACP-176. With this ACP, it is expected for chains to be able to have sub-second block times. However, in the case when a chain's gas capacity is full consumed (i.e. during period of heavy transaction load), blocks would not be able to produced at sub-second intervals because at least one second would need to elapse for new gas capacity to be added. To correct this, upon activation of this ACP, gas capacity will be added on a per millisecond basis.
+Currently, the amount of gas capacity available is only incremented on a per second basis, as defined by ACP-176. With this ACP, it is expected for chains to be able to have sub-second block times. However, in the case when a chain's gas capacity is fully consumed (i.e. during period of heavy transaction load), blocks would not be able to produced at sub-second intervals because at least one second would need to elapse for new gas capacity to be added. To correct this, upon activation of this ACP, gas capacity will be added on a per millisecond basis.
 
-The ACP-176 mechanism for determing the target gas consumption per second will remain unchanged, but will now be used to derive the target gas consumption per millisecond by dividing by 1000, and gas capacity will be added at that rate as each block advances time by some number of milliseconds.
+The ACP-176 mechanism for determing the target gas consumption per second will remain unchanged, but its result will now be used to derive the target gas consumption per millisecond by dividing by 1000, and gas capacity will be added at that rate as each block advances time by some number of milliseconds.
 
 ### Activation Parameters for the C-Chain
 
