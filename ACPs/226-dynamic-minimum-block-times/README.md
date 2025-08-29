@@ -23,7 +23,7 @@ With the prospect of ACP-194 removing block execution from consensus and allowin
 
 ### Block Header Changes
 
-Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelay`.
+Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelayExcess`.
 
 #### `timestampMilliseconds`
 
@@ -33,13 +33,13 @@ Existing tools that do not need millisecond granularity do not need to parse the
 
 The `timestampMilliseconds` field will be represented in block headers as a `uint64`.
 
-#### `minimumBlockDelay`
+#### `minimumBlockDelayExcess`
 
-The new `minimumBlockDelay` field in the block header encodes the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelay` of $d$, then the effective timestamp of block $B+1$ in milliseconds must be at least $d$ greater than the effective timestamp of block $B$ in milliseconds.
+The new `minimumBlockDelayExcess` field in the block header will be used to derive the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelayExcess` of $q$, then the effective timestamp of block $B+1$ in milliseconds must be at least $ M * e^{\frac{q}{D}} $ greater than the effective timestamp of block $B$ in milliseconds. $M$, $q$, and $D$ are defined below in the mechanism specification.
 
-The `minimumBlockDelay` field will be represented in block headers as a `uint64`.
+The `minimumBlockDelayExcess` field will be represented in block headers as a `uint64`.
 
-The value of `minimumBlockDelay` can be updated in each block according to a mechanism similar to the one used by ACP-176 to support dynamic gas targets. The mechanism is specified below.
+The value of `minimumBlockDelayExcess` can be updated in each block, similar to the target excess field introduced in ACP-176. The mechanism is specified below.
 
 ### Dynamic `minimumBlockDelay` mechanism
 
@@ -49,7 +49,7 @@ $$ m = M * e^{\frac{q}{D}} $$
 
 Where:
 - $M$ is the global minimum `minimumBlockDelay` value in milliseconds
-- $q$ is a non-negative integer that is initialized upon the activation of this mechanism
+- $q$ is a non-negative integer that is initialized upon the activation of this mechanism, referred to as the `minimumBlockDelayExcess`
 - $D$ is a constant that helps control the rate of change of `minimumBlockDelay`
 
 After the execution of transactions in block $b$, the value of $q$ can be increased or decreased by up to $Q$. It must be the case that $\left|\Delta q\right| \leq Q$, or block $b$ is considered invalid. The amount by which $q$ changes after executing block $b$ is specified by the block builder.
@@ -73,6 +73,12 @@ When building a block, builders can calculate their next preferred value for $q$
 
 As $q$ is updated after the execution of transactions within the block, $m$ is also updated such that $m = M \cdot e^{\frac{q}{D}}$ at all times. As noted above, the change to $m$ only takes effect for subsequent block production, and cannot change the time at which block $b$ can be produced itself.
 
+### Gas Accounting Updates
+
+Currently, the amount of gas capacity available is only incremented on a per second basis, as defined by ACP-176. With this ACP, it is expected for chains to be able to have sub-second block times. However, in the case when a chain's gas capacity is full consumed (i.e. during period of heavy transaction load), blocks would not be able to produced at sub-second intervals because at least one second would need to elapse for new gas capacity to be added. To correct this, upon activation of this ACP, gas capacity will be added on a per millisecond basis.
+
+The ACP-176 mechanism for determing the target gas consumption per second will remain unchanged, but will now be used to derive the target gas consumption per millisecond by dividing by 1000, and gas capacity will be added at that rate as each block advances time by some number of milliseconds.
+
 ### Activation Parameters for the C-Chain
 
 Parameters at activation on the C-Chain are:
@@ -82,7 +88,7 @@ Parameters at activation on the C-Chain are:
 | Parameter | Description | C-Chain Configuration|
 | - | - | - |
 | $M$ | minimum `minimumBlockDelay` value | 100 milliseconds |
-| $q$ | initial target `minimumBlockDelay` excess | 3,141,253 |
+| $q$ | initial `minimumBlockDelayExcess` | 3,141,253 |
 | $D$ | `minimumBlockDelay` update constant | $2^{20}$ |
 | $Q$ | `minimumBlockDelay` update factor change limit | 200 |
 
