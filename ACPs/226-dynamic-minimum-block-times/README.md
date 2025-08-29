@@ -39,7 +39,7 @@ The new `minimumBlockDelayExcess` field in the block header will be used to deri
 
 The `minimumBlockDelayExcess` field will be represented in block headers as a `uint64`.
 
-The value of `minimumBlockDelayExcess` can be updated in each block, similar to the target excess field introduced in ACP-176. The mechanism is specified below.
+The value of `minimumBlockDelayExcess` can be updated in each block, similar to the gas target excess field introduced in ACP-176. The mechanism is specified below.
 
 ### Dynamic `minimumBlockDelay` mechanism
 
