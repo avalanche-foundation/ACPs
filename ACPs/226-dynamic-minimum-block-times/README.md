@@ -87,14 +87,14 @@ Parameters at activation on the C-Chain are:
 
 | Parameter | Description | C-Chain Configuration|
 | - | - | - |
-| $M$ | minimum `minimumBlockDelay` value | 100 milliseconds |
-| $q$ | initial `minimumBlockDelayExcess` | 3,141,253 |
+| $M$ | minimum `minimumBlockDelay` value | 1 millisecond |
+| $q$ | initial `minimumBlockDelayExcess` | 7,970,124 |
 | $D$ | `minimumBlockDelay` update constant | $2^{20}$ |
 | $Q$ | `minimumBlockDelay` update factor change limit | 200 |
 
 </div>
 
-$M$ was chosen to balance providing the option of significantly faster block times without the need for future network upgrades while still providing an upper bound on the maximum possible rate of block production and changes to the `minimumBlockDelay` value.
+$M$ was chosen as a lower bound for `minimumBlockDelay` values to allow high-performance Avalanche L1s to be able to realize maximum performance and minimal transaction latency.
 
 Based on the 100-millisecond value for $M$, $q$ was chosen such that the effective `minimumBlockDelay` value at time of activation is as close as possible to the current target block rate of the C-Chain, which is 2 seconds.
 
