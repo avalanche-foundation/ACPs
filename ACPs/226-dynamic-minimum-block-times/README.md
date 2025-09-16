@@ -96,7 +96,7 @@ Parameters at activation on the C-Chain are:
 
 $M$ was chosen as a lower bound for `minimumBlockDelay` values to allow high-performance Avalanche L1s to be able to realize maximum performance and minimal transaction latency.
 
-Based on the 100-millisecond value for $M$, $q$ was chosen such that the effective `minimumBlockDelay` value at time of activation is as close as possible to the current target block rate of the C-Chain, which is 2 seconds.
+Based on the 1 millisecond value for $M$, $q$ was chosen such that the effective `minimumBlockDelay` value at time of activation is as close as possible to the current target block rate of the C-Chain, which is 2 seconds.
 
 $D$ and $Q$ were chosen such that it takes approximately 3,600 consecutive blocks of the maximum allowed change in $q$ for the effective `minimumBlockDelay` value to either halve or double.
 
