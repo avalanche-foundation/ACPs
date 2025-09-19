@@ -8,7 +8,7 @@
 ## Abstract
 
 This proposal introduces continuous staking for validators on the Avalanche P-Chain. Validators can stake their tokens
-continuously, allowing their stake to compound over time.
+continuously, allowing their stake to compound over time, accruing rewards once per specified cycle.
 
 ## Motivation
 
@@ -20,51 +20,63 @@ until stakers initiate the necessary transactions to stake them again.
 
 ## Specification
 
-When validators wish to start staking, they submit an `AddContinuousValidatorTx`, specifying the desired cycle
-duration (period). To stop staking at any time, they submit a `StopContinuousValidatorTx`.
+Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to
+manually submit new staking transactions at the end of each period.
 
-Note: Submitting an AddContinuousValidatorTx immediately followed by a StopContinuousValidatorTx effectively replicates
+Instead of committing to a fixed end time upfront, validators specify a cycle duration (period) when they
+submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically re-staked for a new cycle
+of the same duration, unless the validator has submitted a `StopContinuousValidatorTx`.
+
+Rewards accrue once per cycle, and they are automatically added to principal in subsequent cycles.
+
+At the end of each cycle, if the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds the
+maximum stake limit defined in the network configuration, the excess amount is automatically withdrawn and sent to the
+wallets specified in the original transaction.
+
+Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `StopContinuousValidatorTx` replicates
 the behavior of the current staking system.
 
 ### New P-Chain Transaction Types
 
 The following new transaction types are introduced on the P-Chain to support this functionality:
 
-- `AddContinuousValidatorTx`
-- `StopContinuousValidatorTx`
+#### AddContinuousValidatorTx
 
 ```golang
 type AddContinuousValidatorTx struct {
-// Metadata, inputs and outputs
-BaseTx `serialize:"true"`
-
-// Node ID of the validator
-ValidatorNodeID ids.NodeID `serialize:"true" json:"nodeID"`
-
-// Period (in seconds).
-Period uint64 `serialize:"true" json:"period"`
-
-// [Signer] is the BLS key for this validator.
-Signer signer.Signer `serialize:"true" json:"signer"`
-
-// Where to send staked tokens when done validating
-StakeOuts []*avax.TransferableOutput `serialize:"true" json:"stake"`
-
-// Where to send validation rewards when done validating
-ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
-
-// Where to send delegation rewards when done validating
-DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
-
-// Fee this validator charges delegators as a percentage, times 10,000
-// For example, if this validator has DelegationShares=300,000 then they
-// take 30% of rewards from delegators
-DelegationShares uint32 `serialize:"true" json:"shares"`
-
-// Weight of this validator used when sampling
-Wght uint64 `serialize:"true" json:"weight"`
+  // Metadata, inputs and outputs
+  BaseTx `serialize:"true"`
+  
+  // Node ID of the validator
+  ValidatorNodeID ids.NodeID `serialize:"true" json:"nodeID"`
+  
+  // Period (in seconds).
+  Period uint64 `serialize:"true" json:"period"`
+  
+  // [Signer] is the BLS key for this validator.
+  Signer signer.Signer `serialize:"true" json:"signer"`
+  
+  // Where to send staked tokens when done validating
+  StakeOuts []*avax.TransferableOutput `serialize:"true" json:"stake"`
+  
+  // Where to send validation rewards when done validating
+  ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
+  
+  // Where to send delegation rewards when done validating
+  DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
+  
+  // Fee this validator charges delegators as a percentage, times 10,000
+  // For example, if this validator has DelegationShares=300,000 then they
+  // take 30% of rewards from delegators
+  DelegationShares uint32 `serialize:"true" json:"shares"`
+  
+  // Weight of this validator used when sampling
+  Wght uint64 `serialize:"true" json:"weight"`
 }
+
 ```
+
+#### StopContinuousValidatorTx
 
 ```golang
 type StopContinuousValidatorTx struct {
@@ -80,11 +92,8 @@ type StopContinuousValidatorTx struct {
 }
 ```
 
-### New Transactions
-
-- P-Chain
-  - `AddContinuousValidatorTx`
-  - `StopContinuousValidatorTx`
+`StopSignature` is the BLS Proof of Possession signature of the tx ID of `AddContinuousValidatorTx` using the validator
+key.
 
 ## Backwards Compatibility
 
