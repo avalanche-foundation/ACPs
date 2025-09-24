@@ -23,15 +23,27 @@ until stakers initiate the necessary transactions to stake them again.
 Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to
 manually submit new staking transactions at the end of each period.
 
-Instead of committing to a fixed end time upfront, validators specify a cycle duration (period) when they
-submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically re-staked for a new cycle
-of the same duration, unless the validator has submitted a `StopContinuousValidatorTx`.
+Instead of committing to a fixed end time upfront, validators specify a cycle duration (period) when they submit an
+AddContinuousValidatorTx. At the end of each cycle, the validator is automatically re-staked for a new cycle of the same
+duration, unless the validator has submitted a StopContinuousValidatorTx. If a validator submits a
+StopContinuousValidatorTx during a cycle, the validator will continue validating until the end of the current cycle, at
+which point the validator exits and funds unlock. The minimum and maximum cycle lengths follow the same protocol
+parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
-Rewards accrue once per cycle, and they are automatically added to principal in subsequent cycles.
+Delegators interact with continuous validators in the same way as with fixed-period validators, and the same constraints
+apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple
+cycles, since there is no guarantee that a validator will continue validating after the current cycle.
 
-At the end of each cycle, if the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds the
-maximum stake limit defined in the network configuration, the excess amount is automatically withdrawn and sent to the
-wallets specified in the original transaction.
+Rewards accrue once per cycle, and they are automatically added to principal in subsequent cycles, both for validator
+rewards and for delegation rewards. If the updated stake weight (previous stake + staking rewards + delegatee rewards)
+exceeds the maximum stake limit defined in the network configuration, the excess amount is automatically withdrawn and
+sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+
+Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical
+transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous
+validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a
+timestamp. For simplicity and consistency, any stake exceeding the maximum limit is withdrawn from the validator, and
+the resulting UTXOs are tied to the `RewardContinuousValidatorTx` ID.
 
 Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `StopContinuousValidatorTx` replicates
 the behavior of the current staking system.
@@ -95,13 +107,25 @@ type StopContinuousValidatorTx struct {
 `StopSignature` is the BLS Proof of Possession signature of the tx ID of `AddContinuousValidatorTx` using the validator
 key.
 
+#### RewardContinuousValidatorTx
+
+```golang
+type RewardContinuousValidatorTx struct {
+    // ID of the tx that created the validator being removed/rewarded
+    TxID ids.ID `serialize:"true" json:"txID"`
+
+    // End time of the validator.
+    Timestamp uint64 `serialize:"true" json:"timestamp"`
+    
+    unsignedBytes []byte // Unsigned byte representation of this data
+}
+
+```
+
 ## Backwards Compatibility
 
 This change requires a network upgrade to make sure that all validators are able to verify and execute the new
 introduced transactions.
-
-Another subsequent ACP could eventually remove `AddPermissionlessValidatorTx`, since the old staking behaviour is
-replicable by using the newly added transactions.
 
 ## Considerations
 
