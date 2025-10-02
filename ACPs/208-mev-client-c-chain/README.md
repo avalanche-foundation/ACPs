@@ -128,7 +128,7 @@ If any of these checks fail, the validator drops the bid and reverts to its own 
 
 ### Implementation
 
-In our setup, builders and validators work together in a single step: during each block interval, the builder sends a bid that already contains the full list of transactions. The validator can then seal and publish the block right away.
+In our setup, builders and validators work together in a double steps: during each block interval, the validator request information to the block builder. The builder sends a bid that already contains the full list of transactions. The validator can then seal and publish the block right away.
 
 ```mermaid
 sequenceDiagram
@@ -158,49 +158,6 @@ sequenceDiagram
 #### JSON-RPC APIs & Configuration
 
 This part describes how builders interact with a validator that has **MEV functionality** enabled and how a validator can configure that functionality.
-
-### 1. JSON-RPC Endpoints
-
-#### 1.1 mev_sendBid
-
-Submit a MEV bid to the validator.
-
-```jsonc
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "mev_sendBid",
-  "params": [
-    {
-      "rawBid": {
-        "blockNumber": <uint>,               // Target block height
-        "parentHash": "<parent_block_hash>", // Hash of the parent block
-        "txs": [ "<raw_signed_tx>", ... ],   // Raw transactions included in the bid
-        "unRevertible": [ "<tx_hash>", ... ],// (Optional) Tx hashes that MUST NOT fail
-        "gasUsed": <uint>,                   // Gas consumed by the block
-        "gasFee": "<wei>",                   // How much gas gets sent to the coinbase address
-        "mevRewards": "<wei>",               // Total MEV extracted by builder
-        "mevBurnShare": "<wei>",             // Portion of MEV burned
-        "mevValidatorShare": "<wei>"         // Portion of MEV paid to validator
-      },
-      "signature": "<builder_signature>",     // ECDSA-sign over rawBid
-      "payBidTx": "<raw_signed_tx>",          // Tx that transfers mevRewards to validator
-      "payBidTxGasUsed": <uint>,              // Gas used by payBidTx
-      "burnTx": "<raw_signed_tx>"             // Tx that burns mevBurnShare
-    }
-  ]
-}
-```
-
-#### Response
-
-```jsonc
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": "<bid_hash>" // Hash of the accepted bid
-}
-```
 
 #### 1.2 mev_params
 
@@ -236,36 +193,25 @@ To enable it, validators need edit the chain-config file following the official 
 
 ```jsonc
 {
-  "eth-apis": [
-    "internal-mev"        // Expose MEV-specific RPC endpoints
-  ],
-
+  // Turns the MEV auction logic on for this validator.
+  "mev-api-enabled": true,
+  // MEV parameters
   "mev": {
-    "enabled": true,       // Switch for the MEV module
-
-    "builders": [          // List of trusted builders
+    // Whitelisted builder relay(s) – address must match the signer of the bundles it relays.
+    "builders": [
       {
-        "address": "<builder_address>",  // EOAs allowed to submit bids
-        "url": "<builder_rpc_url>"       // Builder RPC endpoint to send notifications
+        "address": "0x00B22a6A183DdBefe7B515A73eC2Dc7C39bf82cE",
+        "url": "https://builder.mev.zone/ext/bc/C/rpc"
       }
     ],
-
-    "validatorCommission": <bps>,        // Commission in basis points (e.g. 500 = 5 %)
-    "validatorWallet": "<validator_wallet_address>" // Validator reward address
+    // Commission the validator keeps from every winning bundle (basis-points).
+    "validatorCommission": 500,
+    // Address that actually receives the commission.
+    "validatorWallet": "0x00..."
   }
 }
 ```
 
-### Field Reference
-
-| Field                     | Description                                                                                     |
-| ------------------------- | ----------------------------------------------------------------------------------------------- |
-| `eth-apis`                | Extra API namespaces exposed by the node. Must include `internal-mev` for any MEV RPCs to work. |
-| `mev.enabled`             | Global on/off toggle for the MEV module.                                                        |
-| `mev.builders[].address`  | EOA of an authorized builder. Only these addresses can call `mev_sendBid`.                      |
-| `mev.builders[].url`      | Builder’s public RPC endpoint .                                                                 |
-| `mev.validatorCommission` | Validator commission expressed in basis points (1 bp = 0.01 %).                                 |
-| `mev.validatorWallet`     | Address that receives the validator’s commission share.                                         |
 
 ### 3. Reference Go Types
 
@@ -318,6 +264,7 @@ MEV Zone integrates with AvalancheGo through minimal, isolated modifications tha
 
 - [Mev Explorer](https://explorer.mev.zone)
 - [Documentation](https://mevzone.gitbook.io/mevzone)
+
 
 
 
