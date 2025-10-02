@@ -135,6 +135,7 @@ sequenceDiagram
     participant Builder
     participant Validator
 
+    Validator->>+Builder: Get bid with transactions
     Builder->>+Validator: Submit bid with transactions
     Validator->>+Validator: Select the most profitable bid
     Validator->>+Validator: Executes bid with transactions
@@ -145,7 +146,7 @@ sequenceDiagram
         Validator->>+Validator: Seal block
     end
 ```
-
+- The next proposer asks the builder its bid with transactions transactions 
 - The builder sends its bid with transactions to the next proposer.
 - When the validator is the proposer, it picks the bid worth the most if it has any.
 - The validator runs every transaction to make sure the set of rules match what the bid promised.
@@ -317,6 +318,7 @@ MEV Zone integrates with AvalancheGo through minimal, isolated modifications tha
 
 - [Mev Explorer](https://explorer.mev.zone)
 - [Documentation](https://mevzone.gitbook.io/mevzone)
+
 
 
 
