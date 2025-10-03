@@ -30,7 +30,7 @@ An epoch is defined as a contiguous range of blocks that share the same three va
 
 Let $E_N$ denote an epoch with epoch number $N$. $E_N$'s start time is denoted as $T_{start}^N$, and its P-Chain height as $P_N$. 
 
-$E_0$ is defined as the epoch whose start time $T_{start}^0$ is the block timestamp of the block that activates this ACP (i.e. the first block at or following this ACP's activation timestamp).
+$E_0$ is defined as the epoch whose start time $T_{start}^0$ is the block timestamp of the parent block of the block that activates this ACP (i.e. the last block prior to this ACP's activation timestamp).
 
 ### Epoch Sealing
 
@@ -101,7 +101,7 @@ type Block interface {
 }
 
 func GetPChainEpoch(parent Block) Epoch {
-    if parent.Timestamp().After(time.Add(parent.Epoch().StartTime, D)) {
+    if !parent.Timestamp().Before(time.Add(parent.Epoch().StartTime, D)) {
         // If the parent crossed its epoch boundary, then it sealed its epoch.
         // The child is the first block of the new epoch, so it should use the parent's
         // P-Chain height as the new epoch's height, and its parent's timestamp as the new
@@ -114,13 +114,9 @@ func GetPChainEpoch(parent Block) Epoch {
     }
 
     // Otherwise, the parent did not seal its epoch, so the child should use the same
-    // epoch height. This is true even if the child seals its epoch, since sealing
+    // epoch values. This is true even if the child seals its epoch, since sealing
     // blocks are considered to be part of the epoch they seal.
-    return Epoch{
-        PChainHeight: parent.Epoch().PChainHeight
-        Number: parent.Epoch().Number
-        StartTime: parent.Epoch().StartTime
-    }
+    return parent.Epoch()
 }
 ```
 
@@ -131,7 +127,7 @@ A full reference implementation that implements this ACP in the ProposerVM is av
 
 ### Setting the Epoch Duration
 
-The epoch duration $D$ is hardcoded in the upgrade configuration, and may only be changed by a required network upgrade.
+The epoch duration $D$ is set on a network-wide level. For both Fuji (network ID 5) and Mainnet (network ID), $D$ will be set to 5 minutes upon activation of this ACP. Any changes to $D$ in the future would require another network upgrade.
 
 #### Changing the Epoch Duration
 
