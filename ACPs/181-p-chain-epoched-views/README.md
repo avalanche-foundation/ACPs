@@ -30,7 +30,7 @@ An epoch is defined as a contiguous range of blocks that share the same three va
 
 Let $E_N$ denote an epoch with epoch number $N$. $E_N$'s start time is denoted as $T_{start}^N$, and its P-Chain height as $P_N$. 
 
-$E_0$ is defined as the epoch whose start time $T_{start}^0$ is the block timestamp of the parent block of the block that activates this ACP (i.e. the last block prior to this ACP's activation timestamp).
+Let block $b_a$ be the block that activates this ACP. The first epoch ($E_0$) has $T_{start}^0 = t_{a-1}$, and $P_0 = p_{a-1}$. In other words, the first epoch start time is the timestamp of the last block prior to the activation of this ACP, and similarly, the first epoch P-Chain height is the P-Chain height of last block prior to the activation of this ACP.
 
 ### Epoch Sealing
 
@@ -101,22 +101,22 @@ type Block interface {
 }
 
 func GetPChainEpoch(parent Block) Epoch {
-    if !parent.Timestamp().Before(time.Add(parent.Epoch().StartTime, D)) {
-        // If the parent crossed its epoch boundary, then it sealed its epoch.
-        // The child is the first block of the new epoch, so it should use the parent's
-        // P-Chain height as the new epoch's height, and its parent's timestamp as the new
-        // epoch's starting time
-        return Epoch{
-            PChainHeight: parent.PChainHeight()
-            Number: parent.Epoch().Number + 1
-            StartTime: parent.Timestamp()
-        }
-    }
+	parentTimestamp := parent.Timestamp()
+	parentEpoch := parent.Epoch()
+	epochEndTime := parentEpoch.StartTime.Add(D)
+	if parentTimestamp.Before(epochEndTime) {
+		// If the parent was issued before the end of its epoch, then it did not
+		// seal the epoch.
+		return parentEpoch
+	}
 
-    // Otherwise, the parent did not seal its epoch, so the child should use the same
-    // epoch values. This is true even if the child seals its epoch, since sealing
-    // blocks are considered to be part of the epoch they seal.
-    return parent.Epoch()
+	// The parent sealed the epoch, so the child is the first block of the new
+	// epoch.
+	return Epoch{
+		PChainHeight: parent.PChainHeight(),
+		Number:       parentEpoch.Number + 1,
+		StartTime:    parentTimestamp,
+	}
 }
 ```
 
