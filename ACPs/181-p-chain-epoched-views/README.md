@@ -127,7 +127,7 @@ A full reference implementation that implements this ACP in the ProposerVM is av
 
 ### Setting the Epoch Duration
 
-The epoch duration $D$ is set on a network-wide level. For both Fuji (network ID 5) and Mainnet (network ID), $D$ will be set to 5 minutes upon activation of this ACP. Any changes to $D$ in the future would require another network upgrade.
+The epoch duration $D$ is set on a network-wide level. For both Fuji (network ID 5) and Mainnet (network ID 1), $D$ will be set to 5 minutes upon activation of this ACP. Any changes to $D$ in the future would require another network upgrade.
 
 #### Changing the Epoch Duration
 
