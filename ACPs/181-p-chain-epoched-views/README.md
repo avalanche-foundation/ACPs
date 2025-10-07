@@ -123,7 +123,7 @@ func GetPChainEpoch(parent Block) Epoch {
 - If the parent sealed its epoch, the current block [advances the epoch](#advancing-an-epoch), refreshing the epoch height, incrementing the epoch number, and setting the epoch starting time.
 - Otherwise, the current block uses the current epoch height, number, and starting time, regardless of whether it seals the epoch.
 
-A full reference implementation of this ACP for avalanchego can be found [here](https://github.com/ava-labs/avalanchego/pull/4238)
+A full reference implementation of this ACP for avalanchego can be found [here](https://github.com/ava-labs/avalanchego/pull/4238).
 
 ### Setting the Epoch Duration
 
