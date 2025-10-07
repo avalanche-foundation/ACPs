@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | P-Chain Epoched Views |
 | **Author(s)** | Cam Schultz [@cam-schultz](https://github.com/cam-schultz) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/211)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/211)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -152,6 +152,10 @@ If an epoched view of the P-Chain is used by the consensus engine, then validato
 - What should the epoch duration $D$ be set to?
 
 - Is it safe for `PChainEpochHeight` and `PChainHeight` to differ significantly within a block, due to [unbounded epoch duration](#epoch-duration-bounds)?
+
+## Reference Implementation
+
+An implementation of this ACP for avalanchego can be found [here](https://github.com/ava-labs/avalanchego/pull/4238)
 
 ## Acknowledgements
 
