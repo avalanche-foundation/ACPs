@@ -59,9 +59,9 @@ When building a block, Avalanche blockchains use the P-Chain height [embedded in
 
 ### ICM Verification Optimization
 
-For a validator to verify an ICM message, the signing L1/Subnet's validator set must be retrieved during block execution by traversing backward from the current P-Chain height to the P-Chain height provided by the ProposerVM. The traversal depth is highly variable, so to account for the worst case, VM implementations charge a large fixed amount of gas to perform this verification.
+For a validator to verify an ICM message, the signing L1/Subnet's validator set must be retrieved during block verification by traversing backward from the current P-Chain height to the P-Chain height provided by the ProposerVM. The traversal depth is highly variable, so to account for the worst case, VM implementations charge a large amount of gas to perform this verification.
 
-With epochs, validator set retrieval occurs at fixed P-Chain heights that increment at regular intervals, which provides opportunities to optimize this retrieval. For instance, validator retrieval may be done asynchronously from block execution as soon as $D$ time has passed since the current epoch's start time, allowing the verification gas cost to be safely reduced by a significant amount.
+With epochs, validator set retrieval occurs at fixed P-Chain heights that increment at regular intervals, which provides opportunities to optimize this retrieval. For instance, validator retrieval may be done asynchronously from block verification as soon as an epoch has been sealed. Further, validator sets at a given height can be more effectively cached or otherwise kept in memory, because the same height will be used verify all ICM messages for the remainder of an epoch. Each of these VM optimizations allow for the potential of ICM verification costs to be safely reduced by a significant amount within VM implementations.
 
 ### Improved Relayer Reliability
 
@@ -73,6 +73,34 @@ Current ICM VM implementations verify ICM messages against the local P-Chain sta
 If the validator set changes between steps 1 and 3, the ICM message will fail verification.
 
 Epochs improve upon this by fixing the P-Chain height used to verify ICM messages for a duration of time that is predictable to off-chain relayers. A relayer should be able to derive the epoch boundaries based on the specification above, or they could retrieve that information via a node API. Relayers could use that information to decide the validator set to query, knowing that it will be stable for the duration of the epoch. Further, VMs could relax the verification rules to allow ICM messages to be verified against the previous epoch as a fallback, eliminating edge cases around the epoch boundary.
+
+## EVM ICM Verification Gas Cost Updates
+
+Since the activation of [ACP-30](https://github.com/michaelkaplan13/ACPs/tree/60cbfc32e7ee2cffed33d8daee980d7a85dded48/ACPs/30-avalanche-warp-x-evm#gas-costs), the cost to verify ICM messages in the EVM using the `WarpPrecompile` have been based on the worst-case verification flow, including the relatively expensive lookup of the source chain's validator set at an aribtrary P-Chain height used by each new block. This ACP allows for optimizing this verification, as described above.
+
+The existing gas costs of relevant `WarpPrecompile` functions are:
+```
+const (
+	GetVerifiedWarpMessageBaseCost  = 2
+	GetBlockchainIDGasCost          = 2
+	GasCostPerWarpSigner            = 500
+	GasCostPerWarpMessageChunk      = 3_200
+	GasCostPerSignatureVerification = 200_000
+)
+```
+
+With optimizations implemented, based on the results of [new benchmarks](https://github.com/ava-labs/coreth/pull/1331) of the `WarpPrecompile` and roughly targeting processing 150 million gas per second, Avalanche EVM chains with this ACP activated will use the following gas costs for the `WarpPrecompile`.
+```
+const (
+	GetVerifiedWarpMessageBaseCost  = 750
+	GetBlockchainIDGasCost          = 200
+	GasCostPerWarpSigner            = 250
+	GasCostPerWarpMessageChunk      = 512
+	GasCostPerSignatureVerification = 100_000
+)
+```
+
+While the performance of `GetVerifiedWarpMessageBaseCost`, `GetBlockchainIDGasCost`, and `GasCostPerWarpMessageChunk` are not directly impacted by this ACP, updated benchmark numbers show the new gas costs to be better aligned with relative time that the operations take to perform.
 
 ## Backwards Compatibility
 
