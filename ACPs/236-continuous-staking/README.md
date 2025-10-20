@@ -139,7 +139,11 @@ risk of network congestion.
 However, the risk per cycle slightly increases depending on cycle length and validator performance. For example, missing
 five days in a one-year cycle may still yield rewards, whereas missing five days in a two-week cycle may affect rewards.
 
-## Acknowledgements
+## Open Questions
+
+- Should rewards be automatically restaked into the validator's active stake?
+
+- Should the `AddContinuousValidatorTx` transaction allow specifying a reward withdrawal frequency?
 
 ## Copyright
 
