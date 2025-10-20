@@ -2,7 +2,7 @@
 |:--------------|:------------------------------------------------------------|
 | **Title**     | Continuous Staking                                          |
 | **Author(s)** | Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1)) |
-| **Status**    |                                                             |
+| **Status**    | Proposed                                                    |
 | **Track**     | Standards                                                   |
 
 ## Abstract
