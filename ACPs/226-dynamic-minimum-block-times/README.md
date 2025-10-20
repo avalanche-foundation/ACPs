@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Dynamic Minimum Block Times |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/228)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/228)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -23,7 +23,7 @@ With the prospect of ACP-194 removing block execution from consensus and allowin
 
 ### Block Header Changes
 
-Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields will be added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelayExcess`.
+Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields is added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelayExcess`.
 
 #### `timestampMilliseconds`
 
@@ -31,13 +31,13 @@ The canonical serialization and interpretation of EVM blocks already contains a 
 
 Existing tools that do not need millisecond granularity do not need to parse the new field, which limits the amount of breaking changes.
 
-The `timestampMilliseconds` field will be represented in block headers as a `uint64`.
+The `timestampMilliseconds` field is represented in block headers as a `uint64`.
 
 #### `minimumBlockDelayExcess`
 
-The new `minimumBlockDelayExcess` field in the block header will be used to derive the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelayExcess` of $q$, then the effective timestamp of block $B+1$ in milliseconds must be at least $M * e^{\frac{q}{D}}$ greater than the effective timestamp of block $B$ in milliseconds. $M$, $q$, and $D$ are defined below in the mechanism specification.
+The new `minimumBlockDelayExcess` field in the block header is used to derive the minimum number of milliseconds that must pass before the next block is allowed to be accepted. Specifically, if block $B$ has a `minimumBlockDelayExcess` of $q$, then the effective timestamp of block $B+1$ in milliseconds must be at least $M * e^{\frac{q}{D}}$ greater than the effective timestamp of block $B$ in milliseconds. $M$, $q$, and $D$ are defined below in the mechanism specification.
 
-The `minimumBlockDelayExcess` field will be represented in block headers as a `uint64`.
+The `minimumBlockDelayExcess` field is represented in block headers as a `uint64`.
 
 The value of `minimumBlockDelayExcess` can be updated in each block, similar to the gas target excess field introduced in ACP-176. The mechanism is specified below.
 
@@ -75,9 +75,9 @@ As $q$ is updated after the execution of transactions within the block, $m$ is a
 
 ### Gas Accounting Updates
 
-Currently, the amount of gas capacity available is only incremented on a per second basis, as defined by ACP-176. With this ACP, it is expected for chains to be able to have sub-second block times. However, in the case when a chain's gas capacity is fully consumed (i.e. during period of heavy transaction load), blocks would not be able to produced at sub-second intervals because at least one second would need to elapse for new gas capacity to be added. To correct this, upon activation of this ACP, gas capacity will be added on a per millisecond basis.
+Currently, the amount of gas capacity available is only incremented on a per second basis, as defined by ACP-176. With this ACP, it is expected for chains to be able to have sub-second block times. However, in the case when a chain's gas capacity is fully consumed (i.e. during period of heavy transaction load), blocks would not be able to produced at sub-second intervals because at least one second would need to elapse for new gas capacity to be added. To correct this, upon activation of this ACP, gas capacity is added on a per millisecond basis.
 
-The ACP-176 mechanism for determing the target gas consumption per second will remain unchanged, but its result will now be used to derive the target gas consumption per millisecond by dividing by 1000, and gas capacity will be added at that rate as each block advances time by some number of milliseconds.
+The ACP-176 mechanism for determing the target gas consumption per second remains unchanged, but its result now be used to derive the target gas consumption per millisecond by dividing by 1000, and gas capacity is added at that rate as each block advances time by some number of milliseconds.
 
 ### Activation Parameters for the C-Chain
 
@@ -116,7 +116,7 @@ While this proposal requires a network upgrade and updates the EVM block header 
 
 ## Reference Implementation
 
-A reference implementation is not yet provided, and must be made available for this ACP to be considered `implementable`.
+This ACP was implemented and merged into Coreth and Subnet-EVM behind the `Granite` upgrade flag. The full implementation can be found in [coreth@v0.15.4-rc.4](https://github.com/ava-labs/coreth/releases/tag/v0.15.4-rc.4) and [subnet-evm@v0.8.0-fuji-rc.0](https://github.com/ava-labs/subnet-evm/releases/tag/v0.8.0-fuji-rc.0).
 
 ## Security Considerations
 
