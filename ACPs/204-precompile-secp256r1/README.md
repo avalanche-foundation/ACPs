@@ -84,7 +84,7 @@ The implementation builds upon existing work:
 
 The implementation follows established patterns for precompile integration, adding the contract to the precompile registry and implementing the verification logic using established cryptographic libraries.
 
-This ACP was implemented and merged into Coreth and LibEVM behind the `Granite` upgrade flag. The full implementation can be found in [coreth@v0.15.4-rc.4](https://github.com/ava-labs/coreth/releases/tag/v0.15.4-rc.4) and [libevm@v1.13.14-0.3.0.release](https://github.com/ava-labs/libevm/releases/tag/v1.13.14-0.3.0.release).
+This ACP was implemented and merged into Coreth and Subnet-EVM behind the `Granite` upgrade flag. The full implementation can be found in [coreth@v0.15.4-rc.4](https://github.com/ava-labs/coreth/releases/tag/v0.15.4-rc.4), [subnet-evm@v0.8.0-fuji-rc.2](https://github.com/ava-labs/subnet-evm/releases/tag/v0.8.0-fuji-rc.2) and [libevm@v1.13.14-0.3.0.release](https://github.com/ava-labs/libevm/releases/tag/v1.13.14-0.3.0.release).
 
 ## Copyright
 
