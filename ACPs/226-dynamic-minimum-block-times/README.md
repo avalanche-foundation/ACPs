@@ -23,7 +23,7 @@ With the prospect of ACP-194 removing block execution from consensus and allowin
 
 ### Block Header Changes
 
-Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields is added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelayExcess`.
+Upon activation of this ACP, the `blockGasCost` field in block headers will be required to be set to 0. This means that no validation of the cumulative priority fee amounts of transactions within the block exceeding the block gas cost is required. Additionally, two new fields are added to EVM block headers: `timestampMilliseconds` and `minimumBlockDelayExcess`.
 
 #### `timestampMilliseconds`
 
