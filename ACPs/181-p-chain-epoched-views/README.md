@@ -76,9 +76,9 @@ Epochs improve upon this by fixing the P-Chain height used to verify ICM message
 
 ## EVM ICM Verification Gas Cost Updates
 
-Since the activation of [ACP-30](https://github.com/michaelkaplan13/ACPs/tree/60cbfc32e7ee2cffed33d8daee980d7a85dded48/ACPs/30-avalanche-warp-x-evm#gas-costs), the cost to verify ICM messages in the EVM using the `WarpPrecompile` have been based on the worst-case verification flow, including the relatively expensive lookup of the source chain's validator set at an aribtrary P-Chain height used by each new block. This ACP allows for optimizing this verification, as described above.
+Since the activation of [ACP-30](https://github.com/avalanche-foundation/ACPs/tree/60cbfc32e7ee2cffed33d8daee980d7a85dded48/ACPs/30-avalanche-warp-x-evm#gas-costs), the cost to verify ICM messages in the Avalanche EVM implementations (i.e. `coreth` and `subnet-evm`) using the `WarpPrecompile` have been based on the worst-case verification flow, including the relatively expensive lookup of the source chain's validator set at an aribtrary P-Chain height used by each new block. This ACP allows for optimizing this verification, as described above.
 
-The existing gas costs of relevant `WarpPrecompile` functions are:
+Prior to this ACP, the gas costs of relevant `WarpPrecompile` functions were:
 ```
 const (
 	GetVerifiedWarpMessageBaseCost  = 2
@@ -89,7 +89,7 @@ const (
 )
 ```
 
-With optimizations implemented, based on the results of [new benchmarks](https://github.com/ava-labs/coreth/pull/1331) of the `WarpPrecompile` and roughly targeting processing 150 million gas per second, Avalanche EVM chains with this ACP activated will use the following gas costs for the `WarpPrecompile`.
+With optimizations implemented, based on the results of [new benchmarks](https://github.com/ava-labs/coreth/pull/1331) of the `WarpPrecompile` and roughly targeting processing 150 million gas per second, Avalanche EVM chains with this ACP activated use the following gas costs for the `WarpPrecompile`.
 ```
 const (
 	GetVerifiedWarpMessageBaseCost  = 750
