@@ -4,7 +4,7 @@
 | :--- | :--- |
 | **Title** | Precompile for secp256r1 Curve Support |
 | **Author(s)** | [Santiago Cammi](https://github.com/scammi), [Arran Schlosberg](https://github.com/ARR4N)  |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/212)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/212)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -75,7 +75,7 @@ Adoption requires a coordinated network upgrade for the C-Chain. Other EVM L1s c
 
 ## Reference Implementation
 
-The implementation will build upon existing work:
+The implementation builds upon existing work:
 
 1. EIP-7951 Reference: The [Go-Ethereum implementation]https://github.com/ethereum/go-ethereum/pull/31991) of EIP-7951 provides the foundation
 2. Coreth Implementation: Integration with Avalanche's C-Chain (Avalanche's fork of go-ethereum)
@@ -83,6 +83,8 @@ The implementation will build upon existing work:
 
 
 The implementation follows established patterns for precompile integration, adding the contract to the precompile registry and implementing the verification logic using established cryptographic libraries.
+
+This ACP was implemented and merged into Coreth and Subnet-EVM behind the `Granite` upgrade flag. The full implementation can be found in [coreth@v0.15.4-rc.4](https://github.com/ava-labs/coreth/releases/tag/v0.15.4-rc.4), [subnet-evm@v0.8.0-fuji-rc.2](https://github.com/ava-labs/subnet-evm/releases/tag/v0.8.0-fuji-rc.2) and [libevm@v1.13.14-0.3.0.release](https://github.com/ava-labs/libevm/releases/tag/v1.13.14-0.3.0.release).
 
 ## Copyright
 
