@@ -145,6 +145,10 @@ five days in a one-year cycle may still yield rewards, whereas missing five days
 
 - Should the `AddContinuousValidatorTx` transaction allow specifying a reward withdrawal frequency?
 
+- If auto-restaking causes the total stake to exceed the maximum allowed limit, should all accumulated rewards (from the
+  last cycle) be withdrawn instead of only the excess amount? This approach favors simplicity and results in a less
+  error-prone implementation.
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
