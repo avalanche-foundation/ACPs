@@ -96,7 +96,7 @@ const (
 	GetBlockchainIDGasCost          = 200
 	GasCostPerWarpSigner            = 250
 	GasCostPerWarpMessageChunk      = 512
-	GasCostPerSignatureVerification = 100_000
+	GasCostPerSignatureVerification = 125_000
 )
 ```
 
