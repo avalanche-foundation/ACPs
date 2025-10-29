@@ -23,21 +23,21 @@ until stakers initiate the necessary transactions to stake them again.
 Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to
 manually submit new staking transactions at the end of each period.
 
-Instead of committing to a fixed end time upfront, validators specify a cycle duration (period) when they submit an
-AddContinuousValidatorTx. At the end of each cycle, the validator is automatically re-staked for a new cycle of the same
-duration, unless the validator has submitted a StopContinuousValidatorTx. If a validator submits a
-StopContinuousValidatorTx during a cycle, the validator will continue validating until the end of the current cycle, at
-which point the validator exits and funds unlock. The minimum and maximum cycle lengths follow the same protocol
-parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) when they submit an
+`AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle of the
+same duration, unless the validator has submitted a `StopContinuousValidatorTx`. If a validator submits a
+`StopContinuousValidatorTx` during a cycle, the validator will continue validating until the end of the current cycle,
+at which point the validator exits and the funds are unlocked. The minimum and maximum cycle lengths follow the same
+protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
-Delegators interact with continuous validators in the same way as with fixed-period validators, and the same constraints
-apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple
-cycles, since there is no guarantee that a validator will continue validating after the current cycle.
+Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within
+the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator
+will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
 
-Rewards accrue once per cycle, and they are automatically added to principal in subsequent cycles, both for validator
-rewards and for delegation rewards. If the updated stake weight (previous stake + staking rewards + delegatee rewards)
-exceeds the maximum stake limit defined in the network configuration, the excess amount is automatically withdrawn and
-sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+Rewards accrue once per cycle, and are automatically added to the validator's existing stake in subsequent cycles, both
+for validation rewards and for delegatee rewards. If the updated stake weight (previous stake + staking rewards +
+delegatee rewards) exceeds the maximum stake limit defined in the network configuration, the excess amount is
+automatically withdrawn and sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical
 transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous
@@ -50,7 +50,7 @@ the behavior of the current staking system.
 
 ### New P-Chain Transaction Types
 
-The following new transaction types are introduced on the P-Chain to support this functionality:
+The following new transaction types will be introduced to the P-Chain to support this functionality:
 
 #### AddContinuousValidatorTx
 
@@ -136,9 +136,28 @@ Greater staking participation leads to stronger overall network security.
 Validators benefit by not having to manually restart at the end of each cycle, which reduces transaction volume and the
 risk of network congestion.
 
-However, the risk per cycle slightly increases depending on cycle length and validator performance. For example, missing
-five days in a one-year cycle may still yield rewards, whereas missing five days in a two-week cycle may affect rewards.
+However, the uptime risk per cycle slightly increases depending on cycle length and validator performance. For example,
+missing five days in a one-year cycle will still yield validation rewards, whereas missing five days in a two-week cycle
+may affect rewards.
 
+## Flow of a Continuous Validator
+```mermaid
+flowchart TD
+  A[Issue AddContinuousValidatorTx] --> B[Validator active]
+  B -->|Optional| C[Issue StopContinuousValidatorTx anytime during cycle]
+  B --> D[Cycle endtime reached]
+  D --> E[Block builder issues RewardContinuousValidatorTx]
+  E --> F{Stop requested?}
+  F -->|No| G[Compute rewards and compound]
+  G --> H{New stake greater than MaxStakeLimit?}
+  H -->|Yes| I[Withdraw excess]
+  H -->|No| K
+  I --> K[Restake and start new cycle]
+  K --> B
+  F -->|Yes| L[Compute rewards]
+  L --> M[Send initial stake and withdraw validation/delegatee rewards]
+  M --> N[Validator stopped]
+```
 ## Open Questions
 
 - Should rewards be automatically restaked into the validator's active stake?
