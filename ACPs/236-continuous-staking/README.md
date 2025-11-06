@@ -7,46 +7,28 @@
 
 ## Abstract
 
-This proposal introduces continuous staking for validators on the Avalanche P-Chain. Validators can stake their tokens
-continuously, allowing their stake to compound over time, accruing rewards once per specified cycle.
+This proposal introduces continuous staking for validators on the Avalanche P-Chain. Validators can stake their tokens continuously, allowing their stake to compound over time, accruing rewards once per specified cycle.
+Note that this mechanism applies only to primary network validation. It does not apply to L1 validators or to legacy subnet validators.
 
 ## Motivation
 
-The current staking system on the Avalanche P-Chain restricts flexibility for stakers, limiting their ability to respond
-to changing market conditions or liquidity needs. Managing a large number of nodes is also challenging, as re-staking at
-the end of each period is labor-intensive, time-consuming, and poses security risks due to
-the required transaction signing. Additionally, tokens can remain idle at the end of a staking period
-until stakers initiate the necessary transactions to stake them again.
+The current staking system on the Avalanche P-Chain restricts flexibility for stakers by requiring them to specify an explicit end time for their stake and by enforcing minimum and maximum staking durations, limiting their ability to respond to changing market conditions or liquidity needs. Managing a large number of nodes is also challenging, as re-staking at the end of each period is labor-intensive, time-consuming, and poses security risks due to the required transaction signing. Additionally, tokens can remain idle at the end of a staking period until stakers initiate the necessary transactions to stake them again.
 
 ## Specification
 
-Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to
-manually submit new staking transactions at the end of each period.
+Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually submit new staking transactions at the end of each period.
 
-Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) when they submit an
-`AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle of the
-same duration, unless the validator has submitted a `StopContinuousValidatorTx`. If a validator submits a
-`StopContinuousValidatorTx` during a cycle, the validator will continue validating until the end of the current cycle,
-at which point the validator exits and the funds are unlocked. The minimum and maximum cycle lengths follow the same
-protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle of the same duration, unless the validator has submitted a `StopContinuousValidatorTx`. If a validator submits a `StopContinuousValidatorTx` during a cycle, the validator will continue validating until the end of the current cycle, at which point the validator exits and the funds are unlocked. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
-Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within
-the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator
-will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
+Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
 
-Rewards accrue once per cycle, and are automatically added to the validator's existing stake in subsequent cycles, both
-for validation rewards and for delegatee rewards. If the updated stake weight (previous stake + staking rewards +
-delegatee rewards) exceeds the maximum stake limit defined in the network configuration, the excess amount is
-automatically withdrawn and sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+Rewards accrue once per cycle, and are automatically added to the validator's existing stake in subsequent cycles, both for validation rewards and for delegatee rewards. If the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds the maximum stake limit defined in the network configuration, the excess amount is automatically withdrawn and sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
-Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical
-transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous
-validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a
-timestamp. For simplicity and consistency, any stake exceeding the maximum limit is withdrawn from the validator, and
-the resulting UTXOs are tied to the `RewardContinuousValidatorTx` ID.
+Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp. For simplicity and consistency, any stake exceeding the maximum limit is withdrawn from the validator, and the resulting UTXOs are tied to the `RewardContinuousValidatorTx` ID.
 
-Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `StopContinuousValidatorTx` replicates
-the behavior of the current staking system.
+Continuous validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. When a new cycle begins, uptime tracking resets and starts again for the next period.
+
+Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `StopContinuousValidatorTx` replicates the behavior of the current staking system.
 
 ### New P-Chain Transaction Types
 
@@ -99,13 +81,12 @@ type StopContinuousValidatorTx struct {
   TxID ids.ID `serialize:"true" json:"txID"`
   
   // Authorizes this validator to be stopped.
-  // It is a BLS Proof of Possession signature of the TxID using validator key.
+  // It is a BLS Proof of Possession signature of the AddContinuousValidatorTx transaction ID using validator key.
   StopSignature [bls.SignatureLen]byte `serialize:"true" json:"stopSignature"`
 }
 ```
 
-`StopSignature` is the BLS Proof of Possession signature of the tx ID of `AddContinuousValidatorTx` using the validator
-key.
+`StopSignature` is the BLS Proof of Possession signature of the tx ID of `AddContinuousValidatorTx` using the validator key.
 
 #### RewardContinuousValidatorTx
 
@@ -124,21 +105,15 @@ type RewardContinuousValidatorTx struct {
 
 ## Backwards Compatibility
 
-This change requires a network upgrade to make sure that all validators are able to verify and execute the new
-introduced transactions.
+This change requires a network upgrade to make sure that all validators are able to verify and execute the new introduced transactions.
 
 ## Considerations
 
-Continuous staking makes it easier for users to keep their funds staked longer than with fixed-period staking, since it
-involves fewer transactions, lower friction, and reduced risks.
-Greater staking participation leads to stronger overall network security.
+Continuous staking makes it easier for users to keep their funds staked longer than with fixed-period staking, since it involves fewer transactions, lower friction, and reduced risks. Greater staking participation leads to stronger overall network security.
 
-Validators benefit by not having to manually restart at the end of each cycle, which reduces transaction volume and the
-risk of network congestion.
+Validators benefit by not having to manually restart at the end of each cycle, which reduces transaction volume and the risk of network congestion.
 
-However, the uptime risk per cycle slightly increases depending on cycle length and validator performance. For example,
-missing five days in a one-year cycle will still yield validation rewards, whereas missing five days in a two-week cycle
-may affect rewards.
+However, the uptime risk per cycle slightly increases depending on cycle length and validator performance. For example, missing five days in a one-year cycle will still yield validation rewards, whereas missing five days in a two-week cycle may affect rewards.
 
 ## Flow of a Continuous Validator
 ```mermaid
@@ -164,9 +139,7 @@ flowchart TD
 
 - Should the `AddContinuousValidatorTx` transaction allow specifying a reward withdrawal frequency?
 
-- If auto-restaking causes the total stake to exceed the maximum allowed limit, should all accumulated rewards (from the
-  last cycle) be withdrawn instead of only the excess amount? This approach favors simplicity and results in a less
-  error-prone implementation.
+- If auto-restaking causes the total stake to exceed the maximum allowed limit, should all accumulated rewards (from the last cycle) be withdrawn instead of only the excess amount? This approach favors simplicity and results in a less error-prone implementation.
 
 ## Copyright
 
