@@ -1,7 +1,7 @@
 # ACP-246: Delegation Multiplier Increase & Maximum Validator Weight Reduction
 
 
-| ACP | 246 |
+| ACP | 247 |
 | :--- | :--- |
 | **Title** | Delegation Multiplier Increase & Maximum Validator Weight Reduction |
 | **Authors** | Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)), BENQI ([@benqifinance](https://x.com/benqifinance)) |
