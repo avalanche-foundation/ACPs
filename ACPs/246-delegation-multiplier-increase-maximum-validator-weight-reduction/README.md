@@ -1,6 +1,3 @@
-# ACP-246: Delegation Multiplier Increase & Maximum Validator Weight Reduction
-
-
 | ACP | 247 |
 | :--- | :--- |
 | **Title** | Delegation Multiplier Increase & Maximum Validator Weight Reduction |
