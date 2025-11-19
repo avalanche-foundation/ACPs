@@ -71,7 +71,7 @@ type AddContinuousValidatorTx struct {
   
   // Where to send delegation rewards when done validating
   DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
-
+  
   // Who is authorized to modify the auto renew rewards shares
   PolicyOwner fx.Owner `serialize:"true" json:"policyOwner"`
   
@@ -79,10 +79,10 @@ type AddContinuousValidatorTx struct {
   // For example, if this validator has DelegationShares=300,000 then they
   // take 30% of rewards from delegators
   DelegationShares uint32 `serialize:"true" json:"shares"`
-	
+
   // Weight of this validator used when sampling
   Wght uint64 `serialize:"true" json:"weight"`
-	
+
   // Auto-renew policy for rewards, expressed in percentage, times 10,000.
   // Range [0..1_000_000] means the percentage of cycle rewards to auto-restake:
   //   0         = restake principal only; withdraw 100% of rewards 
@@ -121,13 +121,13 @@ type SetAutoRenewPolicyTx struct {
 
 ```golang
 type RewardContinuousValidatorTx struct {
-    // ID of the tx that created the validator being removed/rewarded
-    TxID ids.ID `serialize:"true" json:"txID"`
-
-    // End time of the validator.
-    Timestamp uint64 `serialize:"true" json:"timestamp"`
-    
-    unsignedBytes []byte // Unsigned byte representation of this data
+  // ID of the tx that created the validator being removed/rewarded
+  TxID ids.ID `serialize:"true" json:"txID"`
+  
+  // End time of the validator.
+  Timestamp uint64 `serialize:"true" json:"timestamp"`
+  
+  unsignedBytes []byte // Unsigned byte representation of this data
 }
 
 ```
