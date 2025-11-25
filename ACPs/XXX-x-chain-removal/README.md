@@ -17,19 +17,19 @@ At the time of the launch of Avalanche Mainnet, the original vision was for thes
 
 Today, the X-Chain is barely used at all. In the past year, there have been in total less than XXX transactions on the X-Chain, and XXX% of them were `BaseTx`s performing basic AVAX transfers, which is an operation possible on both the C-Chain and the P-Chain as well. Despite this lack of usage, significant development effort would need to be put into the X-Chain in order to support items such as state sync and dynamic fees. Given that the it is serving little purpose or benefit to the Avalanche ecosystem, it will be best to focus all future efforts on continuing to enable and push novel use case development on Avalanche, rather than maintaining the X-Chain.
 
-The X-Chain can be safely halted and removed from the Primary Network without any permanent loss of AVAX tokens. Any AVAX remaining on the X-Chain can be made available to their existing owners on the P-Chain in a future network upgrade, as specified below.
+The X-Chain can be safely halted and removed from the Primary Network without any permanent loss of AVAX. Any AVAX remaining on the X-Chain can be made available to their existing owners on the P-Chain in a future network upgrade, as specified below.
 
 ## Specification
 
 This ACP would need to be activated in steps across two required network upgrades, referred to as upgrade $A$ and upgrade $B$. Upgrade $B$ must come after after upgrade $A$, but they do not necessarily need to be consecutive network upgrades.
 
-As part of the process, support for ANTs created on the X-Chain will be discontinued. However once upgrade $B$ is completed, **all AVAX tokens held on the X-Chain at the time of its termination will be made available to their existing holders on the P-Chain**.
+As part of the process, support for ANTs created on the X-Chain will be discontinued. However once upgrade $B$ is completed, **all AVAX held on the X-Chain at the time of its termination will be made available to its existing owners on the P-Chain**.
 
 ### X-Chain Deprecation and EOL Process
 
 #### 1. Depreaction Notice (prior to upgrade $A$)
 
-Should this ACP have the necessary support to move forward, a planned X-Chain deprecation notice will be published and communicated to broader Avalanche ecosystem. This will provide the entire ecosystem an extended window of time to move any AVAX tokens they hold on the X-Chain to either the P- or C-Chains prior to the X-Chain's termination.
+Should this ACP have the necessary support to move forward, a planned X-Chain deprecation notice will be published and communicated to broader Avalanche ecosystem. This will provide the entire ecosystem an extended window of time to move any AVAX they hold on the X-Chain to either the P- or C-Chains prior to the X-Chain's termination.
 
 #### 2. Upgrade $A$
 
@@ -51,9 +51,9 @@ After the X-Chain is halted and `ExportTx`s to the X-Chain discontinued upon the
 - The full set of [SECP256K1 transfer outputs](https://build.avax.network/docs/rpcs/x-chain/txn-format#secp256k1-transfer-output) that hold AVAX on the X-Chain.
 - The full set of [SECP256K1 transfer outputs](https://build.avax.network/docs/rpcs/x-chain/txn-format#secp256k1-transfer-output) from [`ExportTx`s](https://build.avax.network/docs/rpcs/x-chain/txn-format#unsigned-exporttx) on the P- and C-Chains that hold AVAX and have the X-Chain blockchain ID as their `destination_chain`.
 
-The above represents the full set of AVAX UTXOs that will permanently frozen after activation of network upgrade $A$.
+The above represents the full set of AVAX UTXOs that will permanently frozen after activation of network upgrade $A$. These sets can be computed by anyone by replaying the X-, P-, and C-Chain transactions up through the activation of upgrade $A$, and tracking the repspective UTXO sets present in the current state. 
 
-Upon activation of network upgrade $B$, identical versions of these UTXOs will be created on the P-Chain, which already supports the same exact [SECP256K1 transfer output](https://build.avax.network/docs/rpcs/p-chain/txn-format#secp256k1-transfer-output) format. This means that the UTXOs will have the same `type_id`, `amount`, `locktime`, `threshold`, and `addresses` as they did on the X-Chain.
+Upon activation of network upgrade $B$, identical versions of these UTXOs will be created on the P-Chain, which already supports the same exact [SECP256K1 transfer output](https://build.avax.network/docs/rpcs/p-chain/txn-format#secp256k1-transfer-output) format. This means that the UTXOs will have the same `type_id`, `amount`, `locktime`, `threshold`, and `addresses` as they did on the X-Chain. These UTXOs can be explicitly specified on the P-Chain with the resulting sets determined from re-executing the chains as described above.
 
 ## Backwards Compatibility
 
