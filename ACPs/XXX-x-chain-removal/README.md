@@ -7,23 +7,23 @@
 
 ## Abstract
 
-Proposes the deprecation and end-of-life of the X-Chain. All AVAX held by addresses on the X-Chain would be made available as UTXOs on the P-Chain.
+Proposes the deprecation and end-of-life of the X-Chain. All AVAX held on the X-Chain would be made available to its existing owners as UTXOs on the P-Chain.
 
 ## Motivation
 
-The X-Chain was initially created at the inception of Avalanche to demonstrate to the world the speed and flexibility of the novel Avalanche consensus mechanism. It runs the Avalanche Virtual Machine (AVM), which was the first implementation of a custom virtual machine for Avalanche. The AVM does not support programmability, but it does support specific customized actions such the create a new fungible and non-fungible tokens (ANTs), and operations on them such as mints and transfers. 
+The X-Chain was initially created at the inception of Avalanche to demonstrate the speed and flexibility of the Avalanche consensus mechanism. It runs the Avalanche Virtual Machine (AVM), which was the first implementation of a custom virtual machine for Avalanche. The AVM does not support programmability, but it does support specific actions such the creation of new fungible and non-fungible tokens (ANTs), and operations on them such as mints and transfers. 
 
-At the time of the launch of Avalanche Mainnet, the original vision was for these ANTs minted on the X-Chain to be a key piece of the broader Avalanche ecosystem by allowing them to be traded on DEXes, moved to the P-Chain to be used to validate new Avlanache Subnets (now L1s), and more. In the 5+ years since that time, the Avalanche ecosystem has been largely successful in realizing the effects of that desired vision, in that there are many tokens and applications launched on Avalanche in novel ways, including new and interesting mechanisms for staking and validating L1 chains, but the path to do so ultimately did not involve any ANT assets created on the X-Chain.
+At the time of the launch of Avalanche Mainnet, the original vision was for these ANTs on the X-Chain to be a key piece of the broader Avalanche ecosystem by allowing them to be traded on DEXes, moved to the P-Chain to be used to validate new Avlanache Subnets (now L1s), and more. In the 5+ years since that time, the Avalanche ecosystem has been largely successful in realizing the effects of that vision. There are many tokens and applications launched on Avalanche in novel ways, and Avalanche L1s can define their own validation mechanisms, including the staking of arbitrary new tokens. However, the path to realize this vision ultimately did not involve any ANT assets created on the X-Chain.
 
-Today, the X-Chain is barely used at all. In the past year, there have been under XXX transactions on the X-Chain in total, and XXX% of them were `BaseTx`s performing basic AVAX transfers, which is an operation possible on both the C-Chain and the P-Chain as well. Despite this in order to properly maintain the X-Chain significant development effort would need to be put into it in order to support items such as state sync and dynamic fees. Given that the it is serving little purpose or benefit to the Avalanche ecosystem, it will be best to focus all future efforts on continuing to enable and push novel use case development on Avalanche, rather than maintaining the X-Chain.
+Today, the X-Chain is barely used at all. In the past year, there have been in total less than XXX transactions on the X-Chain, and XXX% of them were `BaseTx`s performing basic AVAX transfers, which is an operation possible on both the C-Chain and the P-Chain as well. Despite this lack of usage, significant development effort would need to be put into the X-Chain in order to support items such as state sync and dynamic fees. Given that the it is serving little purpose or benefit to the Avalanche ecosystem, it will be best to focus all future efforts on continuing to enable and push novel use case development on Avalanche, rather than maintaining the X-Chain.
 
-The X-Chain can be safely halted and removed from the Primary Network without any permanent loss of AVAX tokens, as any tokens remaining on the X-Chain can be made available to their existing owners on the P-Chain in a future network upgrade, as specified below.
+The X-Chain can be safely halted and removed from the Primary Network without any permanent loss of AVAX tokens. Any AVAX remaining on the X-Chain can be made available to their existing owners on the P-Chain in a future network upgrade, as specified below.
 
 ## Specification
 
-This ACP to halt X-Chain would need to be activated in steps across two required network upgrades, referred to as upgrade $A$ and upgrade $B$. Upgrade $B$ must come after after upgrade $A$, but they do not necessarily need to be consecutive network upgrades.
+This ACP would need to be activated in steps across two required network upgrades, referred to as upgrade $A$ and upgrade $B$. Upgrade $B$ must come after after upgrade $A$, but they do not necessarily need to be consecutive network upgrades.
 
-As part of the process, support for ANTs created on the X-Chain will be discontinued. However once the two upgrade process is completed, **all AVAX tokens held on the X-Chain at the time of its termination will be made available to their existing holders on the P-Chain**.
+As part of the process, support for ANTs created on the X-Chain will be discontinued. However once upgrade $B$ is completed, **all AVAX tokens held on the X-Chain at the time of its termination will be made available to their existing holders on the P-Chain**.
 
 ### X-Chain Deprecation and EOL Process
 
@@ -61,16 +61,19 @@ This ACP would be activated as a part of 2 required network upgrades.
 
 After the first network upgrade, all support for ANTs minted on the X-Chain would be removed, and all AVAX held on the X-Chain would be temporarily frozen. Anyone with X-Chain integrations would need to move their AVAX to the P- or C-Chain's prior to the first network upgrade to prevent any distruption of service.
 
-
-
+All AVAX frozen on the X-Chain would be again be made available to the identical holders on the P-Chain as of the activation of the second network upgrade.
 
 ## Reference Implementation
 
+A reference implementation is not yet available and must be provided for this ACP to be considered implementable.
 
 ## Security Considerations
 
+Removal of the X-Chain from the Primary Network should serve as an overall security improvement to the Avalanche Ecosystem as it significantly reduces the possible attack surface and the amount of code needed to be properly maintained for the network to remain secure and available.
 
-## Acknowledgments
+That being said, it should also be considered that:
+1. The calculation of the full set of AVAX UTXOs to be made available on the P-Chain as part of the second network upgrade must be done with extreme care, and made publicly verifiable by anyone before activation.
+1. There will be a temporary loss of AVAX liquidity between the first and second network upgrades. This should be reduced as much as possible with a well communicated deprecation notice as far in advance as possible of the first network upgrade, allowing all Avalanche ecosystem partcipants a long window of time to move their AVAX off of the X-Chain in preparation.
 
 ## Copyright
 
