@@ -72,7 +72,7 @@ The current 3,000,000 AVAX maximum weight limit allows individual validators to 
 Implement two complementary changes:
 
 1. **Reduce maximum validator weight to 1,000,000 AVAX** - Prevents dangerous concentration
-2. **Increase delegation multiplier to 24x** - Enables efficient capital deployment within weight constraint
+2. **Increase delegation multiplier to 24x** - Increases the maximum _potential_ rewards that validators could receive from delegations, not changing any of the underlying incentives of delegation if not flipping the perception of maximum rewards for validators on Avalanche.
 
 **Resulting Economics at 24x Multiplier** (at $20 AVAX, 2,000 AVAX self-stake, 8.25% APY, 5% delegation fee):
 
