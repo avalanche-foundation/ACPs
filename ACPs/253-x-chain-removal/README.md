@@ -1,4 +1,4 @@
-| ACP | XXX |
+| ACP | 253 |
 | :- | :- |
 | **Title** | X-Chain Removal |
 | **Author(s)** | Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
