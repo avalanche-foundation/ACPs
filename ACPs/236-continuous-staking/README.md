@@ -26,7 +26,7 @@ Clarification: In the rewards formula, `StakingPeriod` is the cycle’s duration
 
 Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
 
-Rewards are accrued once per cycle and are managed according to the `AutoRenewRewardsShares` value: the specified portion is restaked and the remainder withdrawn. If the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds the maximum stake limit, the entire cycle’s rewards are withdrawn and sent to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+Rewards are accrued once per cycle and are managed according to the `AutoRenewRewardsShares` value: the specified portion is restaked and the remainder withdrawn. If the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
@@ -71,7 +71,7 @@ type AddContinuousValidatorTx struct {
   
   // Where to send delegation rewards when done validating
   DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
-  
+
   // Who is authorized to modify the auto renew rewards shares
   PolicyOwner fx.Owner `serialize:"true" json:"policyOwner"`
   
@@ -124,7 +124,7 @@ type RewardContinuousValidatorTx struct {
   // ID of the tx that created the validator being removed/rewarded
   TxID ids.ID `serialize:"true" json:"txID"`
   
-  // End time of the validator.
+  // End time of the validation cycle.
   Timestamp uint64 `serialize:"true" json:"timestamp"`
   
   unsignedBytes []byte // Unsigned byte representation of this data
@@ -161,7 +161,7 @@ flowchart TD
 
   G -->|No| J[Apply auto-renew policy and split rewards into restake and withdrawal]
   J --> K{New stake exceeds MaxStakeLimit?}
-  K -->|Yes| L[Withdraw entire rewards]
+  K -->|Yes| L[Withdraw excess above MaxStakeLimit]
   K -->|No| N[Start new cycle]
   L --> N[Start new cycle]
   N --> B
