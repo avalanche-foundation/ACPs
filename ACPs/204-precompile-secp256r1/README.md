@@ -4,7 +4,7 @@
 | :--- | :--- |
 | **Title** | Precompile for secp256r1 Curve Support |
 | **Author(s)** | [Santiago Cammi](https://github.com/scammi), [Arran Schlosberg](https://github.com/ARR4N)  |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/212)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/212)) |
 | **Track** | Standards |
 
 ## Abstract
