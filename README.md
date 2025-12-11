@@ -134,6 +134,7 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[224](ACPs/224-dynamic-gas-limit-in-subnet-evm/README.md)|Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM|Ceyhun Onur ([@ceyonur](https://github.com/ceyonur), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 |[226](ACPs/226-dynamic-minimum-block-times/README.md)|Dynamic Minimum Block Times|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 |[236](ACPs/236-continuous-staking/README.md)|Continuous Staking |Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1))|Standards|
+|[247](ACPs/247-delegation-multiplier-increase-maximum-validator-weight-reduction/README.md)|Delegation Multiplier Increase & Maximum Validator Weight Reduction|Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)), BENQI ([@benqifinance](https://x.com/benqifinance))|Standards|
 
 ## Contributing
 
