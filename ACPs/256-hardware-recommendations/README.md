@@ -1,7 +1,7 @@
 | ACP | 256 |
 | :- | :- |
 | **Title** | Hardware and Bandwidth Recommendations for Validators and Full Nodes |
-| **Author(s)** | Martin Eckardt (https://github.com/martineckardt), Meaghan FitzGerald (https://github.com/meaghanfitzgerald) |
+| **Author(s)** | Martin Eckardt (https://github.com/martineckardt), Aaron Buchwald (https://github.com/aaronbuchwald), Meaghan FitzGerald (https://github.com/meaghanfitzgerald) |
 | **Status** | Proposed |
 | **Track** | Best Practices |
 
