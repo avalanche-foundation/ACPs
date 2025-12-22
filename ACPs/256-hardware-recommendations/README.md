@@ -66,7 +66,7 @@ Network-attached storage may be used if all following conditions are met:
 
 State Management: Validators using network-attached storage must periodically implement either of the following:
 
-- Offline pruning - Reduces database size 30-50%, requires ~1 hour downtime on mainnet
+- Offline pruning - Reduces database size 30-50%, requires downtime on mainnet
 - State sync - Deploy new node with state sync, migrate operations, decommission old node
 
 Operators must implement management before exceeding 500 GB.
@@ -249,7 +249,7 @@ Configuration in ~/.avalanchego/configs/chains/C/config.json:
 }
 ```
 
-Runs on node startup. Reduces database size 30-50% with ~1 hour downtime on mainnet. Requires 512 MB additional disk space for bloom filter.
+Runs on node startup. Reduces database size 30-50% while experiencing downtime on mainnet. Requires 512 MB additional disk space for bloom filter.
 
 ### State Sync
 
