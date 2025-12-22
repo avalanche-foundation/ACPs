@@ -216,26 +216,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ---
 
-## Appendix A: Storage Performance Reference
-
-### Cloud Storage Characteristics
-
-AWS:
-- Instance Store NVMe (i3, i4i, i4g): 400,000+ IOPS, <100μs latency, physically-mounted
-- EBS gp3: 16,000 IOPS baseline, 2-5ms latency, network-attached
-- EBS io2: 64,000 IOPS max, 1-3ms latency, network-attached
-
-Azure:
-- Local NVMe (Lsv3-series): 400,000+ IOPS, <100μs latency, physically-mounted
-- Premium SSD P30: 5,000 IOPS, 2-5ms latency, network-attached
-- Premium SSD P40: 20,000 IOPS, 2-5ms latency, network-attached
-
-Google Cloud:
-- Local SSD (NVMe): 400,000+ IOPS, <100μs latency, physically-mounted
-- Persistent SSD: 30,000 IOPS max, 2-5ms latency, network-attached
-- Balanced Persistent: 6,000 IOPS, 3-6ms latency, network-attached
-
-## Appendix B: State Management Procedures
+## Appendix: State Management Procedures
 
 ### Offline Pruning
 
