@@ -1,7 +1,7 @@
 | ACP | 256 |
 | :- | :- |
 | **Title** | Hardware and Bandwidth Recommendations for Validators and Full Nodes |
-| **Author(s)** | Martin Eckardt (https://github.com/martineckardt), Aaron Buchwald (https://github.com/aaronbuchwald), Meaghan FitzGerald (https://github.com/meaghanfitzgerald) |
+| **Author(s)** | Martin Eckardt (https://github.com/martineckardt), Meaghan FitzGerald (https://github.com/meaghanfitzgerald) |
 | **Status** | Proposed |
 | **Track** | Best Practices |
 
@@ -26,6 +26,10 @@ Without clear recommendations, operators may choose inappropriate infrastructure
 
 Primary Network Validator Node: Node participating in Primary Network consensus, maintaining current network state. Validates transactions on X-Chain, P-Chain, and C-Chain, produces or attests to blocks, maintains active UTXO set. Does not require complete historical data beyond consensus requirements.
 
+Low Stake Validator: Primary Network validator with stake below 0.01% of total network stake. Requires 100 Mbps symmetric bandwidth.
+
+High Stake Validator: Primary Network validator with stake at or above 0.01% of total network stake (~21,000 AVAX based on current 210M AVAX staked). Receives prioritized transaction dissemination due to higher block proposal probability, with transaction data volumes driving bandwidth requirements toward 1 Gbps capacity.
+
 Full Archival Node: Node maintaining complete historical blockchain data from genesis. Serves archival API requests for historical state queries and blockchain analysis. Cannot use pruning without losing archival capability.
 
 Physically-Mounted Storage: Storage attached via direct PCIe/NVMe connection (AWS Instance Store, Azure Local NVMe, Google Cloud Local SSD, bare metal NVMe, etc.). Provides lowest latency and highest performance.
@@ -46,18 +50,17 @@ Network-attached storage represents a compromise for validators only, under cond
 
 #### 2.2 Primary Network Validator Nodes
 
-CPU: 8 cores minimum (2.0 GHz or higher recommended)
+CPU: 8 cores minimum
 
-Memory: 16 GB RAM minimum (32 GB recommended)
+Memory: 16 GiB RAM minimum
 
 Storage Capacity: 1 TB minimum (2 TB recommended)
 
 Storage Type: Physically-mounted NVMe SSD
 
-Network-attached storage may be used if all conditions are met:
+Network-attached storage may be used if all following conditions are met:
 
 - State maintained below 500 GB through regular pruning or state sync
-- Storage provides minimum 10,000 IOPS with sub-10ms latency
 - Operator implements monitoring and state management procedures
 - Operator accepts performance trade-offs
 
@@ -70,7 +73,7 @@ Operators must implement management before exceeding 500 GB.
 
 #### 2.3 Full Archival Nodes
 
-CPU: 8 cores minimum (16 cores @ 3.0+ GHz recommended)
+CPU: 8 cores minimum (16 cores GHz recommended)
 
 Memory: 32 GB RAM minimum (64 GB recommended)
 
@@ -78,7 +81,7 @@ Storage Capacity: 12 TB minimum (15 TB recommended)
 
 Storage Type: Physically-mounted NVMe SSD
 
-Network-attached storage is not supported for archival nodes. Historical queries require consistent low-latency random reads across the entire dataset. Network-attached storage introduces 2-10ms per operation, causing 5-10x performance degradation. Over-provisioning IOPS is more expensive than physically-mounted NVMe while delivering inferior latency.
+Network-attached storage is not supported for archival nodes. Historical queries require consistent low-latency random reads across the entire dataset.
 
 Note for archival nodes run on cloud infra: Physically-mounted NVMe storage is ephemeral. Operators must avoid instance stops, implement backup strategies, and use reserved instances to prevent involuntary termination.
 
@@ -103,46 +106,65 @@ Google Cloud: Local SSD (NVMe)
 ### 4. Bandwidth Allocations
 
 Primary Network Validator Nodes:
+
 - Low Stake Validators: 100 Mbps symmetric, stable connection
 - High Stake Validators: 1 Gbps symmetric, low-latency connection
 
 Note: Higher-stake validators receive proportionally more traffic and must process more data, requiring enhanced network capacity.
 
 Full Archival Nodes:
+
 - Recommended: 1 Gbps symmetric, low-latency connection
 - Archival nodes serving API traffic require bandwidth comparable to high-stake validators
 
 ### 5. Operating System
 
-Recommended: Ubuntu 22.04 LTS or 24.04 LTS
-
-Supported: Most Linux distributions (Debian, CentOS, RHEL)
+Recommended: Ubuntu 22.04/24.04 LTS, macOS >= 12
 
 Not supported for production: Windows, macOS
+
+The following table lists currently supported platforms and their corresponding
+AvalancheGo support tiers:
+
+| Architecture | Operating system | Support tier  |
+| :----------: | :--------------: | :-----------: |
+|    amd64     |      Linux       |       1       |
+|    arm64     |      Linux       |       2       |
+|    arm64     |      Darwin      |       2       |
+|    amd64     |      Darwin      | Not supported |
+|    amd64     |     Windows      | Not supported |
+|     arm      |      Linux       | Not supported |
+|     i386     |      Linux       | Not supported |
+
+To officially support a new platform, one must satisfy the following requirements:
+
+| AvalancheGo continuous integration | Tier 1  | Tier 2  | Tier 3  |
+| ---------------------------------- | :-----: | :-----: | :-----: |
+| Build passes                       | &check; | &check; | &check; |
+| Unit and integration tests pass    | &check; | &check; |         |
+| End-to-end and stress tests pass   | &check; |         |         |
 
 ### 6. Monitoring Requirements
 
 Operators should monitor:
 
-Storage: Disk usage (alert at 80%, critical at 90%), I/O latency (alert if sustained >10ms), IOPS utilization
-
-Network: Bandwidth utilization (alert at 80%), packet loss (investigate if >0.1%)
-
-Validation: Uptime percentage, validation success rate, block height synchronization
+1. Storage: Disk usage (alert at 80%, critical at 90%), I/O latency (alert if sustained >10ms), IOPS utilization
+2. Network: Bandwidth utilization (alert at 80%), packet loss (investigate if >0.1%)
+3. Validation: Uptime percentage, validation success rate, block height synchronization
 
 ## Rationale
 
 ### Storage Performance Requirements
 
-Blockchain operations require high IOPS and low latency. Physically-mounted NVMe provides 400,000+ IOPS with <100μs latency compared to network-attached storage's 10,000-30,000 IOPS with 2-10ms latency. This 20-40x latency difference directly impacts validator responsiveness, state sync operations, and API response times.
+Blockchain operations require high throughput and low latency. Physically-mounted NVMe provide higher throughput with lower latency compared to network-attached storage. This difference directly impacts validator responsiveness, state sync operations, and API response times.
 
 ### State Management Threshold
 
-The 500 GB threshold reflects observed performance characteristics of network-attached storage. Below this threshold, baseline IOPS (10,000-16,000) provides adequate validator operation. Above this threshold, increased I/O operations cause performance degradation affecting consensus participation.
+The 500 GB threshold reflects observed performance characteristics of network-attached storage. Above this threshold, increased I/O operations cause performance degradation affecting consensus participation.
 
 ### Archival Node Requirements
 
-Archival nodes generate random reads across arbitrary blockchain history. The latency difference between physically-mounted NVMe (<100μs) and network-attached storage (2-10ms) compounds with database operations, often causing API timeouts. While network-attached storage can be over-provisioned, the cost exceeds physically-mounted NVMe instances while delivering inferior latency.
+Archival nodes generate random reads across arbitrary blockchain history. The latency difference between physically-mounted NVMe and network-attached storage compounds with database operations, often causing API timeouts. While network-attached storage can be over-provisioned, the cost exceeds physically-mounted NVMe instances while delivering inferior latency.
 
 ### Bandwidth Requirements
 
@@ -168,7 +190,7 @@ Validators with insufficient bandwidth may experience delayed block propagation,
 
 ### State Management
 
-Offline pruning requires validator downtime (~1 hour on mainnet). Operators should coordinate pruning windows to avoid simultaneous pruning, which could reduce network capacity.
+Offline pruning requires validator downtime. Operators should coordinate pruning windows to avoid simultaneous pruning, which could reduce network capacity.
 
 State sync relies on validator quorum for state correctness, which is acceptable as state is validated against consensus. Operators concerned about validity can perform full replay from genesis.
 
@@ -241,4 +263,4 @@ Configuration in ~/.avalanchego/configs/chains/C/config.json:
 
 Enables nodes to download current state from peers rather than replaying all blocks. Reduces bootstrap time from days to hours. Operators can deploy new state-synced nodes and migrate operations for zero-downtime management.
 
-Reference: https://docs.avax.network/nodes/maintain/reduce-disk-usage
+Reference: https://build.avax.network/docs/nodes/maintain/chain-state-management#managing-disk-usage
