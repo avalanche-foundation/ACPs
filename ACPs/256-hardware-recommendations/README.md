@@ -40,13 +40,7 @@ Network-Attached Storage: Storage accessed over network (AWS EBS, Azure Managed 
 
 #### 2.1 Suggested Storage Architecture
 
-All Avalanche nodes should use physically-mounted NVMe SSDs. This recommendation applies to validators and archival nodes based on:
-
-- Performance: 400,000+ IOPS with <100μs latency
-- Reliability: Direct PCIe attachment eliminates network failure modes
-- Operational simplicity: No IOPS provisioning or network tuning required
-
-Network-attached storage represents a compromise for validators only, under conditions specified in Section 2.2.
+All Avalanche nodes should use physically-mounted NVMe SSDs. This recommendation applies to validators and archival nodes based on superior performance and throughput capabilities. Network-attached storage represents a compromise for validators only, under conditions specified in Section 2.2.
 
 #### 2.2 Primary Network Validator Nodes
 
