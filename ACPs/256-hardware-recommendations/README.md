@@ -1,8 +1,8 @@
 | ACP | 256 |
 | :- | :- |
 | **Title** | Update Hardware Requirements for Primary Network Nodes |
-| **Author(s)** | Martin Eckardt (https://github.com/martineckardt), Meaghan FitzGerald (https://github.com/meaghanfitzgerald) |
-| **Status** | Proposed |
+| **Author(s)** |Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)) |
+| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/257))|
 | **Track** | Best Practices |
 
 ## Abstract
