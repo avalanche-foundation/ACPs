@@ -10,7 +10,8 @@
 This ACP updates the recommended minimum hardware for Avalanche Primary Network nodes.
 
 [Call to Action]: Move Primary Network node storage to a physically-mounted (local) NVMe SSD.
-[Proposed ACP Activation Date]: January 17, 2026
+
+_The majority of node operators currently fulfill these requirements. All other operators are encouraged to update by January 17th, 2026._
 
 Avalanche L1 nodes: No change required.
 
