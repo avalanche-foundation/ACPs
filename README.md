@@ -131,10 +131,11 @@ _You can view the status of each ACP on the [ACP Tracker](https://github.com/org
 |[194](./ACPs/194-streaming-asynchronous-execution/README.md)|Streaming Asynchronous Execution|Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
 |[204](ACPs/204-precompile-secp256r1/README.md)|Precompile for secp256r1 Curve Support|Santiago Cammi ([@scammi](https://github.com/scammi)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N))|Standards|
 |[209](ACPs/209-eip7702-style-account-abstraction/README.md)|EIP-7702-style Set Code for EOAs|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[224](ACPs/224-dynamic-gas-limit-in-subnet-evm/README.md)|Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM|Ceyhun Onur ([@ceyonur](https://github.com/ceyonur), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
+|[224](ACPs/224-dynamic-gas-limit-in-subnet-evm/README.md)|Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM|Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
 |[226](ACPs/226-dynamic-minimum-block-times/README.md)|Dynamic Minimum Block Times|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[236](ACPs/236-continuous-staking/README.md)|Continuous Staking |Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1))|Standards|
+|[236](ACPs/236-continuous-staking/README.md)|Continuous Staking|Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1))|Standards|
 |[247](ACPs/247-delegation-multiplier-increase-maximum-validator-weight-reduction/README.md)|Delegation Multiplier Increase & Maximum Validator Weight Reduction|Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)), BENQI ([@benqifinance](https://x.com/benqifinance))|Standards|
+|[256](ACPs/256-hardware-recommendations/README.md)|Update Hardware Requirements for Primary Network Nodes|Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|Best Practices|
 
 ## Contributing
 
