@@ -93,7 +93,7 @@ The gas capacity added per second (`R`) always being equal to `2*T` keeps it suc
 
 #### Max Capacity Factor (C) Design Rationale
 
-The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (SAE)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#block-size) defines the max gas capacity (i.e., max block size) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
+The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (SAE)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#block-size) defines the max gas capacity (i.e., max block size/block gas limit) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
 
 The original motivation to make this configurable was to allow for very high maximum gas usage by a single block, primarily to support large contract deployments. Given that SAE will be activated at the same time as ACP-224, the max capacity of the C-Chain will double upon ACP-194 activation, making this configurable largely unnecessary.
 
@@ -101,6 +101,7 @@ Given these considerations, `C` was changed to not be parametrizable for L1s bec
 
 1. SAE provides clear rationale for the max capacity value (ensuring the transaction queue can be saturated).
 2. There are very limited benefits to allowing `C` to be higher than the SAE-defined value in the future.
+3. It's still a function of `T`, so it can be adjusted dynamically via the `ACP224FeeManagerPrecompile` if needed.
 
 ### Genesis Configuration
 
