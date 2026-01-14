@@ -93,15 +93,16 @@ The gas capacity added per second (`R`) always being equal to `2*T` keeps it suc
 
 #### Max Capacity Factor (C) Design Rationale
 
-The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (SAE)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#block-size) defines the max gas capacity (i.e., max block size/block gas limit) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
+The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (SAE)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#block-size) defines the max gas capacity (i.e., max block size/block gas limit) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This definition ensures that the transaction queue can always be fully saturated. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
 
-The original motivation to make this configurable was to allow for very high maximum gas usage by a single block, primarily to support large contract deployments. Given that SAE will be activated at the same time as ACP-224, the max capacity of the C-Chain will double upon ACP-194 activation, making this configurable largely unnecessary.
+The original motivation to make this configurable was to allow for very high maximum gas usage by a single block, primarily to support large contract deployments. Given that SAE will be activated at the same time as ACP-224, the max capacity of the C-Chain will double upon activation, further reducing the need for configurability. Additionally Ethereum's Fusaka upgrade introduces a maximum transaction gas limit of $2^{24}$ (~16.7M), which makes this concern largely moot.
 
 Given these considerations, `C` was changed to not be parametrizable for L1s because:
 
-1. SAE provides clear rationale for the max capacity value (ensuring the transaction queue can be saturated).
-2. There are very limited benefits to allowing `C` to be higher than the SAE-defined value in the future.
-3. It's still a function of `T`, so it can be adjusted dynamically via the `ACP224FeeManagerPrecompile` if needed.
+1. SAE provides clear rationale for the max capacity value (ensuring the transaction queue can always be fully saturated).
+2. The future maximum transaction gas limit of 16.7M makes large contract deployments less of a concern.
+3. There are very limited benefits to allowing `C` to be higher than the SAE-defined value in the future.
+4. It's still a function of `T`, so it can be adjusted dynamically via the `ACP224FeeManagerPrecompile` if needed.
 
 ### Genesis Configuration
 
@@ -225,7 +226,7 @@ Generally, this has the same security considerations as ACP-176. However, due to
 ## Open Questions
 
 * Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be manually disabled as a separate upgrade?
-  *The plan is to activate ACP-224 in the same network upgrade as ACP-194 (SAE). Because of this, the old fee mechanism and the old fee manager precompile will be disabled automatically at that time.
+  * The plan is to activate ACP-224 in the same network upgrade as ACP-194 (SAE). Because of this, the old fee mechanism and the old fee manager precompile will be disabled automatically at that time.
 * Should we use `targetGas` in genesis/chain config as an optional field signaling whether the chain config should have a precedence over the validator preferences?
 * Similarly above, should we have a toggle in `ACP224FeeManager` precompile to give control to validators for `targetGas`?
 
