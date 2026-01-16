@@ -209,11 +209,23 @@ This makes it such that the current gas price stays the same when $K$ is changed
 
 ## Backwards Compatibility
 
-ACP-224 will require a network update in order to activate the new fee mechanism. Another activation will also be required to activate the new fee manager precompile. The activation of precompile should never occur before the activation of ACP-224 (the fee mechanism) since the precompile depends on ACP-224's fee update logic to function correctly.
+ACP-224 will require a network update in order to activate the new fee mechanism. The `ACP224FeeManagerPrecompile` requires a separate activation and can be activated before or after the ACP-224 fee mechanism. If activated before, the precompile operates in a pending state where configuration can be set but does not take effect until ACP-224 activates (see [Early Activation of `ACP224FeeManagerPrecompile`](#early-activation-of-acp224feemanagerprecompile)).
 
-Activation of ACP-224 mechanism will deactivate the prior fee mechanism and the prior fee manager precompile. This ensures that there is no ambiguity or overlap between legacy and new pricing logic. In order to provide a configuration for existing networks, a network upgrade override for both activation time and ACP-176 configuration parameters will be introduced.
+Activation of the ACP-224 mechanism will deactivate the prior fee mechanism and the prior `FeeManagerPrecompile`. This ensures that there is no ambiguity or overlap between legacy and new pricing logic. In order to provide a configuration for existing networks, a network upgrade override for both activation time and ACP-176 configuration parameters will be introduced.
 
-ACP-224 will be activated at the same time as ACP-194 (SAE) in the same network upgrade. This coordinated activation is required because ACP-194 depends on the gas target and capacity mechanism defined by ACP-176, which this ACP implements for Subnet-EVM. Networks that do not activate ACP-224 will not be able to use ACP-194.
+ACP-224 will be activated at the same time as ACP-194 (SAE) in the same network upgrade (Helicon). This coordinated activation is required because ACP-194 depends on the gas target and capacity mechanism defined by ACP-176, which this ACP implements for Subnet-EVM. Networks that do not activate ACP-224 will not be able to use ACP-194.
+
+### Early Activation of `ACP224FeeManagerPrecompile`
+
+For continuity purposes, the `ACP224FeeManagerPrecompile` can be activated before the Helicon network upgrade (which activates ACP-224 and ACP-194). This allows L1 admins to prepare their fee configuration ahead of time.
+
+When the precompile is activated before Helicon:
+
+1. **Configuration calls are accepted**: Precompile's `setFeeConfig` can be called to set desired fee parameters. The values are stored in the precompile's state.
+2. **Values are pending**: The stored fee configuration does not affect the current fee mechanism. The existing `FeeManagerPrecompile` and legacy fee mechanism remain active and in control.
+3. **Activation applies stored values**: When Helicon activates, the stored fee configuration immediately takes effect. The legacy fee mechanism and `FeeManagerPrecompile` are deactivated at this point.
+
+This approach ensures a smooth migration path where admins can test and verify their configuration before it becomes active, avoiding any race conditions at the moment of activation.
 
 ## Reference Implementation
 
@@ -226,9 +238,10 @@ Generally, this has the same security considerations as ACP-176. However, due to
 ## Open Questions
 
 * Should activation of the `ACP224FeeManager` precompile disable the old precompile itself or should we require it to be manually disabled as a separate upgrade?
-  * The plan is to activate ACP-224 in the same network upgrade as ACP-194 (SAE). Because of this, the old fee mechanism and the old fee manager precompile will be disabled automatically at that time.
+  * The `ACP224FeeManagerPrecompile` can be activated before the Helicon upgrade, but will operate in a pending state. The old fee mechanism and `FeeManagerPrecompile` remain active until Helicon, at which point they are automatically disabled.
 * Should we use `targetGas` in genesis/chain config as an optional field signaling whether the chain config should have a precedence over the validator preferences?
 * Similarly above, should we have a toggle in `ACP224FeeManager` precompile to give control to validators for `targetGas`?
+* Calculation of `K` from `TimeToDouble` introduces an extra step of binary search to determine the closest integer solution for `K`. While it is not a significant performance concern, it is a bit of extra complexity. Should we just store the `K` value and use it directly instead of `TimeToDouble`?
 
 ## Acknowledgements
 
