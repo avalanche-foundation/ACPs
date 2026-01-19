@@ -18,7 +18,7 @@ The current staking system on the Avalanche P-Chain restricts flexibility for st
 
 Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually submit new staking transactions at the end of each period.
 
-Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the the auto-restake config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to exit by updating the next cycle’s period to `0`; this causes the validator to exit at the end of the current cycle and unlock the funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`), and any updated period must also respect these limits (except the special value `0`, which means “stop”).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-restake config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
 Note: On mainnet, the current configuration is: `MinStakeDuration = 14 days` and `MaxStakeDuration = 365 days`.
 
@@ -26,21 +26,21 @@ Clarification: In the rewards formula, `StakingPeriod` is the cycle’s duration
 
 Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
 
-Rewards are accrued once per cycle and are managed according to the `AutoRestakeShares` value: the specified portion is restaked and the remainder withdrawn. Auto-restaking only occurs if the validator is eligible for rewards for that cycle. If the validator is not reward-eligible for the cycle, the validator exits at the end of the cycle and funds are unlocked.
+Rewards are accrued once per cycle and are managed according to the `AutoRestakeShares` value: the specified portion is restaked and the remainder withdrawn. Auto-restaking only occurs if the validator is eligible for rewards for that cycle. If the validator is not reward-eligible for the cycle, the validator is forced to exit at the end of the cycle and staked funds are unlocked, and accrued rewards are withdrawn.
 
-If the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+If the updated stake weight (previous stake + staking rewards + delegation commission rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
 Continuous validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-restaking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
 
-Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then exit).
+Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
 
 ### Auto-Restake Config
 
 The `Owner` field defines who is authorized to modify the validator's auto-restake config.
 
-Auto-restake config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restake and withdrawal.
+The auto-restake config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
 
 At creation, validators set the auto-restake config: `AutoRestakeShares` and `Period`.
 
