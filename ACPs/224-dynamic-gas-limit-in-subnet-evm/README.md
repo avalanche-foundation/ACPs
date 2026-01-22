@@ -241,6 +241,8 @@ Generally, this has the same security considerations as ACP-176. However, due to
   * The `ACP224FeeManagerPrecompile` can be activated before the Helicon upgrade, but will operate in a pending state. The old fee mechanism and `FeeManagerPrecompile` remain active until Helicon, at which point they are automatically disabled.
 * Should we use `targetGas` in genesis/chain config as an optional field signaling whether the chain config should have a precedence over the validator preferences?
 * Similarly above, should we have a toggle in `ACP224FeeManager` precompile to give control to validators for `targetGas`?
+  * Not required as disabling the `ACP224FeeManagerPrecompile` will give control to validators for `targetGas`.
+
 * Calculation of `K` from `TimeToDouble` introduces an extra step of binary search to determine the closest integer solution for `K`. While it is not a significant performance concern, it is a bit of extra complexity. Should we just store the `K` value and use it directly instead of `TimeToDouble`?
 
 ## Acknowledgements
