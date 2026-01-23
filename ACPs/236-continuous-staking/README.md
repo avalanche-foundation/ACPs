@@ -143,6 +143,18 @@ type RewardContinuousValidatorTx struct {
 
 ```
 
+### UTXO Creation
+
+Continuous staking creates UTXOs across different transactions depending on the withdrawal reason:
+
+Attached to `AddContinuousValidatorTx`:
+- Initial stake (returned when validator stops)
+
+Attached to `RewardContinuousValidatorTx`:
+- Validation/delegatee rewards withdrawn based on `AutoRestakeShares`
+- Excess rewards withdrawn when restaking would exceed `MaxValidatorStake`
+- Accrued validation/delegatee rewards when validator stops (gracefully or forced)
+
 ## Backwards Compatibility
 
 This change requires a network upgrade to make sure that all validators are able to verify and execute the new introduced transactions.
