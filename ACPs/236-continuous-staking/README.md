@@ -114,17 +114,15 @@ type SetAutoRestakeConfigTx struct {
   // Authorizes this validator to be updated.
   Auth verify.Verifiable `serialize:"true" json:"auth"`
 
-  // Optionally update the auto-restake shares, expressed in percentage, times 10,000.
-  // If nil, leave unchanged. If provided:
-  //   0         = restake principal only; withdraw 100% of rewards 
+  // Auto-restake shares, expressed in percentage, times 10,000.
+  //   0         = restake principal only; withdraw 100% of rewards
   //   300_000   = restake 30% of rewards; withdraw 70%
   //   1_000_000 = restake 100% of rewards; withdraw 0%
-  AutoRestakeShares *uint32 `serialize:"true" json:"autoRestakeShares"`
+  AutoRestakeShares uint32 `serialize:"true" json:"autoRestakeShares"`
 
-  // Optionally update the period for the next cycle (in seconds). Takes effect at cycle end.
-  // If nil, leave unchanged.
+  // Period for the next cycle (in seconds). Takes effect at cycle end.
   // If 0, stop at the end of the current cycle and unlock funds.
-  Period *uint64 `serialize:"true" json:"period"`
+  Period uint64 `serialize:"true" json:"period"`
 }
 ```
 
@@ -137,8 +135,6 @@ type RewardContinuousValidatorTx struct {
   
   // End time of the validation cycle.
   Timestamp uint64 `serialize:"true" json:"timestamp"`
-  
-  unsignedBytes []byte // Unsigned byte representation of this data
 }
 
 ```
