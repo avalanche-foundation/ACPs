@@ -206,6 +206,81 @@ ACP-255's cost plateau at 10-15 validators **aligns with the natural maturity ta
 
 **Economic equilibrium:** The majority of L1s will naturally converge to 10-15 validators over 12-24 months, driven by cost optimization rather than mandates.
 
+## Marginal Cost Comparison
+
+This section addresses the critical question: **How does ACP-255 change the economics of adding validators to an L1?**
+
+Under ACP-77, adding validators is purely a cost (flat +1.33 AVAX/month per validator). Under ACP-255, **adding validators can reduce total L1 costs** due to the L1 multiplier function.
+
+### Marginal Cost Analysis (800 Network Validators)
+
+**Definition:** Marginal cost = change in total L1 monthly cost when adding one validator.
+
+| L1 Size Transition | ACP-77 Total Cost | ACP-255 Total Cost | ACP-77 Marginal | ACP-255 Marginal | Change |
+|-------------------|-------------------|--------------------|-----------------|--------------------|---------|
+| 1 → 2 | 1.33 → 2.66 | 81.50 → 101.83 | **+1.33** | **+20.33** | 15.3x more expensive |
+| 2 → 3 | 2.66 → 3.99 | 101.83 → 117.05 | **+1.33** | **+15.22** | 11.4x more expensive |
+| 3 → 4 | 3.99 → 5.32 | 117.05 → 129.88 | **+1.33** | **+12.83** | 9.6x more expensive |
+| 4 → 5 | 5.32 → 6.65 | 129.88 → 138.05 | **+1.33** | **+8.17** | 6.1x more expensive |
+| 5 → 6 | 6.65 → 7.98 | 138.05 → 143.81 | **+1.33** | **+5.76** | 4.3x more expensive |
+| 6 → 7 | 7.98 → 9.31 | 143.81 → 148.13 | **+1.33** | **+4.32** | 3.2x more expensive |
+| 7 → 8 | 9.31 → 10.64 | 148.13 → 151.57 | **+1.33** | **+3.44** | 2.6x more expensive |
+| 8 → 9 | 10.64 → 11.97 | 151.57 → 154.38 | **+1.33** | **+2.81** | 2.1x more expensive |
+| 9 → 10 | 11.97 → 13.30 | 154.38 → 156.74 | **+1.33** | **+2.36** | 1.8x more expensive |
+| **10 → 11** | **13.30 → 14.63** | **156.74 → 158.72** | **+1.33** | **+1.98** | **1.5x more expensive** |
+| **11 → 12** | **14.63 → 15.96** | **158.72 → 160.42** | **+1.33** | **+1.70** | **1.3x more expensive** |
+| **12 → 15** | **15.96 → 19.95** | **160.42 → 164.64** | **+1.33/ea** | **+1.41/ea** | **~1.1x more expensive** |
+| **15 → 20** | **19.95 → 26.60** | **164.64 → 173.60** | **+1.33/ea** | **+1.79/ea** | **1.3x more expensive** |
+| **20 → 50** | **26.60 → 66.50** | **173.60 → 216.50** | **+1.33/ea** | **+1.43/ea** | **~1.1x more expensive** |
+
+### Key Findings
+
+1. **1-9 validators:** ACP-255 marginal costs are significantly higher (2-15x), creating strong economic pressure to grow beyond single-digit validator sets.
+
+2. **10-15 validators (PLATEAU ZONE):**
+   - Marginal costs approach ACP-77 levels (1.3-1.8x)
+   - This is the **cost-optimal equilibrium point**
+   - Adding validators from 10→15 costs only ~$1.50-2.00/validator (vs. $1.33 flat under ACP-77)
+
+3. **15+ validators:**
+   - Marginal costs stabilize around 1.1-1.3x ACP-77
+   - No penalty for additional decentralization beyond the plateau
+
+### Economic Insight: "Gravity Well" Effect
+
+ACP-255 creates a **cost gravity well** at 10-15 validators:
+
+- **Below 10:** High marginal costs pull L1s upward toward the plateau
+- **At 10-15:** Minimal marginal cost creates stable equilibrium
+- **Above 15:** Continued decentralization is economically viable (marginal cost only slightly higher than ACP-77)
+
+**Example: 5-validator L1 → 15-validator L1**
+
+| Metric | ACP-77 | ACP-255 | Change |
+|--------|--------|---------|--------|
+| **Total monthly cost (5 validators)** | 6.65 AVAX | 138.05 AVAX | 20.8x |
+| **Total monthly cost (15 validators)** | 19.95 AVAX | 164.64 AVAX | 8.3x |
+| **Cost increase for 10 additional validators** | +13.30 AVAX | +26.59 AVAX | +$532/month |
+| **Per-validator average cost (5 val)** | 1.33 AVAX | 27.61 AVAX | 20.8x |
+| **Per-validator average cost (15 val)** | 1.33 AVAX | 10.98 AVAX | 8.3x |
+
+**Conclusion:** Adding 10 validators (5→15) costs an additional ~$530/month, but **reduces per-validator cost by 60%** (27.61 → 10.98 AVAX). This makes decentralization economically attractive for L1s with sufficient budget.
+
+### Marginal Cost at Different Network Scales
+
+As the network grows, the Gaussian factor amplifies all costs. Here's how marginal costs evolve:
+
+**10 → 11 validator transition:**
+
+| Network Size | ACP-77 Marginal | ACP-255 Marginal | Ratio |
+|--------------|-----------------|------------------|-------|
+| 800 validators | +1.33 AVAX | +1.98 AVAX | 1.5x |
+| 5,000 validators | +1.33 AVAX | +2.88 AVAX | 2.2x |
+| 10,000 validators (PEAK) | +1.33 AVAX | +3.84 AVAX | 2.9x |
+| 20,000 validators | +1.33 AVAX | +2.05 AVAX | 1.5x |
+
+**Key insight:** Even at the Gaussian peak (10K validators), the marginal cost of the 11th validator is only 2.9x ACP-77, making the 10-15 validator plateau economically viable across all network growth phases.
+
 ## AVAX Burn Scenarios
 
 _AVAX price is fixed at 20$ unless otherwise specified._
