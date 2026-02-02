@@ -147,6 +147,65 @@ feeRate = 2.65 × 2.62 × 3.84 = 26.66 AVAX/validator/month
 Total L1 cost = 26.66 × 8 = 213.28 AVAX/month
 ```
 
+## L1 Validator Growth Assumptions
+
+This section explains the assumptions underlying ACP-255's economic model, addressing how L1 validator counts are expected to evolve over time.
+
+### L1 Archetypes
+
+Based on current Avalanche L1 deployments and ecosystem analysis, we identify two primary L1 categories:
+
+#### Enterprise L1s (Estimated 60-70% of total L1s)
+
+**Characteristics:**
+- **Validator count:** 3-8 validators (typical: 5)
+- **Growth trajectory:** Slow/stable (designed for control, not maximum decentralization)
+- **Operator profile:** Internal infrastructure, trusted partners, professional node operators
+- **Examples:** Financial institutions, gaming studios, supply chain platforms
+- **Cost sensitivity:** Low (can absorb $100-500/month infrastructure costs as part of operational budget)
+- **Security model:** Permissioned or semi-permissioned validator sets
+
+**Typical lifecycle:**
+- Launch: 1-3 validators (core team)
+- 6 months: 3-5 validators (early partners)
+- 12+ months: 5-8 validators (stable operating model)
+
+#### Community L1s (Estimated 30-40% of total L1s)
+
+**Characteristics:**
+- **Validator count:** 10-50+ validators (typical plateau: 15-25)
+- **Growth trajectory:** Rapid expansion driven by community/token incentives
+- **Operator profile:** Decentralized community members, independent validators, delegators
+- **Examples:** DeFi protocols, DAOs, open-source gaming ecosystems, NFT platforms
+- **Cost sensitivity:** High (rely on volunteer validators or tokenomic incentives)
+- **Security model:** Maximally decentralized, open validator sets
+
+**Typical lifecycle:**
+- Launch: 1-3 validators (core team bootstrap)
+- 3 months: 5-10 validators (early community adoption)
+- 6-12 months: 10-20 validators (active growth phase)
+- 12+ months: 15-30 validators (mature, cost-optimal plateau)
+
+### Expected Network Growth Trajectory
+
+| Time Period | Total L1 Validators | Avg L1 Size | Rationale |
+|-------------|---------------------|-------------|-----------|
+| Current (2025) | ~800 | 5-8 | Early adoption, mostly enterprise pilots |
+| 6 months | 1,500-2,000 | 6-10 | Initial community L1s launching |
+| 12 months | 3,000-5,000 | 8-12 | Community L1s reaching maturity |
+| 24 months | 8,000-10,000 | 10-15 | Peak growth phase, ACP-255 plateau incentives working |
+| 36+ months | 15,000-20,000 | 12-20 | Sustainable mature network |
+
+### Key Insight: Natural Convergence at 10-15 Validators
+
+ACP-255's cost plateau at 10-15 validators **aligns with the natural maturity target for community L1s**. This creates three economic zones:
+
+1. **Zone 1 (1-5 validators):** High cost pressure → strong incentive to add validators
+2. **Zone 2 (5-15 validators):** Decreasing marginal cost → continued growth incentive
+3. **Zone 3 (15+ validators):** Cost plateau → stable equilibrium, no penalty for additional decentralization
+
+**Economic equilibrium:** The majority of L1s will naturally converge to 10-15 validators over 12-24 months, driven by cost optimization rather than mandates.
+
 ## AVAX Burn Scenarios
 
 _AVAX price is fixed at 20$ unless otherwise specified._
