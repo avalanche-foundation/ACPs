@@ -21,7 +21,6 @@ This ACP proposes a fundamental redesign of Avalanche's L1 validator fee economi
 - At 5,000 validators: **14.7x higher burn** (6,650 → 97,800 AVAX/month)
 - **At 10,000 validators: 20.8x higher burn (PEAK)** (13,300 → 266,200 AVAX/month)
 - At 20,000 validators: **8.2x higher burn** (26,600 → 218,000 AVAX/month)
-- At 50,000 validators: **5.2x higher burn** (66,500 → 347,000 AVAX/month)
 
 ## Motivation
 
@@ -42,7 +41,7 @@ The current ACP-77 flat-fee model provides insufficient burn (~1,064 AVAX/month)
 
 ### 2: L1-Size-Dependent Fee Multiplier
 
-This ACP proposes to introduce a new formula to account tied to the number of validators of a given L1.
+This ACP proposes to introduce a new formula tied to the number of validators of a given L1.
 
 **Formula:**
 $$ \text{multiplier}(n) = 1.0 + 17.84 \times e^{-0.3 \times (n-1)} $$
@@ -63,7 +62,7 @@ $$ \text{multiplier}(n) = 1.0 + 17.84 \times e^{-0.3 \times (n-1)} $$
 
 **Formula:**
 
-$$ \text{network_factor}(V) = 1.0 + 2.84 \times e^{-\left(\frac{V - 10,000}{7,500}\right)^2} $$
+$$ \text{networkFactor}(V) = 1.0 + 2.84 \times e^{-\left(\frac{V - 10,000}{7,500}\right)^2} $$
 
 **Properties:**
 - Peak at V = 10,000: factor = **3.84** (20.8x burn)
@@ -73,7 +72,7 @@ $$ \text{network_factor}(V) = 1.0 + 2.84 \times e^{-\left(\frac{V - 10,000}{7,50
 
 **Final Fee Formula:**
 
-$$ \text{fee_rate}(V) = 2.65 \times \text{multiplier}(n) \times \text{network_factor}(V) $$
+$$ \text{feeRate}(V) = 2.65 \times \text{multiplier}(n) \times \text{networkFactor}(V) $$
 
 **Network Factor Values:**
 
@@ -86,7 +85,6 @@ $$ \text{fee_rate}(V) = 2.65 \times \text{multiplier}(n) \times \text{network_fa
 | **10,000** | **3.84** | **20.8x (PEAK)** |
 | 15,000 | 2.82 | 15.3x |
 | 20,000 | 1.57 | 8.5x |
-| 50,000 | 1.00 | 5.4x |
 
 ## Core Formulas
 
@@ -569,13 +567,13 @@ _AVAX price is fixed at 20$ unless otherwise specified._
 | Annual burn | 159,600 AVAX | 3,194,400 AVAX | **20.8x** |
 | Annual value | $3.19M | $63.89M | **+$60.70M** |
 
-### Scale to 50,000 Validators (6,250 L1s)
+### Scale to 20,000 Validators (2,500 L1s)
 
 | Metric | ACP-77 | ACP-255 | Change |
 |---|---|---|---|
-| Monthly burn | 66,500 AVAX | 347,000 AVAX | 5.2x |
-| Annual burn | 798,000 AVAX | 4,164,000 AVAX | 5.2x |
-| Annual value | $15.96M | $83.28M | +$67.32M |
+| Monthly burn | 26,600 AVAX | 218,000 AVAX | 8.2x |
+| Annual burn | 319,200 AVAX | 2,616,000 AVAX | 8.2x |
+| Annual value | $6.38M | $52.32M | +$45.94M |
 
 ## Fee Evolution Example (8-Validator L1)
 
@@ -586,7 +584,6 @@ _AVAX price is fixed at 20$ unless otherwise specified._
 | 5,000 | 2.82 | 19.6 AVAX | 156.8 AVAX | 15.3x |
 | **10,000** | **3.84** | **26.6 AVAX** | **212.8 AVAX** | **20.8x** |
 | 20,000 | 1.57 | 10.9 AVAX | 87.2 AVAX | 8.5x |
-| 50,000 | 1.00 | 6.94 AVAX | 55.52 AVAX | 5.4x |
 
 ## Technical Implementation
 
@@ -652,9 +649,9 @@ uint32 constant GAUSSIAN_CENTER = 10000;          // Peak location
 
 ## Security Considerations
 
-**Validator Count Verification:** L1ValidatorCount tracked on-chain and verified by consensus rules. Misreporting results in automatic deactivation.
+**Validator Count Verification:** `L1ValidatorCount` tracked on-chain and verified by consensus rules. Misreporting results in automatic deactivation.
 
-**Rapid Growth:** Logarithmic curve prevents hyperinflation of fees. Governance can adjust parameters if adoption exceeds projections.
+**Rapid Growth:** Gaussian curve prevents hyperinflation of fees. Governance can adjust parameters if adoption exceeds projections.
 
 **Small L1 Pressure:** Community grants and foundation support available for projects struggling with increased costs during transition.
 
@@ -664,12 +661,12 @@ uint32 constant GAUSSIAN_CENTER = 10000;          // Peak location
 
 **Early Adoption:** Bootstrap fees (8.5x) reward early validators and fund critical protocol development.
 
-**Network Effects:** Each new validator reduces per-validator cost (due to Gaussian decay after peak), creating virtuous adoption spiral.
+**Network Effects:** Each new validator reduces per-validator cost (due to L1 multiplier decay), creating virtuous adoption spiral.
 
 ## Open Questions
 
-- Should the Base Commission Rate be doubled? Or maybe another multipler would be better?
-- Should the Fee Multiplier start a 50 AVAX, or more, or less? How?
+- Should the Base Commission Rate be doubled? Or maybe another multiplier would be better?
+- Should the Fee Multiplier start at 50 AVAX, or more, or less? How?
 
 ## Conclusion
 
