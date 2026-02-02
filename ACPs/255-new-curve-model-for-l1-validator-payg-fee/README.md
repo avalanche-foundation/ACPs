@@ -281,6 +281,117 @@ As the network grows, the Gaussian factor amplifies all costs. Here's how margin
 
 **Key insight:** Even at the Gaussian peak (10K validators), the marginal cost of the 11th validator is only 2.9x ACP-77, making the 10-15 validator plateau economically viable across all network growth phases.
 
+## Game-Theoretic Equilibrium
+
+This section analyzes how ACP-255 changes the optimal validator count for L1s from a game-theoretic perspective.
+
+### ACP-77 Equilibrium (Current State)
+
+**Optimal validator count:** **1** (minimize costs)
+
+**Economic forces:**
+- **Cost minimization:** Every additional validator adds flat +1.33 AVAX/month
+- **Security/decentralization incentive:** Non-economic (reputation, regulatory, community pressure)
+- **Result:** L1s only add validators for non-economic reasons (e.g., avoiding "single point of failure" optics)
+
+**Observed outcome:** Most L1s cluster around 5-8 validators—above the cost-optimal point (1), but below true decentralization (15+).
+
+**Nash equilibrium:** Single-validator L1s are rational profit-maximizers under ACP-77.
+
+---
+
+### ACP-255 Equilibrium (Proposed State)
+
+**Optimal validator count:** **10-15** (minimize per-validator cost)
+
+**Economic forces:**
+
+1. **Cost minimization (1-10 validators):**
+   - High marginal costs create pressure to add validators
+   - Each additional validator reduces per-validator average cost
+   - Strong economic incentive to grow toward plateau
+
+2. **Cost plateau (10-15 validators):**
+   - Marginal cost approaches baseline ACP-77 levels
+   - **Economic equilibrium:** No strong incentive to add more, but no penalty either
+   - L1s naturally stabilize in this range
+
+3. **Beyond plateau (15+ validators):**
+   - Marginal costs remain low (~1.1-1.3x ACP-77)
+   - Community/decentralization goals can be pursued without prohibitive cost
+   - Secondary incentives (token distribution, governance) become primary drivers
+
+**Nash equilibrium:** 10-15 validator L1s represent the cost-optimal rational strategy.
+
+---
+
+### Expected Behavioral Changes
+
+| L1 Type | Current (ACP-77) | Expected (ACP-255) | Mechanism |
+|---------|------------------|-------------------|-----------|
+| **Single-validator L1** | Rational (cost-optimal) | Economically unviable ($1,000/month @ $20 AVAX) | Forced decentralization or shutdown |
+| **3-5 validator L1** | Common (security vs. cost trade-off) | Strong pressure to reach 10+ | Marginal cost of adding 5-7 validators is high but justified by 60% per-validator cost reduction |
+| **10-15 validator L1** | Rare (expensive) | New equilibrium (cost-optimal) | Natural convergence point |
+| **20+ validator L1** | Very rare (altruistic) | More common (economically viable) | Plateau effect removes cost penalty |
+
+---
+
+### Time-Dependent Equilibrium Shift
+
+The Gaussian network factor creates **time-dependent equilibrium dynamics**:
+
+**At 800 validators (current):**
+- Optimal L1 size: 10-15 validators
+- Cost pressure: 8.5x ACP-77
+- Expected behavior: Slow migration from 5→10 validators
+
+**At 5,000 validators (12-18 months):**
+- Optimal L1 size: 10-15 validators (unchanged)
+- Cost pressure: 14.7x ACP-77
+- Expected behavior: Rapid consolidation toward 10-15 validator equilibrium
+
+**At 10,000 validators (24-36 months, PEAK):**
+- Optimal L1 size: 10-15 validators (unchanged)
+- Cost pressure: 20.8x ACP-77 (maximum)
+- Expected behavior: L1s below 10 validators face existential cost pressure; plateau becomes universal
+
+**At 20,000 validators (mature network):**
+- Optimal L1 size: 10-15 validators (still optimal, but less critical)
+- Cost pressure: 5.2x ACP-77 (declining toward baseline)
+- Expected behavior: Stable equilibrium; decentralization driven by non-economic factors
+
+---
+
+### Caveat: Enterprise L1s May Accept Higher Costs
+
+**Not all L1s will conform to the 10-15 validator equilibrium.**
+
+Enterprise L1s with strict control requirements may rationally choose to remain at 3-5 validators and absorb higher costs (e.g., $500-1,000/month vs. $200-300/month at plateau).
+
+**Why this is acceptable:**
+- ACP-255 **taxes centralization** without making it impossible
+- Higher fees fund protocol development (offsetting network externality of centralized L1s)
+- Enterprise budgets can absorb premium for control (analogous to AWS dedicated hosting vs. multi-tenant)
+
+**Expected distribution at equilibrium:**
+- 30-40% of L1s: 3-8 validators (enterprise, willing to pay premium)
+- 50-60% of L1s: 10-15 validators (cost-optimal plateau)
+- 10% of L1s: 20+ validators (maximally decentralized, community-driven)
+
+---
+
+### Summary: Equilibrium Shift
+
+| Metric | ACP-77 | ACP-255 |
+|--------|--------|---------|
+| **Optimal L1 size** | 1 validator | 10-15 validators |
+| **Observed average** | 5-8 validators | 10-15 validators (projected) |
+| **Single-validator viability** | Economically rational | Economically unviable ($1K/month) |
+| **Decentralization incentive** | Non-economic (optics) | Economic (cost reduction) |
+| **Equilibrium stability** | Weak (no cost pressure) | Strong (cost plateau creates attractor) |
+
+**Conclusion:** ACP-255 shifts the Nash equilibrium from centralized (1 validator) to meaningfully decentralized (10-15 validators) through pure economic incentives, without mandates or artificial caps.
+
 ## AVAX Burn Scenarios
 
 _AVAX price is fixed at 20$ unless otherwise specified._
