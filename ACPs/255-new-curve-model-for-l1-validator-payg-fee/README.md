@@ -88,6 +88,65 @@ $$ \text{fee_rate}(V) = 2.65 \times \text{multiplier}(n) \times \text{network_fa
 | 20,000 | 1.57 | 8.5x |
 | 50,000 | 1.00 | 5.4x |
 
+## Core Formulas
+
+This section consolidates the mathematical formulas that define ACP-255's fee structure.
+
+### L1 Multiplier Function
+
+**Purpose:** Incentivize L1 decentralization by reducing per-validator costs as validator count increases.
+
+**Formula:**
+$$ \text{multiplier}(n) = 1.0 + 17.84 \times e^{-0.3 \times (n-1)} $$
+
+**Parameters:**
+- `n` = number of validators in the L1
+- `17.84` = maximum premium coefficient (determines single-validator penalty)
+- `0.3` = decay rate (controls how quickly costs decrease with additional validators)
+
+**Behavior:**
+- At `n=1`: multiplier = 18.84 (maximum penalty)
+- At `n=5`: multiplier = 6.37 (significant reduction)
+- At `n=10`: multiplier = 2.20 (approaching plateau)
+- At `n≥50`: multiplier ≈ 1.0 (baseline)
+
+### Network Factor Function (Gaussian)
+
+**Purpose:** Create time-dependent fee dynamics that fund protocol development during critical growth phases.
+
+**Formula:**
+$$ \text{networkFactor}(V) = 1.0 + 2.84 \times e^{-\left(\frac{V - 10,000}{7,500}\right)^2} $$
+
+**Parameters:**
+- `V` = total number of L1 validators in the network
+- `2.84` = peak amplitude (A)
+- `10,000` = center of bell curve (μ)
+- `7,500` = width parameter (σ)
+
+**Behavior:**
+- At `V=0`: factor ≈ 1.0 (baseline, far from peak)
+- At `V=800`: factor = 1.63 (early growth phase)
+- At `V=10,000`: factor = 3.84 (peak)
+- At `V→∞`: factor → 1.0 (mature network baseline)
+
+### Combined Fee Formula
+
+**Final per-validator monthly fee:**
+$$ \text{feeRate}(V, n) = M \times \text{multiplier}(n) \times \text{networkFactor}(V) $$
+
+Where:
+- `M` = base rate = 2.65 AVAX/month (1,024 nAVAX/sec × 2,592,000 sec/month / 10⁹)
+- `n` = validators in the specific L1
+- `V` = total network validators
+
+**Example Calculation (8-validator L1 at 10K network validators):**
+```
+multiplier(8) = 1.0 + 17.84 × e^(-0.3 × 7) = 2.62
+networkFactor(10,000) = 1.0 + 2.84 × e^0 = 3.84
+feeRate = 2.65 × 2.62 × 3.84 = 26.66 AVAX/validator/month
+Total L1 cost = 26.66 × 8 = 213.28 AVAX/month
+```
+
 ## AVAX Burn Scenarios
 
 _AVAX price is fixed at 20$ unless otherwise specified._
