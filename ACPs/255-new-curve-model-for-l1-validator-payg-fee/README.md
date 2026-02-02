@@ -392,6 +392,147 @@ Enterprise L1s with strict control requirements may rationally choose to remain 
 
 **Conclusion:** ACP-255 shifts the Nash equilibrium from centralized (1 validator) to meaningfully decentralized (10-15 validators) through pure economic incentives, without mandates or artificial caps.
 
+## Interaction with ACP-247 (L1 Validator Rewards)
+
+ACP-255 is designed to work in tandem with [ACP-247](https://github.com/avalanche-foundation/ACPs/pull/247), which proposes AVAX rewards for L1 validators based on their participation in Primary Network validation.
+
+### Combined Economic Model
+
+**ACP-255 (fees) + ACP-247 (rewards) = Net validator economics**
+
+#### Without ACP-247 (Fee-Only Model)
+
+| Role | Monthly Cost | Monthly Revenue | Net |
+|------|--------------|-----------------|-----|
+| L1 validator (10-val L1, 800 network) | 15.67 AVAX | 0 AVAX | **-15.67 AVAX** |
+| L1 operator (10-validator L1) | 156.74 AVAX | 0 AVAX | **-156.74 AVAX** |
+
+**Result:** Pure cost model discourages validator participation, especially for community-driven L1s.
+
+---
+
+#### With ACP-247 (Fee + Reward Model)
+
+Assuming ACP-247 distributes rewards proportional to L1 validator uptime and P-Chain stake:
+
+| Role | Monthly Cost | Monthly Reward (ACP-247) | Net |
+|------|--------------|--------------------------|-----|
+| L1 validator (10-val L1, 800 network) | 15.67 AVAX | ~10-20 AVAX (estimated) | **-5 to +4 AVAX** |
+| L1 operator (10-validator L1) | 156.74 AVAX | 100-200 AVAX (if all validators earn rewards) | **-50 to +43 AVAX** |
+
+**Result:** Validator participation becomes revenue-neutral or revenue-positive, dramatically improving L1 decentralization economics.
+
+---
+
+### Economic Balance: ACP-255 Push + ACP-247 Pull
+
+**ACP-255 (the "stick"):**
+- High fees for centralized L1s (1-5 validators)
+- Cost plateau incentive to reach 10-15 validators
+- Network-wide burn increases (funding protocol development)
+
+**ACP-247 (the "carrot"):**
+- Rewards for L1 validators who secure the Primary Network
+- Offsets ACP-255 fee increases
+- Creates positive-sum game: Validate L1 + earn P-Chain rewards
+
+**Combined effect:**
+1. **L1s grow validator sets** (ACP-255 cost pressure + ACP-247 revenue opportunity)
+2. **Validators join L1s** (ACP-247 rewards offset ACP-255 fees)
+3. **Primary Network security increases** (more L1 validators = more P-Chain validators via ACP-247 incentives)
+4. **AVAX burn increases** (ACP-255) while **validator revenue increases** (ACP-247)
+
+---
+
+### Timing and Implementation Strategy
+
+**Recommendation:** Implement ACP-255 and ACP-247 **together or in rapid succession** to avoid fee shock.
+
+#### Scenario 1: ACP-255 Alone (Suboptimal)
+- Month 0: ACP-255 activates
+- Fees increase 8.5-20x
+- No reward offset
+- **Result:** Community backlash, L1 validator churn, calls for fee rollback
+
+#### Scenario 2: ACP-247 Alone (Incomplete)
+- Month 0: ACP-247 activates
+- L1 validators earn rewards
+- Fees remain flat (ACP-77)
+- **Result:** Insufficient burn, no decentralization pressure, rewards feel like "free money"
+
+#### Scenario 3: Coordinated Launch (Optimal)
+- Month 0: ACP-255 + ACP-247 activate simultaneously
+- Fees increase 8.5x (ACP-255)
+- Validators earn rewards (ACP-247)
+- **Net effect:** Revenue-neutral to revenue-positive for active validators
+- **Result:** Sustainable burn + decentralization incentives + positive community sentiment
+
+---
+
+### Example: 10-Validator Community L1
+
+**Without ACP-247:**
+- Total L1 cost: 156.74 AVAX/month (at 800 network validators)
+- Revenue: 0
+- **Net: -156.74 AVAX/month (-$3,135/month @ $20 AVAX)**
+
+**With ACP-247 (assuming 15 AVAX/validator/month reward):**
+- Total L1 cost: 156.74 AVAX/month
+- Revenue: 150 AVAX/month (10 validators × 15 AVAX)
+- **Net: -6.74 AVAX/month (-$135/month @ $20 AVAX)**
+
+**Result:** A 95% cost reduction for L1s whose validators actively participate in Primary Network validation.
+
+---
+
+### Open Question: ACP-247 Reward Magnitude
+
+The effectiveness of the ACP-255 + ACP-247 pairing depends critically on **how much ACP-247 rewards per L1 validator**.
+
+**If ACP-247 rewards are too low (e.g., 5 AVAX/month):**
+- Net L1 cost remains high (156.74 - 50 = 106.74 AVAX/month for 10-val L1)
+- ACP-255 fee pressure dominates
+- Risk: Validator churn, L1 shutdowns
+
+**If ACP-247 rewards are too high (e.g., 30 AVAX/month):**
+- Net L1 cost becomes negative (156.74 - 300 = -143.26 AVAX/month for 10-val L1)
+- L1 validation becomes a profit center (unsustainable token distribution)
+- Risk: Sybil attacks, low-quality L1s farming rewards
+
+**Optimal range (estimated): 10-20 AVAX/validator/month**
+- Offsets 60-95% of ACP-255 costs
+- Keeps L1 validation slightly net-negative or neutral (ensuring quality)
+- Sustainable long-term (rewards decline as network matures)
+
+**Recommendation:** ACP-247 reward parameters should be calibrated to **offset 70-80% of ACP-255 costs** at the 10-15 validator plateau.
+
+---
+
+### Governance Coordination
+
+Given the tight coupling between ACP-255 and ACP-247, the following governance process is recommended:
+
+1. **Joint proposal review:** Both ACPs should be evaluated together by the Avalanche Foundation and community
+2. **Synchronized activation:** Implement both ACPs in the same network upgrade (or within 1-2 months)
+3. **Parameter tuning:** Allow 3-6 month observation period, then adjust:
+   - ACP-255 Gaussian parameters (if burn is too high/low)
+   - ACP-247 reward rates (if validator economics are net-negative)
+4. **Future ACPs:** Create mechanism for joint parameter updates (e.g., "ACP-XXX: Adjust 255/247 Balance")
+
+---
+
+### Summary: Why ACP-255 + ACP-247 Work Together
+
+| Without ACP-247 | With ACP-247 |
+|-----------------|--------------|
+| High L1 costs (8.5-20x) | Costs offset by rewards |
+| Validator churn risk | Validator retention via revenue |
+| Pure fee pressure | Balanced incentive (cost + reward) |
+| Community resistance likely | Community support likely (net-neutral economics) |
+| AVAX burn increase only | AVAX burn + validator growth + P-Chain security |
+
+**Conclusion:** ACP-255 alone creates deflationary pressure but risks validator attrition. ACP-247 alone rewards participation but lacks burn mechanism. **Together, they create a balanced economic system** that funds protocol development while incentivizing decentralization.
+
 ## AVAX Burn Scenarios
 
 _AVAX price is fixed at 20$ unless otherwise specified._
