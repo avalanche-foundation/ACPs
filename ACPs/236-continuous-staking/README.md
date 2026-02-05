@@ -179,7 +179,7 @@ flowchart TD
   H --> I[Validator exits]
 
   G -->|No| J{Eligible for rewards?}
-  J -->|No| I
+  J -->|No| H
   J -->|Yes| K[Apply auto-restake config and split rewards into restake/withdrawal]
   K --> L{New stake exceeds MaxStakeLimit?}
   L -->|Yes| M[Withdraw excess above MaxStakeLimit]
