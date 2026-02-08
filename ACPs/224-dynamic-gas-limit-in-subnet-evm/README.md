@@ -104,153 +104,6 @@ Given these considerations, `C` was changed to not be parametrizable for L1s bec
 3. There are very limited benefits to allowing `C` to be higher than the SAE-defined value in the future.
 4. It's still a function of `T`, so it can be adjusted dynamically via the `ACP224FeeManagerPrecompile` if needed.
 
-### Fee Configuration Via `ACP224FeeManagerPrecompile`
-
-All fee configuration for ACP-224 is done through the `ACP224FeeManagerPrecompile`. There is no separate genesis chain configuration for the new fee parameters. If the precompile is not activated at all, default values aligned with the C-Chain are used.
-
-The precompile can be activated with an `initialFeeConfig` to set the initial fee parameters at the activation timestamp. This follows the established Subnet-EVM pattern for [initial precompile configurations](https://build.avax.network/docs/avalanche-l1s/evm-configuration/customize-avalanche-l1#initial-precompile-configurations). If no admin, manager, or enabled addresses are provided, the precompile becomes **read-only**: `getFeeConfig`, `getFeeConfigLastChangedAt`, and view functions like `isStaticPricingEnabled` and `isValidatorTargetGasEnabled` remain callable, but `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `disableStaticPricing`, `enableValidatorTargetGas`, `disableValidatorTargetGas`) revert.
-
-When `initialFeeConfig` is present, all three uint fields (`targetGas`, `minGasPrice`, `timeToDouble`) are **required**. This prevents silent misconfiguration from typos (e.g., a misspelled `"minGasprice"` would otherwise silently fall back to a default, potentially making the chain near-free to spam). Boolean mode flags (`staticPricing`, `validatorTargetGas`) default to `false` when omitted.
-
-The precompile configuration will look like the following:
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "adminAddresses": ["0x..."],
-    "managerAddresses": ["0x..."],
-    "enabledAddresses": ["0x..."],
-    "initialFeeConfig": {
-      "targetGas": 2000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "staticPricing": false,
-      "validatorTargetGas": true
-    }
-  }
-}
-```
-
-The `initialFeeConfig` fields are:
-
-- `targetGas` (uint64, **required**): Target gas consumption per second ($T$). When `validatorTargetGas` is `true`, this value is stored but **not used for block building** -- validators determine the gas target from the parent block's state. The stored value becomes relevant again when validator control is later disabled via `disableValidatorTargetGas(uint256 targetGas)`.
-- `minGasPrice` (uint64, **required**): Minimum gas price in wei ($M$). When `staticPricing` is `true`, this is the fixed gas price.
-- `timeToDouble` (uint64, **required**): Seconds for the gas price to double when the chain is at maximum capacity. Determines $K$ as described in [ACP-176 Parameters in Subnet-EVM](#acp-176-parameters-in-subnet-evm). Stored but has no effect when `staticPricing` is `true`.
-- `staticPricing` (bool, optional, default `false`): When `true`, the gas price is always `minGasPrice`, bypassing the ACP-176 dynamic fee mechanism entirely. The `timeToDouble` value is stored but inactive.
-- `validatorTargetGas` (bool, optional, default `false`): When `true`, validators control `targetGas` dynamically via their node preferences, using the same mechanism as the C-Chain (see [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference)). The stored `targetGas` value is not used for block building; validators always adjust from the parent block's `targetExcess`.
-
-#### Example Configurations
-
-**Custom fees, fully locked (read-only precompile, dynamic pricing):**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "initialFeeConfig": {
-      "targetGas": 5000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60
-    }
-  }
-}
-```
-
-No admin addresses means the precompile is read-only. All boolean flags default to `false`: dynamic pricing is active, and the precompile controls `targetGas`.
-
-**Validators control target gas, fee parameters locked:**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "initialFeeConfig": {
-      "targetGas": 2000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "validatorTargetGas": true
-    }
-  }
-}
-```
-
-Read-only precompile. `targetGas` starts at 2,000,000 gas/second but validators adjust it dynamically via their node preferences. `minGasPrice` and `timeToDouble` are locked.
-
-**Static pricing, fully locked:**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "initialFeeConfig": {
-      "targetGas": 15000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "staticPricing": true
-    }
-  }
-}
-```
-
-Gas price is always 25 gwei regardless of demand. `timeToDouble` is stored but inactive. `targetGas` still governs block gas capacity (15,000,000 gas/second).
-
-**Static pricing with validator-controlled target gas:**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "initialFeeConfig": {
-      "targetGas": 5000000,
-      "minGasPrice": 1000000000,
-      "timeToDouble": 60,
-      "staticPricing": true,
-      "validatorTargetGas": true
-    }
-  }
-}
-```
-
-Flat 1 gwei gas price. Validators adjust throughput dynamically. Read-only precompile.
-
-**Full admin control:**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"],
-    "initialFeeConfig": {
-      "targetGas": 2000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60
-    }
-  }
-}
-```
-
-Admin can call `setFeeConfig`, `enableStaticPricing`, `enableValidatorTargetGas`, and their counterparts at any time.
-
-**Admin controls pricing, validators control target gas:**
-
-```json
-{
-  "acp224FeeManagerConfig": {
-    "blockTimestamp": 0,
-    "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"],
-    "initialFeeConfig": {
-      "targetGas": 2000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "validatorTargetGas": true
-    }
-  }
-}
-```
-
-Admin controls pricing parameters (`minGasPrice`, `timeToDouble`, `staticPricing`). Validators control target gas. Admin can call `disableValidatorTargetGas(uint256 targetGas)` to take back control of `targetGas`.
-
 ### Dynamic Gas Target Via Validator Preference
 
 For L1s that want their gas target to be dynamically adjusted based on the preferences of their validator sets, the same mechanism introduced on the C-Chain in ACP-176 will be employed. Validators will be able to set their `gas-target` preference in their node's configuration, and block builders can then adjust the target excess in blocks that they propose based on their preference.
@@ -262,7 +115,9 @@ Validator target gas preferences are active in the following cases:
 
 When `validatorTargetGas` is `false` (the default), the precompile's stored `targetGas` value is authoritative and validator preferences for gas target are ignored.
 
-### Solidity Interface
+### ACP224FeeManagerPrecompile
+
+#### Solidity Interface
 
 The `ACP224FeeManagerPrecompile` provides an on-chain interface for managing fee parameters dynamically. The `FeeConfig` struct contains only numeric value parameters. Mode flags (`staticPricing`, `validatorTargetGas`) are controlled via separate per-field toggle functions. This design ensures forward-compatibility: adding new modes in the future (e.g., `validatorMinGasPrice`) requires only adding new functions, with no changes to the `FeeConfig` struct or existing function signatures (no ABI breaks).
 
@@ -353,6 +208,136 @@ interface IACP224FeeManager is IAllowList {
 ```
 
 For chains with the precompile activated, `setFeeConfig` can be used to dynamically change each of the values in the fee configuration. Importantly, any updates made via calls to `setFeeConfig` or mode toggle functions in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
+
+#### Initial Fee Configuration
+
+All fee configuration for ACP-224 is done through the `ACP224FeeManagerPrecompile`. There is no separate genesis chain configuration for the new fee parameters. If the precompile is not activated at all, or no `initialFeeConfig` is provided, default values aligned with the C-Chain are used.
+
+The precompile can be activated with an `initialFeeConfig` to set the initial fee parameters at the activation timestamp. This follows the established Subnet-EVM pattern for [initial precompile configurations](https://build.avax.network/docs/avalanche-l1s/evm-configuration/customize-avalanche-l1#initial-precompile-configurations). If no admin, manager, or enabled addresses are provided, the precompile becomes **read-only**: `getFeeConfig`, `getFeeConfigLastChangedAt`, and view functions like `isStaticPricingEnabled` and `isValidatorTargetGasEnabled` remain callable, but `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `disableStaticPricing`, `enableValidatorTargetGas`, `disableValidatorTargetGas`) revert.
+
+When `initialFeeConfig` is present, all three uint fields (`targetGas`, `minGasPrice`, `timeToDouble`) are **required**. This prevents silent misconfiguration from typos (e.g., a misspelled `"minGasprice"` would otherwise silently fall back to a default, potentially making the chain near-free to spam). Boolean mode flags (`staticPricing`, `validatorTargetGas`) default to `false` when omitted.
+
+The precompile configuration will look like the following:
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "adminAddresses": ["0x..."],
+    "managerAddresses": ["0x..."],
+    "enabledAddresses": ["0x..."],
+    "initialFeeConfig": {
+      "targetGas": 2000000,
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60,
+      "staticPricing": false,
+      "validatorTargetGas": true
+    }
+  }
+}
+```
+
+The `initialFeeConfig` fields are:
+
+- `targetGas` (uint64, **required**): Target gas consumption per second ($T$). When `validatorTargetGas` is `true`, this value is stored but **not used for block building** -- validators determine the gas target from the parent block's state. The stored value becomes relevant again when validator control is later disabled via `disableValidatorTargetGas(uint256 targetGas)`.
+- `minGasPrice` (uint64, **required**): Minimum gas price in wei ($M$). When `staticPricing` is `true`, this is the fixed gas price.
+- `timeToDouble` (uint64, **required**): Seconds for the gas price to double when the chain is at maximum capacity. Determines $K$ as described in [ACP-176 Parameters in Subnet-EVM](#acp-176-parameters-in-subnet-evm). Stored but has no effect when `staticPricing` is `true`.
+- `staticPricing` (bool, optional, default `false`): When `true`, the gas price is always `minGasPrice`, bypassing the ACP-176 dynamic fee mechanism entirely. The `timeToDouble` value is stored but inactive.
+- `validatorTargetGas` (bool, optional, default `false`): When `true`, validators control `targetGas` dynamically via their node preferences, using the same mechanism as the C-Chain (see [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference)). The stored `targetGas` value is not used for block building; validators always adjust from the parent block's `targetExcess`.
+
+#### Example Configurations
+
+**Custom fees, fully locked (read-only precompile, dynamic pricing):**
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "initialFeeConfig": {
+      "targetGas": 5000000,
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60
+    }
+  }
+}
+```
+
+No admin addresses means the precompile is read-only. All boolean flags default to `false`: dynamic pricing is active, and the precompile controls `targetGas`.
+
+**Validators control target gas, fee parameters locked:**
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "initialFeeConfig": {
+      "targetGas": 2000000,
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60,
+      "validatorTargetGas": true
+    }
+  }
+}
+```
+
+Read-only precompile. `targetGas` starts at 2,000,000 gas/second but validators adjust it dynamically via their node preferences. `minGasPrice` and `timeToDouble` are locked.
+
+**Static pricing, fully locked:**
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "initialFeeConfig": {
+      "targetGas": 15000000,
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60,
+      "staticPricing": true
+    }
+  }
+}
+```
+
+Gas price is always 25 gwei regardless of demand. `timeToDouble` is stored but inactive. `targetGas` still governs block gas capacity (15,000,000 gas/second).
+
+**Static pricing with validator-controlled target gas:**
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "initialFeeConfig": {
+      "targetGas": 5000000,
+      "minGasPrice": 1000000000,
+      "timeToDouble": 60,
+      "staticPricing": true,
+      "validatorTargetGas": true
+    }
+  }
+}
+```
+
+Flat 1 gwei gas price. Validators adjust throughput dynamically. Read-only precompile.
+
+**Admin controls pricing, validators control target gas:**
+
+```json
+{
+  "acp224FeeManagerConfig": {
+    "blockTimestamp": <activation_timestamp>,
+    "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"],
+    "initialFeeConfig": {
+      "targetGas": 2000000,
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60,
+      "validatorTargetGas": true
+    }
+  }
+}
+```
+
+Admin controls pricing parameters (`minGasPrice`, `timeToDouble`, `staticPricing`). Validators control target gas. Admin can call `disableValidatorTargetGas(uint256 targetGas)` to take back control of `targetGas`.
+
 
 #### Static Pricing Mode
 
