@@ -427,7 +427,7 @@ For continuity purposes, the `ACP224FeeManagerPrecompile` can be activated befor
 
 When the precompile is activated before Helicon:
 
-1. **Configuration calls are accepted**: Precompile's `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `enableValidatorTargetGas`, etc.) can be called to set desired fee parameters and modes. The values are stored in the precompile's state. If `initialFeeConfig` is provided at activation, its values are stored immediately.
+1. **Configuration calls are accepted**: Precompile's `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `enableValidatorTargetGas`, etc.) can be called to set desired fee parameters and modes. The values are stored in the precompile's state. If `initialFeeConfig` is provided at activation, its values are also stored.
 2. **Values are pending**: The stored fee configuration and mode flags do not affect the current fee mechanism. The existing `FeeManagerPrecompile` and legacy fee mechanism remain active and in control.
 3. **Activation applies stored values**: When Helicon activates, the stored fee configuration and mode flags immediately take effect. The legacy fee mechanism and `FeeManagerPrecompile` are deactivated at this point.
 
