@@ -87,7 +87,7 @@ As a result parameters will be set as follows:
 | $D$ | target gas consumption rate update constant | 2^25 | :x:
 | $Q$ | target gas consumption rate update factor change limit | 2^15 | :x:
 | $M$ | minimum gas price | 1 Wei | :white_check_mark:
-| $K$ | gas price update constant ($KMult \cdot T$) | ~87*T | :white_check_mark: Through `TimeToDouble` (default 60s), which sets $KMult = \frac{TimeToDouble}{ln(2)} \approx 87$
+| $K$ | gas price update constant ($KMult \cdot T$) | ~87*T | :white_check_mark: Through `TimeToDouble` (default 60s equivalent to $KMult \approx 87$)$
 
 The gas capacity added per second (`R`) always being equal to `2*T` keeps it such that the gas price is capable of increase and decrease at the same rate. The values of `Q` and `D` affect the magnitude of change to `T` that each block can have, and the granularity at which the target gas consumption rate can be updated. The proposed values match the C-Chain, allowing each block to modify the current gas target by roughly $\frac{1}{1024}$ of its current value. This has provided sufficient responsiveness and granularity as is, removing the need to make `D` and `Q` dynamic or configurable. Similarly, 1,000,000 gas/second should be a low enough minimum target gas consumption for any EVM L1. The target gas for a given L1 will be able to be increased from this value dynamically and has no maximum.
 
@@ -208,6 +208,19 @@ interface IACP224FeeManager is IAllowList {
 ```
 
 For chains with the precompile activated, `setFeeConfig` can be used to dynamically change each of the values in the fee configuration. Importantly, any updates made via calls to `setFeeConfig` or mode toggle functions in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
+
+#### Static Pricing Mode
+
+When static pricing is enabled (via `enableStaticPricing()` or `staticPricing: true` in `initialFeeConfig`), the gas price is always equal to `minGasPrice`. The ACP-176 dynamic fee mechanism is bypassed and there is no exponential price adjustment. The `timeToDouble` value is stored but inactive.
+
+#### Validator Target Gas Mode
+
+When validator target gas is enabled (via `enableValidatorTargetGas()` or `validatorTargetGas: true` in `initialFeeConfig`), validators control the gas target dynamically as described in [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference). While validator target gas is enabled, calling `setFeeConfig` updates the stored `targetGas` value but has no effect on block building.
+
+**Toggling behavior:**
+
+- **Enabling** (`enableValidatorTargetGas()`): Validators begin adjusting `targetExcess` from the parent block's current value. Since ACP-176's bounded update mechanism limits changes to roughly $\frac{1}{1024}$ of the current value per block, the transition is always gradual. No parameter is needed because the parent block's `targetExcess` (which was set by the precompile) provides an unambiguous starting point.
+- **Disabling** (`disableValidatorTargetGas(uint256 targetGas)`): The provided `targetGas` value is stored and immediately becomes authoritative for block building. The `targetGas` parameter is required because validators may have drifted the effective gas target far from the precompile's previously stored value, and using a stale stored value could cause a dangerous sudden jump in gas capacity. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate value.
 
 #### Initial Fee Configuration
 
@@ -338,20 +351,6 @@ Flat 1 gwei gas price. Validators adjust throughput dynamically. Read-only preco
 
 Admin controls pricing parameters (`minGasPrice`, `timeToDouble`, `staticPricing`). Validators control target gas. Admin can call `disableValidatorTargetGas(uint256 targetGas)` to take back control of `targetGas`.
 
-
-#### Static Pricing Mode
-
-When static pricing is enabled (via `enableStaticPricing()` or `staticPricing: true` in `initialFeeConfig`), the gas price is always equal to `minGasPrice`. The ACP-176 dynamic fee mechanism is bypassed and there is no exponential price adjustment. The `timeToDouble` value is stored but inactive.
-
-#### Validator Target Gas Mode
-
-When validator target gas is enabled (via `enableValidatorTargetGas()` or `validatorTargetGas: true` in `initialFeeConfig`), validators control the gas target dynamically as described in [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference). While validator target gas is enabled, calling `setFeeConfig` updates the stored `targetGas` value but has no effect on block building.
-
-**Toggling behavior:**
-
-- **Enabling** (`enableValidatorTargetGas()`): Validators begin adjusting `targetExcess` from the parent block's current value. Since ACP-176's bounded update mechanism limits changes to roughly $\frac{1}{1024}$ of the current value per block, the transition is always gradual. No parameter is needed because the parent block's `targetExcess` (which was set by the precompile) provides an unambiguous starting point.
-- **Disabling** (`disableValidatorTargetGas(uint256 targetGas)`): The provided `targetGas` value is stored and immediately becomes authoritative for block building. The `targetGas` parameter is required because validators may have drifted the effective gas target far from the precompile's previously stored value, and using a stale stored value could cause a dangerous sudden jump in gas capacity. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate value.
-
 #### Internal State
 
 In addition to storing the latest fee configuration to be returned by `getFeeConfig`, the precompile will also maintain state storing the latest values of $q$ (the target excess) and $KMult$. These values can be derived from the `targetGas` and `timeToDouble` values given to the precompile, respectively. The value of $q$ can be deterministically calculated using the same method as Coreth currently employs to calculate a node's desired target excess [here](https://github.com/ava-labs/coreth/blob/b4c8300490afb7f234df704fdcc446f227e4ec2f/plugin/evm/upgrade/acp176/acp176.go#L170). Similarly, $KMult$ is approximated directly from `timeToDouble` according to:
@@ -363,9 +362,9 @@ The resulting ACP-176 gas price update constant is then $K = KMult \cdot T$. Not
 
 Similar to the [desired target excess calculation in Coreth](https://github.com/ava-labs/coreth/blob/0255516f25964cf4a15668946f28b12935a50e0c/plugin/evm/upgrade/acp176/acp176.go#L170), which takes a node's desired gas target and calculates its desired target excess value, the `ACP224FeeManagerPrecompile` will use binary search to determine the resulting dynamic target excess value given the `targetGas` value passed to `setFeeConfig`. All blocks accepted after the settlement of such a call must have the correct target excess value as derived from the binary search result.
 
-#### Block Building Logic
+#### Configuration Precedence
 
-Block building logic can follow the below diagram for determining the target excess of blocks and the gas price.
+Configuration precedence is as follows:
 
 ```mermaid
 flowchart TD
