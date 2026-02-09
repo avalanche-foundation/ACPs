@@ -110,7 +110,7 @@ For L1s that want their gas target to be dynamically adjusted based on the prefe
 
 Validator target gas preferences are active in the following cases:
 
-1. **Precompile not activated**: When the `ACP224FeeManagerPrecompile` is not activated at all, validators control `targetGas` by default using the ACP-176 mechanism with C-Chain default parameters.
+1. **Precompile not activated**: When the `ACP224FeeManagerPrecompile` is not activated at all, validators can control `targetGas` by using the `gas-target` preference in their node's configuration. If a validator does not set a `gas-target` preference, the parent block's gas target is maintained.
 2. **`validatorTargetGas` enabled**: When the precompile is activated and `validatorTargetGas` is set to `true` (either via `initialFeeConfig` or by an admin calling `enableValidatorTargetGas()`), the precompile's stored `targetGas` is **not used for block building**. Validators adjust `targetExcess` from the parent block's current value within ACP-176's bounded update limits. If a validator does not set a `gas-target` preference, the parent block's gas target is maintained.
 
 When `validatorTargetGas` is `false` (the default), the precompile's stored `targetGas` value is authoritative and validator preferences for gas target are ignored.
