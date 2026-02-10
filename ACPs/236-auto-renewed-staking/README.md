@@ -1,13 +1,13 @@
 | ACP | 236 |
 |:--------------|:------------------------------------------------------------|
-| **Title** | Continuous Staking |
+| **Title** | Auto-Renewed Staking |
 | **Author(s)** | Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1)) |
 | **Status** | Proposed  ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/244)) |
 | **Track** | Standards |
 
 ## Abstract
 
-This proposal introduces continuous staking for validators on the Avalanche P-Chain. Validators can stake their tokens continuously, allowing their stake to compound over time, accruing rewards once per specified cycle.
+This proposal introduces auto-renewed staking for validators on the Avalanche P-Chain. Validators can auto-renew their staking position automatically, allowing their stake to compound over time, accruing rewards once per specified cycle.
 Note that this mechanism applies only to primary network validation. It does not apply to L1 validators or to legacy subnet validators.
 
 ## Motivation
@@ -16,7 +16,7 @@ The current staking system on the Avalanche P-Chain restricts flexibility for st
 
 ## Specification
 
-Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually submit new staking transactions at the end of each period.
+Auto-renewed staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually renew staking transactions at the end of each period.
 
 Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-restake config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
@@ -32,17 +32,17 @@ If the updated stake weight (previous stake + staking rewards + delegation commi
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
-Continuous validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-restaking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
+Validators which offer auto-renewed staking follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-renewed staking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
 
 Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
 
-### Auto-Restake Config
+### Auto-Renewed Staking Config
 
-The `Owner` field defines who is authorized to modify the validator's auto-restake config.
+The `Owner` field defines who is authorized to modify the validator's auto-renewed staking config.
 
-The auto-restake config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
+The auto-renewed staking config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
 
-At creation, validators set the auto-restake config: `AutoRestakeShares` and `Period`.
+At creation, validators set the auto-renewed staking config: `AutoRestakeShares` and `Period`.
 
 `AutoRestakeShares` specifies, in millionths (percentage * 10_000), what portion of earned rewards should be automatically restaked at the end of each cycle. The remaining portion of the rewards will be withdrawn.
 For example, a value of 300,000, restakes 30% of the rewards and withdraws 70%.
@@ -141,7 +141,7 @@ type RewardContinuousValidatorTx struct {
 
 ### UTXO Creation
 
-Continuous staking creates UTXOs across different transactions depending on the withdrawal reason:
+Auto-renewed staking creates UTXOs across different transactions depending on the withdrawal reason:
 
 Attached to `AddContinuousValidatorTx`:
 - Initial stake (returned when validator stops)
@@ -157,13 +157,13 @@ This change requires a network upgrade to make sure that all validators are able
 
 ## Considerations
 
-Continuous staking makes it easier for users to keep their funds staked longer than with fixed-period staking, since it involves fewer transactions, lower friction, and reduced risks. Greater staking participation leads to stronger overall network security.
+Auto-renewed staking makes it easier for users to keep their funds staked longer than with fixed-period staking, since it involves fewer transactions, lower friction, and reduced risks. Greater staking participation leads to stronger overall network security.
 
 Validators benefit by not having to manually restart at the end of each cycle, which reduces transaction volume and the risk of network congestion.
 
 However, the uptime risk per cycle slightly increases depending on cycle length and validator performance. For example, missing five days in a one-year cycle will still yield validation rewards, whereas missing five days in a two-week cycle may affect rewards.
 
-## Flow of a Continuous Validator
+## Flow of a Validator offering Auto-Renewed Staking
 ```mermaid
 flowchart TD
   A[Issue AddContinuousValidatorTx] --> B[Validator active]
