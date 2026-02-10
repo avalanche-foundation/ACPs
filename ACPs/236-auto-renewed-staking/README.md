@@ -7,7 +7,7 @@
 
 ## Abstract
 
-This proposal introduces auto-renewed staking for validators on the Avalanche P-Chain. Validators can auto-renew their staking position automatically, allowing their stake to compound over time, accruing rewards once per specified cycle.
+This proposal introduces auto-renewed staking for validators on the Avalanche P-Chain. Validators can renew their staking position automatically, allowing their stake to compound over time, accruing rewards once per specified cycle.
 Note that this mechanism applies only to primary network validation. It does not apply to L1 validators or to legacy subnet validators.
 
 ## Motivation
