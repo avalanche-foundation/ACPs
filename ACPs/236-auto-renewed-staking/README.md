@@ -32,7 +32,7 @@ If the updated stake weight (previous stake + staking rewards + delegation commi
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
-Validators which offer auto-renewed staking follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-renewed staking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
+Auto-renewed validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-renewed staking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
 
 Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
 
