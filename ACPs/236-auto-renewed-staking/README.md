@@ -163,7 +163,7 @@ Validators benefit by not having to manually restart at the end of each cycle, w
 
 However, the uptime risk per cycle slightly increases depending on cycle length and validator performance. For example, missing five days in a one-year cycle will still yield validation rewards, whereas missing five days in a two-week cycle may affect rewards.
 
-## Flow of a Validator offering Auto-Renewed Staking
+## Flow of a Validator with Auto-Renewing
 ```mermaid
 flowchart TD
   A[Issue AddContinuousValidatorTx] --> B[Validator active]
