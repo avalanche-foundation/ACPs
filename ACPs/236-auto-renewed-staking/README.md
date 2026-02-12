@@ -18,31 +18,31 @@ The current staking system on the Avalanche P-Chain restricts flexibility for st
 
 Auto-renewed staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually renew staking transactions at the end of each period.
 
-Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-restake config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddAutoRenewedValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-renew config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
 Note: On mainnet, the current configuration is: `MinStakeDuration = 14 days` and `MaxStakeDuration = 365 days`.
 
 Clarification: In the rewards formula, `StakingPeriod` is the cycle’s duration, not the total accumulated time across cycles. Each cycle is treated separately when computing rewards.
 
-Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
+Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate with auto-renewal.
 
 Rewards are accrued once per cycle and are managed according to the `AutoRestakeShares` value: the specified portion is restaked and the remainder withdrawn. Auto-restaking only occurs if the validator is eligible for rewards for that cycle. If the validator is not reward-eligible for the cycle, the validator is forced to exit at the end of the cycle and staked funds are unlocked, and accrued rewards are withdrawn.
 
 If the updated stake weight (previous stake + staking rewards + delegation commission rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
-Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
+Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping auto-renewed validators: `RewardAutoRenewedValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
 Auto-renewed validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-renewed staking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
 
-Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
+Note: Submitting an `AddAutoRenewedValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
 
-### Auto-Renewed Staking Config
+### Auto-Renew Config
 
-The `Owner` field defines who is authorized to modify the validator's auto-renewed staking config.
+The `Owner` field defines who is authorized to modify the validator's auto-renew config.
 
-The auto-renewed staking config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
+The auto-renew config defines the validator's end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
 
-At creation, validators set the auto-renewed staking config: `AutoRestakeShares` and `Period`.
+At creation, validators set the auto-renew config: `AutoRestakeShares` and `Period`.
 
 `AutoRestakeShares` specifies, in millionths (percentage * 10_000), what portion of earned rewards should be automatically restaked at the end of each cycle. The remaining portion of the rewards will be withdrawn.
 For example, a value of 300,000, restakes 30% of the rewards and withdraws 70%.
@@ -55,11 +55,11 @@ Stopping is requested by setting the next cycle’s `Period` to `0` via `SetAuto
 
 The following new transaction types will be introduced to the P-Chain to support this functionality:
 
-#### AddContinuousValidatorTx
+#### AddAutoRenewedValidatorTx
 
 ```golang
-type AddContinuousValidatorTx struct {
-  // Metadata, inputs and outputs
+type AddAutoRenewedValidatorTx struct {
+  // Metadata, inputs and outputsa
   BaseTx `serialize:"true"`
   
   // Node ID of the validator
@@ -77,7 +77,7 @@ type AddContinuousValidatorTx struct {
   // Where to send delegation rewards when done validating
   DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
 
-  // Who is authorized to modify the auto-restake config
+  // Who is authorized to modify the auto-renew config
   Owner fx.Owner `serialize:"true" json:"owner"`
   
   // Fee this validator charges delegators as a percentage, times 10,000
@@ -108,7 +108,7 @@ type SetAutoRestakeConfigTx struct {
   // Metadata, inputs and outputs
   BaseTx `serialize:"true"`
   
-  // ID of the tx that created the continuous validator.
+  // ID of the tx that created the auto-renewed validator.
   TxID ids.ID `serialize:"true" json:"txID"`
 
   // Authorizes this validator to be updated.
@@ -126,10 +126,10 @@ type SetAutoRestakeConfigTx struct {
 }
 ```
 
-#### RewardContinuousValidatorTx
+#### RewardAutoRenewedValidatorTx
 
 ```golang
-type RewardContinuousValidatorTx struct {
+type RewardAutoRenewedValidatorTx struct {
   // ID of the tx that created the validator being removed/rewarded
   TxID ids.ID `serialize:"true" json:"txID"`
   
@@ -143,10 +143,10 @@ type RewardContinuousValidatorTx struct {
 
 Auto-renewed staking creates UTXOs across different transactions depending on the withdrawal reason:
 
-Attached to `AddContinuousValidatorTx`:
+Attached to `AddAutoRenewedValidatorTx`:
 - Initial stake (returned when validator stops)
 
-Attached to `RewardContinuousValidatorTx`:
+Attached to `RewardAutoRenewedValidatorTx`:
 - Validation/delegatee rewards withdrawn based on `AutoRestakeShares`
 - Excess rewards withdrawn when restaking would exceed `MaxValidatorStake`
 - Accrued validation/delegatee rewards when validator stops (gracefully or forced)
@@ -166,12 +166,12 @@ However, the uptime risk per cycle slightly increases depending on cycle length 
 ## Flow of a Validator with Auto-Renewing
 ```mermaid
 flowchart TD
-  A[Issue AddContinuousValidatorTx] --> B[Validator active]
+  A[Issue AddAutoRenewedValidatorTx] --> B[Validator active]
 
-  B -->|Optional during cycle| C[Issue SetAutoRestakeConfigTx to update auto-restake config or request stop]
+  B -->|Optional during cycle| C[Issue SetAutoRestakeConfigTx to update auto-renew config or request stop]
 
   B --> D[Cycle end reached]
-  D --> E[Block builder issues RewardContinuousValidatorTx]
+  D --> E[Block builder issues RewardAutoRenewedValidatorTx]
   E --> F[Evaluate uptime and compute cycle rewards]
   F --> G{Stop requested?}
 
@@ -180,7 +180,7 @@ flowchart TD
 
   G -->|No| J{Eligible for rewards?}
   J -->|No| H
-  J -->|Yes| K[Apply auto-restake config and split rewards into restake/withdrawal]
+  J -->|Yes| K[Apply auto-renew config and split rewards into restake/withdrawal]
   K --> L{New stake exceeds MaxStakeLimit?}
   L -->|Yes| M[Withdraw excess above MaxStakeLimit]
   L -->|No| N[Start new cycle]
