@@ -1,13 +1,13 @@
 | ACP | 247 |
 | :--- | :--- |
-| **Title** | Delegation Multiplier Increase & Maximum Validator Weight Reduction |
+| **Title** | Delegation Multiplier Increase |
 | **Authors** | Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)), BENQI ([@benqifinance](https://x.com/benqifinance)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/248)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/248)) |
 | **Track** | Standards |
 
 ## Abstract
 
-This Avalanche Community Proposal advocates for two targeted adjustments to Primary Network validator staking parameters: (1) reducing the maximum validator weight from 3,000,000 AVAX to **1,000,000 AVAX** to prevent excessive stake concentration; and (2) increasing the delegation multiplier from 5x to **24x** to enable validators to efficiently serve larger delegated bases within the new weight constraint. These changes maintain the 2,000 AVAX minimum validator stake and focus on improving capital efficiency for existing, well-capitalized validators rather than broadening participation.
+This Avalanche Community Proposal advocates for one targeted adjustment to Primary Network validator staking parameters: increasing the delegation multiplier from 5x to **24x** to enable validators to efficiently serve larger delegated bases within the new weight constraint. These changes maintain the 2,000 AVAX minimum validator stake and focus on improving capital efficiency for existing, well-capitalized validators rather than broadening participation.
 
 ## Motivation
 
@@ -61,17 +61,10 @@ Real validator distribution data (as of October 28, 2025) provides empirical evi
 - They cannot attract delegations at current economics
 - Our profitability calculations ($180/month) match their behavior
 
-### Maximum Validator Weight Centralization Risk
-
-The current 3,000,000 AVAX maximum weight limit allows individual validators to accumulate excessive stake (0.42% of 720M AVAX total supply).
-
-**Proposed 1,000,000 AVAX cap would reduce this to 0.14% per validator**, promoting more distribution in both self- and delegated stake.
-
 ### Proposed Solution
 
 Implement two complementary changes:
 
-1. **Reduce maximum validator weight to 1,000,000 AVAX** - Prevents dangerous concentration
 2. **Increase delegation multiplier to 24x** - Increases the maximum _potential_ rewards that validators could receive from delegations, not changing any of the underlying incentives of delegation if not flipping the perception of maximum rewards for validators on Avalanche.
 
 **Resulting Economics at 24x Multiplier** (at $20 AVAX, 2,000 AVAX self-stake, 8.25% APY, 5% delegation fee):
@@ -95,29 +88,6 @@ This transformation:
 
 ### Technical Changes
 
-#### Change 1: Maximum Validator Weight Reduction
-
-**Current Parameter**:
-```
-MaxValidatorStake = 3,000,000 AVAX
-```
-
-**Proposed Parameter**:
-```
-MaxValidatorStake = 1,000,000 AVAX
-```
-
-**Implementation Details**:
-- Affects calculation of maximum validator weight (stake + delegations)
-- Existing validators exceeding 1,000,000 AVAX weight are **not immediately affected**
-- New delegations to validators at or above 1,000,000 AVAX total weight are **rejected by consensus**
-- Validators already exceeding 1,000,000 AVAX continue earning rewards until staking period ends
-- Upon period end, rewards paid and stake returned; new staking cannot exceed 1,000,000 AVAX
-
-**Rationale**: Prevents single validators from accumulating excessive network influence while allowing existing large positions to mature naturally.
-
-#### Change 2: Delegation Multiplier Increase
-
 **Current Parameter**:
 ```
 DelegationMultiplier = 4
@@ -133,14 +103,14 @@ DelegationMultiplier = 24
 MaxDelegatorStake(validator) = Min(ValidatorStake * 24, MaxValidatorWeight - ValidatorStake)
 
 Example for 2,000 AVAX validator:
-MaxDelegatorStake = Min(2,000 * 24, 1,000,000 - 2,000)
+MaxDelegatorStake = Min(2,000 * 24, 3,000,000 - 2,000)
 MaxDelegatorStake = Min(48,000, 998,000)
 MaxDelegatorStake = 48,000 AVAX
 ```
 
 **Implementation Details**:
 - Applies uniformly to all validators
-- Only validators with 40,000+ AVAX self-stake cannot utilize full 24x due to 1M weight cap
+- Only validators with 120,000+ AVAX self-stake cannot utilize full 24x due to 3M weight cap
 - All 2,000 AVAX validators can deploy full 24x multiplier
 - Non-breaking for existing delegation relationships
 
@@ -267,11 +237,6 @@ The 24x multiplier change has **minimal impact** on P-Chain resources:
 - 2,000 AVAX minimum stake maintained
 - Economic cost to create malicious validator unchanged
 
-**Centralization Risk**: **Improved**
-- 1M AVAX maximum weight reduces concentration
-- Individual validators limited to 0.14% of maximum supply (vs 0.42% current)
-- Prevents dangerous mega-validators
-
 ## Consequences Analysis
 
 ### Positive Consequences
@@ -299,13 +264,7 @@ The 24x multiplier change has **minimal impact** on P-Chain resources:
 - Delegators benefit from stable, profitable validators
 - Competitive fee discovery enabled
 
-**5. Prevents Dangerous Centralization** (Very High probability, High severity)
-- 1M AVAX cap prevents mega-validators
-- Individual validator influence limited to 0.14% (vs 0.42% current)
-- Maintains security through diversification
-- Real data confirms no validators exceed 2.5% currently
-
-**6. Minimal Network Disruption** (Very High probability, Medium severity)
+**5. Minimal Network Disruption** (Very High probability, Medium severity)
 - No new validator cohort entering (no min stake change)
 - Validator count unchanged (~854)
 - P-Chain load impact minimal
@@ -313,14 +272,7 @@ The 24x multiplier change has **minimal impact** on P-Chain resources:
 
 ### Negative Consequences
 
-**1. Delegation Concentration Risk Increases** (High probability, Medium severity)
-- Larger multiplier enables validators to accumulate more delegations
-- Top performers may attract disproportionate share
-- Network vulnerable to large validator failures
-
-**Mitigation**: 1M AVAX weight cap prevents validators from becoming too large. Current 2.5% max means risk is contained.
-
-**2. Geographic Diversity Unchanged** (High probability, Low severity)
+**1. Geographic Diversity Unchanged** (High probability, Low severity)
 - Entry barrier remains $40,000 (unchanged)
 - Validator count unlikely to increase (~854 baseline)
 - Cloud provider concentration persists
@@ -353,23 +305,6 @@ This proposal maintains full backwards compatibility:
 4. **Staking Durations**: All parameters unchanged
 5. **Uptime Requirements**: 80% threshold unchanged
 
-### Transition Mechanism
-
-**Phase 1 - Activation**:
-- New parameters take effect at specified block height
-- Existing validators with weight > 1M AVAX continue operating
-- New delegations to validators > 1M AVAX weight are rejected
-
-**Phase 2 - Maturation**:
-- Existing large validators' delegations mature naturally
-- Upon maturation, new stakes must comply with 1M AVAX cap
-- Validators rebalance to optimize under new parameters
-
-**Phase 3 - Equilibrium**:
-- Network reaches new steady state
-- Validators optimize delegation capacity within constraints
-- Fee market establishes new equilibrium
-
 ## Open Questions
 
 **Core Question**: "Should Avalanche prioritize validator capital efficiency through multiplier increase and weight cap reduction?"
@@ -377,8 +312,7 @@ This proposal maintains full backwards compatibility:
 **Supporting Questions**:
 
 1. Is 24x multiplier appropriate?
-2. Is 1M AVAX the right weight cap?
-3. Should minimum stake remain at 2,000 AVAX?
+2. Should minimum stake remain at 2,000 AVAX?
    - YES: Maintain current barrier (approved)
    - NO: Lower it (pursue separate ACP)
 

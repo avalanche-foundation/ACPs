@@ -2,7 +2,7 @@
 | :----------- | :-------------------------------------------------------------------------------------------------------------------------- |
 | Title        | Validator Manager Solidity Standard                                                                                         |
 | Author(s)    | Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon)), Cam Schultz ([@cam-schultz](https://github.com/cam-schultz)) |
-| Status       | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/165))                                       |
+| Status       | Activated                                                                                                                   |
 | Track        | Best Practices                                                                                                              |
 | Dependencies | [ACP-77](../77-reinventing-subnets/README.md)                                                                               |
 
@@ -226,7 +226,7 @@ function completeValidatorWeightUpdate(uint32 messageIndex)
     returns (bytes32 validationID, uint64 nonce);
 ```
 
->Note: While `getValidator` provides a way to fetch a `Validator` based on its `validationID`, no method that returns all active validators is specified. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
+> Note: While `getValidator` provides a way to fetch a `Validator` based on its `validationID`, no method that returns all active validators is specified. This is because a `mapping` is a reasonable way to store active validators internally, and Solidity `mapping`s are not iterable. This can be worked around by storing additional indexing metadata in the contract, but not all applications may wish to incur that added complexity.
 
 #### Private Methods
 

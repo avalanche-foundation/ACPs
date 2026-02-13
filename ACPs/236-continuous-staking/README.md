@@ -18,7 +18,7 @@ The current staking system on the Avalanche P-Chain restricts flexibility for st
 
 Continuous staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually submit new staking transactions at the end of each period.
 
-Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRenewRewardsShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle of the same duration, unless the validator submits a `SetAutoRenewPolicyTx` with `AutoRenewRewardsShares` set to the sentinel value `MaxUint64`. If a validator submits such a `SetAutoRenewPolicyTx` during a cycle, the validator will continue validating until the end of the current cycle, at which point the validator exits and the funds are unlocked. Both `AddContinuousValidatorTx` and `SetAutoRenewPolicyTx` include the `AutoRenewRewardsShares` field, which controls the automatic restaking or withdrawal behavior of the rewards at the end of each cycle. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoRestakeShares` value when they submit an `AddContinuousValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-restake config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
 Note: On mainnet, the current configuration is: `MinStakeDuration = 14 days` and `MaxStakeDuration = 365 days`.
 
@@ -26,22 +26,30 @@ Clarification: In the rewards formula, `StakingPeriod` is the cycle’s duration
 
 Delegator interaction remains unchanged, and the same constraints apply: a delegation period must fit entirely within the validator’s cycle. Delegators cannot delegate across multiple cycles, since there is no guarantee that a validator will continue validating after the current cycle. Essentially, it is not possible to delegate continuously.
 
-Rewards are accrued once per cycle and are managed according to the `AutoRenewRewardsShares` value: the specified portion is restaked and the remainder withdrawn. If the updated stake weight (previous stake + staking rewards + delegatee rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
+Rewards are accrued once per cycle and are managed according to the `AutoRestakeShares` value: the specified portion is restaked and the remainder withdrawn. Auto-restaking only occurs if the validator is eligible for rewards for that cycle. If the validator is not reward-eligible for the cycle, the validator is forced to exit at the end of the cycle and staked funds are unlocked, and accrued rewards are withdrawn.
+
+If the updated stake weight (previous stake + staking rewards + delegation commission rewards) exceeds `MaxStakeLimit`, only the excess above `MaxStakeLimit` is withdrawn and distributed to `ValidatorRewardsOwner` and `DelegatorRewardsOwner`.
 
 Because of the way `RewardValidatorTx` is structured, multiple instances cannot be issued without resulting in identical transaction IDs. To resolve this, a new transaction type has been introduced for both rewarding and stopping continuous validators: `RewardContinuousValidatorTx`. Along with the validator’s creation transaction ID, it also includes a timestamp.
 
-Continuous validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. When a new cycle begins, uptime tracking resets and starts again for the next period.
+Continuous validators follow the existing uptime requirements. The main difference is that uptime is measured separately for each cycle. At the end of every cycle, the validator’s uptime during that specific period is evaluated to determine eligibility for rewards. Auto-restaking is conditioned on reward eligibility. When a new cycle begins, uptime tracking resets and starts again for the next period.
 
-Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRenewPolicyTx` (with `AutoRenewRewardsShares = MaxUint32`) replicates the behavior of the current staking system.
+Note: Submitting an `AddContinuousValidatorTx` immediately followed by a `SetAutoRestakeConfigTx` that sets the next period to `0` replicates the behavior of the current fixed-period staking system (stake for a single cycle, then gracefully exit).
 
-### Auto-Renew Policy
+### Auto-Restake Config
 
-The `PolicyOwner` field defines who is authorized to modify the validator's auto-renew policy. Only those specified as the `PolicyOwner` can update the auto-renew policy or signal the validator to exit at the end of a cycle.
+The `Owner` field defines who is authorized to modify the validator's auto-restake config.
 
-To support flexible reward withdrawal while keeping UX simple, continuous validators include an auto-renew policy field at creation called `AutoRenewRewardsShares`. This value specifies, in millionths (percentage * 10_000), what portion of earned rewards should be automatically restaked at the end of each cycle. The remaining portion of the rewards will be withdrawn.
-Using a sentinel value of `MaxUint64` signals that the validator should exit at the end of the current cycle.
+The auto-restake config defines the validator’s end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
 
+At creation, validators set the auto-restake config: `AutoRestakeShares` and `Period`.
+
+`AutoRestakeShares` specifies, in millionths (percentage * 10_000), what portion of earned rewards should be automatically restaked at the end of each cycle. The remaining portion of the rewards will be withdrawn.
 For example, a value of 300,000, restakes 30% of the rewards and withdraws 70%.
+
+`Period` defines the duration of the next validation cycle and can be updated during a cycle with changes taking effect at cycle end.
+
+Stopping is requested by setting the next cycle’s `Period` to `0` via `SetAutoRestakeConfigTx`.
 
 ### New P-Chain Transaction Types
 
@@ -57,9 +65,6 @@ type AddContinuousValidatorTx struct {
   // Node ID of the validator
   ValidatorNodeID ids.NodeID `serialize:"true" json:"nodeID"`
   
-  // Period (in seconds).
-  Period uint64 `serialize:"true" json:"period"`
-  
   // [Signer] is the BLS key for this validator.
   Signer signer.Signer `serialize:"true" json:"signer"`
   
@@ -72,8 +77,8 @@ type AddContinuousValidatorTx struct {
   // Where to send delegation rewards when done validating
   DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
 
-  // Who is authorized to modify the auto renew rewards shares
-  PolicyOwner fx.Owner `serialize:"true" json:"policyOwner"`
+  // Who is authorized to modify the auto-restake config
+  Owner fx.Owner `serialize:"true" json:"owner"`
   
   // Fee this validator charges delegators as a percentage, times 10,000
   // For example, if this validator has DelegationShares=300,000 then they
@@ -83,21 +88,23 @@ type AddContinuousValidatorTx struct {
   // Weight of this validator used when sampling
   Wght uint64 `serialize:"true" json:"weight"`
 
-  // Auto-renew policy for rewards, expressed in percentage, times 10,000.
-  // Range [0..1_000_000] means the percentage of cycle rewards to auto-restake:
+  // Percentage of rewards to auto-restake at the end of each cycle, expressed in millionths (percentage * 10,000).
+  // Range [0..1_000_000]:
   //   0         = restake principal only; withdraw 100% of rewards 
   //   300_000   = restake 30% of rewards; withdraw 70%
   //   1_000_000 = restake 100% of rewards; withdraw 0%
-  // Sentinel value MaxUint64 indicates "stop at the end of current cycle".
-  AutoRenewRewardsShares uint32 `serialize:"true" json:"autoRenewRewardsShares"`
+  AutoRestakeShares uint32 `serialize:"true" json:"autoRestakeShares"`
+
+  // Period is the validation cycle duration, in seconds.
+  Period uint64 `serialize:"true" json:"period"`
 }
 
 ```
 
-#### SetAutoRenewPolicyTx
+#### SetAutoRestakeConfigTx
 
 ```golang
-type SetAutoRenewPolicyTx struct {
+type SetAutoRestakeConfigTx struct {
   // Metadata, inputs and outputs
   BaseTx `serialize:"true"`
   
@@ -107,13 +114,15 @@ type SetAutoRenewPolicyTx struct {
   // Authorizes this validator to be updated.
   Auth verify.Verifiable `serialize:"true" json:"auth"`
 
-  // Auto-renew policy for rewards, expressed in percentage, times 10,000.
-  // Range [0..1_000_000] means the percentage of cycle rewards to auto-restake:
-  //   0         = restake principal only; withdraw 100% of rewards 
+  // Auto-restake shares, expressed in percentage, times 10,000.
+  //   0         = restake principal only; withdraw 100% of rewards
   //   300_000   = restake 30% of rewards; withdraw 70%
   //   1_000_000 = restake 100% of rewards; withdraw 0%
-  // Sentinel value MaxUint64 indicates "stop at the end of current cycle".
-  AutoRenewRewardsShares uint32 `serialize:"true" json:"autoRenewRewardsShares"`
+  AutoRestakeShares uint32 `serialize:"true" json:"autoRestakeShares"`
+
+  // Period for the next cycle (in seconds). Takes effect at cycle end.
+  // If 0, stop at the end of the current cycle and unlock funds.
+  Period uint64 `serialize:"true" json:"period"`
 }
 ```
 
@@ -126,11 +135,21 @@ type RewardContinuousValidatorTx struct {
   
   // End time of the validation cycle.
   Timestamp uint64 `serialize:"true" json:"timestamp"`
-  
-  unsignedBytes []byte // Unsigned byte representation of this data
 }
 
 ```
+
+### UTXO Creation
+
+Continuous staking creates UTXOs across different transactions depending on the withdrawal reason:
+
+Attached to `AddContinuousValidatorTx`:
+- Initial stake (returned when validator stops)
+
+Attached to `RewardContinuousValidatorTx`:
+- Validation/delegatee rewards withdrawn based on `AutoRestakeShares`
+- Excess rewards withdrawn when restaking would exceed `MaxValidatorStake`
+- Accrued validation/delegatee rewards when validator stops (gracefully or forced)
 
 ## Backwards Compatibility
 
@@ -149,23 +168,26 @@ However, the uptime risk per cycle slightly increases depending on cycle length 
 flowchart TD
   A[Issue AddContinuousValidatorTx] --> B[Validator active]
 
-  B -->|Optional during cycle| C[Issue SetAutoRenewPolicyTx to update AutoRenewRewardsShares or request stop]
+  B -->|Optional during cycle| C[Issue SetAutoRestakeConfigTx to update auto-restake config or request stop]
 
-  B --> D[Cycle endtime reached]
+  B --> D[Cycle end reached]
   D --> E[Block builder issues RewardContinuousValidatorTx]
-  E --> F[Compute cycle rewards]
+  E --> F[Evaluate uptime and compute cycle rewards]
   F --> G{Stop requested?}
 
   G -->|Yes| H[Withdraw rewards and unlock principal]
   H --> I[Validator exits]
 
-  G -->|No| J[Apply auto-renew policy and split rewards into restake and withdrawal]
-  J --> K{New stake exceeds MaxStakeLimit?}
-  K -->|Yes| L[Withdraw excess above MaxStakeLimit]
-  K -->|No| N[Start new cycle]
-  L --> N[Start new cycle]
+  G -->|No| J{Eligible for rewards?}
+  J -->|No| H
+  J -->|Yes| K[Apply auto-restake config and split rewards into restake/withdrawal]
+  K --> L{New stake exceeds MaxStakeLimit?}
+  L -->|Yes| M[Withdraw excess above MaxStakeLimit]
+  L -->|No| N[Start new cycle]
+  M --> N[Start new cycle]
   N --> B
 ```
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
