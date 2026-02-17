@@ -61,6 +61,10 @@ The change is non-breaking: all existing validation infrastructure, reward mecha
 
 ## Security Considerations
 
+Shorter staking periods increase the likelihood of significant validator churn over a short period of time. This may impact Primary Network consensus safety and the reliability of Interchain Message delivery, which is required for L1 validator operations. This risk may impact the eventual implementation details of this ACP.
+
+Additionally, if the incentive to stake for longer than 24 hours is insufficient, the vast majority of stake may opt for the minimum 24-hour duration (particularly likely with the addition of [ACP-236](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/236-auto-renewed-staking/README.md), which introduces auto-renewed staking). In this scenario, essentially all entities securing the network could change completely within 24 hours. The entire validator set could disappear, or a low-stake-weight validator could become a high-stake-weight validator within a single day (i.e. a validator could go from 1% network stake to 20% network stake in just a few hours). This instability poses a real cost in terms of network security and should be weighed against the benefits of shorter staking periods.
+
 Validators remain subject to the same accountability standards during the 24-hour period. Network consensus sampling assumes the same validator availability model. Historical data demonstrates that validator uptime patterns remain consistent regardless of staking duration length, as infrastructure quality and operational commitment drive uptime, not duration requirements alone.
 
 ## Open Questions
@@ -70,6 +74,8 @@ Validators remain subject to the same accountability standards during the 24-hou
 At the time of writing, the ratio of `AddPermissionlessDelegatorTx`s to `AddPermissionlessValidatorTx`s over the past 365 days was 100:1, with delegations accounting for 46% of all P-Chain transactions. Assuming all delegations are currently set to the minimum duration (14 days), reducing the minimum to 24 hours would increase the rate of state growth from delegation operations on the P-Chain by approximately 14x.
 
 Given this potential impact, if the minimum delegation period is reduced, should there be an additional requirement that short-term delegations (e.g., 24 hours) must stake at least 1,000 AVAX?
+
+2. Based on the scenario posed in Security Considerations, should the rewards rate differ for shorter vs longer validation periods to incentivize network stability?
 
 ## Copyright
 
