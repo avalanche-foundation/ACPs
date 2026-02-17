@@ -53,6 +53,8 @@ Only the minimum duration parameter changes, with all other validation rules and
 
 ## Backwards Compatibility
 
+This is a non-backwards compatible change to the P-Chain validation and execution requirements. Therefore, it requires a network upgrade in order to be implemented.
+
 This change affects only new staking periods initiated after activation. Existing validators with active staking periods remain unaffected and will complete their original durations under the previous rules.
 
 The change is non-breaking: all existing validation infrastructure, reward mechanisms, and consensus operations continue functioning without modification.
