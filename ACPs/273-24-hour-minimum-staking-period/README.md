@@ -67,7 +67,7 @@ Validators remain subject to the same accountability standards during the 24-hou
 
 1. If the minimum validation period is shortened, should the minimum delegation period also be reduced?
 
-At the time of writing, the ratio of AddPermissionlessDelegatorTxs to AddPermissionlessValidatorTxs over the past 365 days was 100:1, with delegations accounting for 46% of all P-Chain transactions. Assuming all delegations are currently set to the minimum duration (14 days), reducing the minimum to 24 hours would increase the rate of state growth from delegation operations on the P-Chain by approximately 14x.
+At the time of writing, the ratio of `AddPermissionlessDelegatorTx`s to `AddPermissionlessValidatorTx`s over the past 365 days was 100:1, with delegations accounting for 46% of all P-Chain transactions. Assuming all delegations are currently set to the minimum duration (14 days), reducing the minimum to 24 hours would increase the rate of state growth from delegation operations on the P-Chain by approximately 14x.
 
 Given this potential impact, if the minimum delegation period is reduced, should there be an additional requirement that short-term delegations (e.g., 24 hours) must stake at least 1,000 AVAX?
 
