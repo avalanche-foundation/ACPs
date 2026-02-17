@@ -111,7 +111,7 @@ For L1s that want their gas target to be dynamically adjusted based on the prefe
 Validator target gas preferences are active in the following cases:
 
 1. **Precompile not activated**: When the `ACP224FeeManagerPrecompile` is not activated at all, validators can control `targetGas` by using the `gas-target` preference in their node's configuration. If a validator does not set a `gas-target` preference, the parent block's gas target is maintained.
-2. **`validatorTargetGas` enabled**: When the precompile is activated and `validatorTargetGas` is set to `true` (either via `initialFeeConfig` or by an admin calling `enableValidatorTargetGas()`), the precompile's stored `targetGas` is **not used for block building**. Validators adjust `targetExcess` from the parent block's current value within ACP-176's bounded update limits. If a validator does not set a `gas-target` preference, the parent block's gas target is maintained.
+2. **`validatorTargetGas` enabled**: When the precompile is activated and `validatorTargetGas` is set to `true` (either via `initialFeeConfig` or by an admin calling `setFeeConfig` with `validatorTargetGas: true`), the precompile's stored `targetGas` is **not used for block building**. Validators adjust `targetExcess` from the parent block's current value within ACP-176's bounded update limits. If a validator does not set a `gas-target` preference, the parent block's gas target is maintained.
 
 When `validatorTargetGas` is `false` (the default), the precompile's stored `targetGas` value is authoritative and validator preferences for gas target are ignored.
 
@@ -119,7 +119,7 @@ When `validatorTargetGas` is `false` (the default), the precompile's stored `tar
 
 #### Solidity Interface
 
-The `ACP224FeeManagerPrecompile` provides an on-chain interface for managing fee parameters dynamically. The `FeeConfig` struct contains only numeric value parameters. Mode flags (`staticPricing`, `validatorTargetGas`) are controlled via separate per-field toggle functions. This design ensures forward-compatibility: adding new modes in the future (e.g., `validatorMinGasPrice`) requires only adding new functions, with no changes to the `FeeConfig` struct or existing function signatures (no ABI breaks).
+The `ACP224FeeManagerPrecompile` provides an on-chain interface for managing fee parameters dynamically. The `FeeConfig` struct contains all configuration parameters, including both numeric values and mode flags (`staticPricing`, `validatorTargetGas`). All changes are made through a single `setFeeConfig` call, keeping the interface minimal and straightforward. This design ensures configurations are applied atomically and consistently.
 
 The precompile offers similar controls as the existing `FeeManagerPrecompile` implemented in Subnet-EVM [here](https://github.com/ava-labs/subnet-evm/tree/53f5305/precompile/contracts/feemanager). The solidity interface is as follows:
 
@@ -133,10 +133,14 @@ import "./IAllowList.sol";
 /// @dev Inherits from IAllowList for access control
 interface IACP224FeeManager is IAllowList {
     /// @notice Configuration parameters for the dynamic fee mechanism
+    /// @dev Fields are ordered so each mode flag precedes the parameter(s) it governs,
+    ///      reducing the risk of mis-ordering arguments.
     struct FeeConfig {
-        uint256 targetGas;       // Target gas consumption per second (T)
-        uint256 minGasPrice;     // Minimum gas price in wei (M)
-        uint256 timeToDouble;    // Seconds for gas price to double at max capacity
+        bool    validatorTargetGas; // When true, validators control targetGas via node preferences
+        uint256 targetGas;          // Target gas consumption per second (T)
+        bool    staticPricing;      // When true, gas price is always minGasPrice
+        uint256 minGasPrice;        // Minimum gas price in wei (M)
+        uint256 timeToDouble;       // Seconds for gas price to double at max capacity
     }
 
     /// @notice Emitted when fee configuration is updated
@@ -144,23 +148,6 @@ interface IACP224FeeManager is IAllowList {
     /// @param oldFeeConfig Previous configuration
     /// @param newFeeConfig New configuration
     event FeeConfigUpdated(address indexed sender, FeeConfig oldFeeConfig, FeeConfig newFeeConfig);
-
-    /// @notice Emitted when static pricing mode is enabled
-    /// @param sender Address that triggered the change
-    event StaticPricingEnabled(address indexed sender);
-
-    /// @notice Emitted when static pricing mode is disabled
-    /// @param sender Address that triggered the change
-    event StaticPricingDisabled(address indexed sender);
-
-    /// @notice Emitted when validator target gas mode is enabled
-    /// @param sender Address that triggered the change
-    event ValidatorTargetGasEnabled(address indexed sender);
-
-    /// @notice Emitted when validator target gas mode is disabled
-    /// @param sender Address that triggered the change
-    /// @param targetGas The new authoritative target gas value
-    event ValidatorTargetGasDisabled(address indexed sender, uint256 targetGas);
 
     /// @notice Set the fee configuration
     /// @param config New fee configuration parameters
@@ -173,60 +160,29 @@ interface IACP224FeeManager is IAllowList {
     /// @notice Get the block number when fee config was last changed
     /// @return blockNumber Block number of last configuration change
     function getFeeConfigLastChangedAt() external view returns (uint256 blockNumber);
-
-    /// @notice Enable static pricing mode
-    /// When enabled, gas price is always minGasPrice, bypassing dynamic fee adjustment.
-    /// timeToDouble is stored but has no effect while static pricing is active.
-    function enableStaticPricing() external;
-
-    /// @notice Disable static pricing mode
-    /// Restores the ACP-176 dynamic fee mechanism using stored minGasPrice and timeToDouble.
-    function disableStaticPricing() external;
-
-    /// @notice Check if static pricing mode is enabled
-    /// @return enabled True if gas price is fixed at minGasPrice
-    function isStaticPricingEnabled() external view returns (bool enabled);
-
-    /// @notice Enable validator target gas mode
-    /// When enabled, validators control targetGas dynamically via their node preferences
-    /// using the ACP-176 mechanism. Validators adjust targetExcess from the parent block's
-    /// current value; the precompile's stored targetGas is not used for block building.
-    function enableValidatorTargetGas() external;
-
-    /// @notice Disable validator target gas mode and set the new target gas
-    /// When disabled, the provided targetGas becomes authoritative and validator
-    /// preferences for gas target are ignored. The targetGas parameter is required
-    /// to prevent accidental snap-back to a stale value when validators may have
-    /// drifted far from the previously stored targetGas.
-    /// @param targetGas The new target gas consumption per second to use
-    function disableValidatorTargetGas(uint256 targetGas) external;
-
-    /// @notice Check if validator target gas mode is enabled
-    /// @return enabled True if validators control targetGas via node preferences
-    function isValidatorTargetGasEnabled() external view returns (bool enabled);
 }
 ```
 
-For chains with the precompile activated, `setFeeConfig` can be used to dynamically change each of the values in the fee configuration. Importantly, any updates made via calls to `setFeeConfig` or mode toggle functions in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
+For chains with the precompile activated, `setFeeConfig` can be used to dynamically change all fee configuration parameters, including both numeric values and mode flags. Importantly, any updates made via calls to `setFeeConfig` in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
 
 #### Static Pricing Mode
 
-When static pricing is enabled (via `enableStaticPricing()` or `staticPricing: true` in `initialFeeConfig`), the gas price is always equal to `minGasPrice`. The ACP-176 dynamic fee mechanism is bypassed and there is no exponential price adjustment. The `timeToDouble` value is stored but inactive.
+When `staticPricing` is set to `true` (via `setFeeConfig` or `initialFeeConfig`), the gas price is always equal to `minGasPrice`. The ACP-176 dynamic fee mechanism is bypassed and there is no exponential price adjustment. The `timeToDouble` value is stored but inactive.
 
 #### Validator Target Gas Mode
 
-When validator target gas is enabled (via `enableValidatorTargetGas()` or `validatorTargetGas: true` in `initialFeeConfig`), validators control the gas target dynamically as described in [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference). While validator target gas is enabled, calling `setFeeConfig` updates the stored `targetGas` value but has no effect on block building.
+When `validatorTargetGas` is set to `true` (via `setFeeConfig` or `initialFeeConfig`), validators control the gas target dynamically as described in [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference). While validator target gas is enabled, the `targetGas` value in `setFeeConfig` is stored but has no effect on block building.
 
 **Toggling behavior:**
 
-- **Enabling** (`enableValidatorTargetGas()`): Validators begin adjusting `targetExcess` from the parent block's current value. Since ACP-176's bounded update mechanism limits changes to roughly $\frac{1}{1024}$ of the current value per block, the transition is always gradual. No parameter is needed because the parent block's `targetExcess` (which was set by the precompile) provides an unambiguous starting point.
-- **Disabling** (`disableValidatorTargetGas(uint256 targetGas)`): The provided `targetGas` value is stored and immediately becomes authoritative for block building. The `targetGas` parameter is required because validators may have drifted the effective gas target far from the precompile's previously stored value, and using a stale stored value could cause a dangerous sudden jump in gas capacity. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate value.
+- **Enabling** (setting `validatorTargetGas` to `true` via `setFeeConfig`): Validators begin adjusting `targetExcess` from the parent block's current value. Since ACP-176's bounded update mechanism limits changes to roughly $\frac{1}{1024}$ of the current value per block, the transition is always gradual. The parent block's `targetExcess` (which was set by the precompile) provides an unambiguous starting point.
+- **Disabling** (setting `validatorTargetGas` to `false` via `setFeeConfig`): The `targetGas` value provided in the same `setFeeConfig` call is stored and immediately becomes authoritative for block building. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate `targetGas` value, since validators may have drifted the effective gas target far from the previously stored value and using a stale value could cause a dangerous sudden jump in gas capacity.
 
 #### Initial Fee Configuration
 
 All fee configuration for ACP-224 is done through the `ACP224FeeManagerPrecompile`. There is no separate genesis chain configuration for the new fee parameters. If the precompile is not activated at all, or no `initialFeeConfig` is provided, default values aligned with the C-Chain are used.
 
-The precompile can be activated with an `initialFeeConfig` to set the initial fee parameters at the activation timestamp. This follows the established Subnet-EVM pattern for [initial precompile configurations](https://build.avax.network/docs/avalanche-l1s/evm-configuration/customize-avalanche-l1#initial-precompile-configurations). If no admin, manager, or enabled addresses are provided, the precompile becomes **read-only**: `getFeeConfig`, `getFeeConfigLastChangedAt`, and view functions like `isStaticPricingEnabled` and `isValidatorTargetGasEnabled` remain callable, but `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `disableStaticPricing`, `enableValidatorTargetGas`, `disableValidatorTargetGas`) revert. In this case the precompile has to be disabled and re-enabled with the desired admin, manager, or enabled addresses to change them.
+The precompile can be activated with an `initialFeeConfig` to set the initial fee parameters at the activation timestamp. This follows the established Subnet-EVM pattern for [initial precompile configurations](https://build.avax.network/docs/avalanche-l1s/evm-configuration/customize-avalanche-l1#initial-precompile-configurations). If no admin, manager, or enabled addresses are provided, the precompile becomes **read-only**: `getFeeConfig` and `getFeeConfigLastChangedAt` remain callable, but `setFeeConfig` reverts. In this case the precompile has to be disabled and re-enabled with the desired admin, manager, or enabled addresses to change the configuration.
 
 When `initialFeeConfig` is present, all three uint fields (`targetGas`, `minGasPrice`, `timeToDouble`) are **required**. This prevents silent misconfiguration from typos (e.g., a misspelled `"minGasprice"` would otherwise silently fall back to a default, potentially making the chain near-free to spam). Boolean mode flags (`staticPricing`, `validatorTargetGas`) default to `false` when omitted.
 
@@ -240,11 +196,11 @@ The precompile configuration will look like the following:
     "managerAddresses": ["0x..."],
     "enabledAddresses": ["0x..."],
     "initialFeeConfig": {
+      "validatorTargetGas": true,
       "targetGas": 2000000,
-      "minGasPrice": 25000000000,
-      "timeToDouble": 60,
       "staticPricing": false,
-      "validatorTargetGas": true
+      "minGasPrice": 25000000000,
+      "timeToDouble": 60
     }
   }
 }
@@ -252,11 +208,11 @@ The precompile configuration will look like the following:
 
 The `initialFeeConfig` fields are:
 
-- `targetGas` (uint64, **required**): Target gas consumption per second ($T$). When `validatorTargetGas` is `true`, this value is stored but **not used for block building** -- validators determine the gas target from the parent block's state. The stored value becomes relevant again when validator control is later disabled via `disableValidatorTargetGas(uint256 targetGas)`.
+- `validatorTargetGas` (bool, optional, default `false`): When `true`, validators control `targetGas` dynamically via their node preferences, using the same mechanism as the C-Chain (see [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference)). The stored `targetGas` value is not used for block building; validators always adjust from the parent block's `targetExcess`.
+- `targetGas` (uint64, **required**): Target gas consumption per second ($T$). When `validatorTargetGas` is `true`, this value is stored but **not used for block building** -- validators determine the gas target from the parent block's state. The stored value becomes relevant again when `validatorTargetGas` is set back to `false` via `setFeeConfig`.
+- `staticPricing` (bool, optional, default `false`): When `true`, the gas price is always `minGasPrice`, bypassing the ACP-176 dynamic fee mechanism entirely. The `timeToDouble` value is stored but inactive.
 - `minGasPrice` (uint64, **required**): Minimum gas price in wei ($M$). When `staticPricing` is `true`, this is the fixed gas price.
 - `timeToDouble` (uint64, **required**): Seconds for the gas price to double when the chain is at maximum capacity. Determines $K$ as described in [ACP-176 Parameters in Subnet-EVM](#acp-176-parameters-in-subnet-evm). Stored but has no effect when `staticPricing` is `true`.
-- `staticPricing` (bool, optional, default `false`): When `true`, the gas price is always `minGasPrice`, bypassing the ACP-176 dynamic fee mechanism entirely. The `timeToDouble` value is stored but inactive.
-- `validatorTargetGas` (bool, optional, default `false`): When `true`, validators control `targetGas` dynamically via their node preferences, using the same mechanism as the C-Chain (see [Dynamic Gas Target Via Validator Preference](#dynamic-gas-target-via-validator-preference)). The stored `targetGas` value is not used for block building; validators always adjust from the parent block's `targetExcess`.
 
 #### Example Configurations
 
@@ -284,10 +240,10 @@ No admin addresses means the precompile is read-only. All boolean flags default 
   "acp224FeeManagerConfig": {
     "blockTimestamp": <activation_timestamp>,
     "initialFeeConfig": {
+      "validatorTargetGas": true,
       "targetGas": 2000000,
       "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "validatorTargetGas": true
+      "timeToDouble": 60
     }
   }
 }
@@ -303,9 +259,9 @@ Read-only precompile. `targetGas` starts at 2,000,000 gas/second but validators 
     "blockTimestamp": <activation_timestamp>,
     "initialFeeConfig": {
       "targetGas": 15000000,
+      "staticPricing": true,
       "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "staticPricing": true
+      "timeToDouble": 60
     }
   }
 }
@@ -320,11 +276,11 @@ Gas price is always 25 gwei regardless of demand. `timeToDouble` is stored but i
   "acp224FeeManagerConfig": {
     "blockTimestamp": <activation_timestamp>,
     "initialFeeConfig": {
+      "validatorTargetGas": true,
       "targetGas": 5000000,
-      "minGasPrice": 1000000000,
-      "timeToDouble": 60,
       "staticPricing": true,
-      "validatorTargetGas": true
+      "minGasPrice": 1000000000,
+      "timeToDouble": 60
     }
   }
 }
@@ -340,16 +296,16 @@ Flat 1 gwei gas price. Validators adjust throughput dynamically. Read-only preco
     "blockTimestamp": <activation_timestamp>,
     "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"],
     "initialFeeConfig": {
+      "validatorTargetGas": true,
       "targetGas": 2000000,
       "minGasPrice": 25000000000,
-      "timeToDouble": 60,
-      "validatorTargetGas": true
+      "timeToDouble": 60
     }
   }
 }
 ```
 
-Admin controls pricing parameters (`minGasPrice`, `timeToDouble`, `staticPricing`). Validators control target gas. Admin can call `disableValidatorTargetGas(uint256 targetGas)` to take back control of `targetGas`.
+Admin controls all fee parameters via `setFeeConfig`. Validators control target gas. Admin can set `validatorTargetGas` to `false` via `setFeeConfig` to take back control of `targetGas`.
 
 #### Internal State
 
@@ -427,9 +383,9 @@ For continuity purposes, the `ACP224FeeManagerPrecompile` can be activated befor
 
 When the precompile is activated before Helicon:
 
-1. **Configuration calls are accepted**: Precompile's `setFeeConfig` and mode toggle functions (`enableStaticPricing`, `enableValidatorTargetGas`, etc.) can be called to set desired fee parameters and modes. The values are stored in the precompile's state. If `initialFeeConfig` is provided at activation, its values are also stored.
-2. **Values are pending**: The stored fee configuration and mode flags do not affect the current fee mechanism. The existing `FeeManagerPrecompile` and legacy fee mechanism remain active and in control.
-3. **Activation applies stored values**: When Helicon activates, the stored fee configuration and mode flags immediately take effect. The legacy fee mechanism and `FeeManagerPrecompile` are deactivated at this point.
+1. **Configuration calls are accepted**: The precompile's `setFeeConfig` can be called to set desired fee parameters and modes. The values are stored in the precompile's state. If `initialFeeConfig` is provided at activation, its values are also stored.
+2. **Values are pending**: The stored fee configuration does not affect the current fee mechanism. The existing `FeeManagerPrecompile` and legacy fee mechanism remain active and in control.
+3. **Activation applies stored values**: When Helicon activates, the stored fee configuration immediately takes effect. The legacy fee mechanism and `FeeManagerPrecompile` are deactivated at this point.
 
 This approach ensures a smooth migration path where admins can test and verify their configuration before it becomes active, avoiding any race conditions at the moment of activation.
 
