@@ -1,4 +1,4 @@
-| ACP | 274 |
+| ACP | 275 |
 |:--------------|:------------------------------------------------------------|
 | **Title** | L1 Trust Profile Framework |
 | **Author(s)** | Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)) |
