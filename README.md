@@ -1,144 +1,97 @@
-<div align="center">
-  <img width="80%" src="LOGO.png">
-</div>
+# [AIP-QR-001] Avalanche Improvement Proposal: Quantum-Resistant Cryptography
 
-## What is an Avalanche Community Proposal (ACP)?
+**AIP ID:** AIP-QR-001  
+**Author(s):** Independent Blockchain Research Lab  
+**Status:** Draft  
+**Date:** 2026-02-21  
 
-An Avalanche Community Proposal is a concise document that introduces a change or best practice for adoption on the [Avalanche Network](https://www.avax.com). ACPs should provide clear technical specifications of any proposals and a compelling rationale for their adoption.
+---
 
-ACPs are an open framework for proposing improvements and gathering consensus around changes to the Avalanche Network. ACPs can be proposed by anyone and will be merged into this repository as long as they are well-formatted and coherent. Once an overwhelming majority of the Avalanche Network/Community have [signaled their support for an ACP](https://docs.avax.network/nodes/configure/avalanchego-config-flags#avalanche-community-proposals), it may be scheduled for activation on the Avalanche Network by Avalanche Network Clients (ANCs). It is ultimately up to members of the Avalanche Network/Community to adopt ACPs they support by running a compatible ANC, such as [AvalancheGo](https://github.com/ava-labs/avalanchego). 
+## 1. Abstract
+Avalanche currently relies on ECDSA (secp256k1) for transaction and validator signatures. Future large-scale quantum computers could compromise these signatures using Shor’s algorithm. This proposal outlines a staged, technically feasible path to integrate post-quantum (PQ) cryptography into Avalanche, preserving validator efficiency, subnet modularity, and EVM compatibility.
 
-## ACP Tracks
+---
 
-There are three kinds of ACP:
+## 2. Motivation
+Quantum computing poses a long-term threat to elliptic curve cryptography. Avalanche’s modular architecture allows experimental deployment of PQ schemes (like Falcon and Dilithium) without destabilizing the network. This protects validator and user funds and enables subnet-level experimentation.
 
-* A `Standards Track` ACP describes a change to the design or function of the Avalanche Network, such as a change to the P2P networking protocol, P-Chain design, Subnet architecture, or any change/addition that affects the interoperability of Avalanche Network Clients (ANCs).
-* A `Best Practices Track` ACP describes a design pattern or common interface that should be used across the Avalanche Network to make it easier to integrate with Avalanche or for Subnets to interoperate with each other. This would include things like proposing a smart contract interface, not proposing a change to how smart contracts are executed.
-* A `Meta Track` ACP describes a change to the ACP process or suggests a new way for the Avalanche Community to collaborate.
-* A `Subnet Track` ACP describes a change to a particular Subnet. This would include things like configuration changes or coordinated Subnet upgrades.
+---
 
-## ACP Statuses
+## 3. Threat Model
+* **Primary Threat:** Quantum adversary capable of running Shor’s algorithm at scale.
+* **Targets:** Exposed public keys of validators and users.
+* **Attack Window:** Before transaction finality.
+* **Excluded:** Immediate breaks of SHA-256 or consensus logic.
 
-There are four statuses of an ACP:
+---
 
-* A `Proposed` ACP has been merged into the main branch of the ACP repository. It is actively being discussed by the Avalanche Community and may be modified based on feedback.
-* An `Implementable` ACP is considered "ready for implementation" by the author(s) and will no longer change meaningfully from its current form (which would require a new ACP).
-* An `Activated` ACP has been activated on the Avalanche Network via a coordinated upgrade by the Avalanche Community. Once an ACP is `Activated`, it is locked.
-* A `Stale` ACP has been abandoned by its author(s) because it is not supported by the Avalanche Community or has been replaced with another ACP.
+## 4. Proposed Architecture
 
-## ACP Workflow
+### 4.1 C-Chain PQ Precompiles
+Introduce EVM precompiled contracts to handle heavy PQC verification natively in Go, reducing gas costs significantly compared to Solidity-only implementations.
 
-### Step 0: Think of a Novel Improvement to Avalanche
+| Address | Function | Notes |
+|:---|:---|:---|
+| `0x0000000000000000000000000000000000000101` | `verifyDilithium(bytes msg, bytes sig, bytes pubKey)` | NIST Level 2 Security |
+| `0x0000000000000000000000000000000000000102` | `verifyFalcon(bytes msg, bytes sig, bytes pubKey)` | Optimized for speed/size |
 
-The ACP process begins with a new idea for Avalanche. Each potential ACP must have an author(s): someone who writes the ACP using the style and format described below, shepherds the associated GitHub Discussion, and attempts to build consensus around the idea. Note that ideas and any resulting ACP is public. Authors should not post any ideas or anything in an ACP that the Author wants to keep confidential or to keep ownership rights in (such as intellectual property rights).
+**Gas Model:** `Gas = BaseCost + (SignatureSize × ByteCost)`
 
-### Step 1: Post Your Idea to [GitHub Discussions](https://github.com/avalanche-foundation/ACPs/discussions/categories/ideas)
+### 4.2 Hybrid Account Model (PQ-EOA)
+A new address type that requires two signatures for a transaction to be valid:
+1. **Classical Signature:** ECDSA (secp256k1)
+2. **PQ Signature:** Dilithium or Falcon
 
-The author(s) should first attempt to ascertain whether there is support for their idea by posting in the "Ideas" category of GitHub Discussions. Vetting an idea publicly before going as far as writing an ACP is meant to save both the potential author(s) and the wider Avalanche Community time. Asking the Avalanche Community first if an idea is original helps prevent too much time being spent on something that is guaranteed to be rejected based on prior discussions (searching the Internet does not always do the trick). It also helps to make sure the idea is applicable to the entire community and not just the author(s). Small enhancements or patches often don't need standardization between multiple projects; these don't need an ACP and should be injected into the relevant development workflow with a patch submission to the applicable ANC issue tracker.
+**Logic:** `Transaction Valid iff (Verify_ECDSA && Verify_PQ)`
 
-### Step 2: Propose an ACP via [Pull Request](https://github.com/avalanche-foundation/ACPs/pulls)
+### 4.3 P-Chain Validator Hybrid Signing
+Validators sign blocks with both classical and PQ keys to ensure the "Proof of Stake" remains unhackable.
 
-Once the author(s) feels confident that an idea has a decent chance of acceptance, an ACP should be drafted and submitted as a pull request (PR). This draft must be written in ACP style as described below. It is highly recommended that a single ACP contain a single key proposal or new idea. The more focused the ACP, the more successful it tends to be. If in doubt, split your ACP into several well-focused ones. The PR number of the ACP will become its assigned number.
+```go
+func ValidateBlockHybrid(block Block) bool {
+    if !VerifyECDSA(block.Signature, block.PubKey) {
+        return false
+    }
+    if !VerifyPQ(block.PQSignature, block.PQPubKey) {
+        return false
+}
+    return true
+}
+5. Technical Implementation: The "Falcon-EVM" Path
 
-### Step 3: Build Consensus on [GitHub Discussions](https://github.com/avalanche-foundation/ACPs/discussions/categories/discussion) and Provide an Implementation (if Applicable)
+To implement this without breaking the Primary Network, we leverage:
 
-ACPs will be merged by ACP maintainers if the proposal is generally well-formatted and coherent. ACP editors will attempt to merge anything worthy of discussion, regardless of feasibility or complexity, that is not a duplicate or incomplete. After an ACP is merged, an official GitHub Discussion will be opened for the ACP and linked to the proposal for community discussion. It is recommended for author(s) or supportive Avalanche Community members to post an accompanying non-technical overview of their ACP for general consumption in this GitHub Discussion. The ACP should be reviewed and broadly supported before a reference implementation is started, again to avoid wasting the author(s) and the Avalanche Community's time, unless a reference implementation will aid people in studying the ACP.
+    CGO Integration: Linking liboqs (Library for Quantum-Safe Cryptography) into avalanchego.
 
-### Step 4: Mark ACP as `Implementable` via [Pull Request](https://github.com/avalanche-foundation/ACPs/pulls)
+    Subnet-EVM Customization: Launching a dedicated Quantum-Safe Subnet using AWM (Avalanche Warp Messaging) as a bridge.
 
-Once an ACP is considered complete by the author(s), it should be marked as `Implementable`. At this point, all open questions should be addressed and an associated reference implementation should be provided (if applicable). As mentioned earlier, the Avalanche Foundation meets periodically to recommend the ratification of specific ACPs but it is ultimately up to members of the Avalanche Network/Community to adopt ACPs they support by running a compatible Avalanche Network Client (ANC), such as [AvalancheGo](https://github.com/ava-labs/avalanchego).
+6. Performance Benchmarks (Estimates)
+Signature Type	Size (Bytes)	Validation CPU Cost	Block Impact
+ECDSA	65–70	1x	Minimal
+Falcon-512	~666	~10x	Low
+Dilithium L2	2420	~35x	Medium
+Hybrid	~2490	~36x	Medium
+7. Migration Roadmap
 
-### [Optional] Step 5: Mark ACP as `Stale` via [Pull Request](https://github.com/avalanche-foundation/ACPs/pulls)
+    Phase 1: Optional PQ precompiles on C-Chain.
 
-An ACP can be superseded by a different ACP, rendering the original obsolete. If this occurs, the original ACP will be marked as `Stale`. ACPs may also be marked as `Stale` if the author(s) abandon work on it for a prolonged period of time (12+ months). ACPs may be reopened and moved back to `Proposed` if the author(s) restart work.
+    Phase 2: Hybrid PQ addresses and EOAs.
 
-### Maintenance
+    Phase 3: Hybrid validator signing on P-Chain.
 
-ACP maintainers will only merge PRs updating an ACP if it is created or approved by at least one of the author(s). ACP maintainers are not responsible for ensuring ACP author(s) approve the PR. ACP author(s) are expected to review PRs that target their unlocked ACP (`Proposed` or `Implementable`). Any PRs opened against a locked ACP (`Activated` or `Stale`) will not be merged by ACP maintainers.
+    Phase 4: PQ-enabled experimental subnets.
 
-## What belongs in a successful ACP?
+    Phase 5: Full ECDSA deprecation (Long-term).
 
-Each ACP must have the following parts:
+8. Conclusion
 
-* `Preamble`: Markdown table containing metadata about the ACP, including the ACP number, a short descriptive title, the author(s), and optionally the contact info for each author, etc.
-* `Abstract`: Concise (~200 word) description of the ACP
-* `Motivation`: Rationale for adopting the ACP and the specific issue/challenge/opportunity it addresses
-* `Specification`: Complete description of the semantics of any change should allow any ANC/Avalanche Community member to implement the ACP
-* `Security Considerations`: Security implications of the proposed ACP
+Avalanche’s architecture allows for a controlled deployment of quantum-resistant cryptography. By combining Hybrid Signing with Stateful Precompiles, we can preserve sub-second finality while securing the network against future threats.
 
-Each ACP can have the following parts:
+Support this Independent Research
 
-* `Open Questions`: Questions that should be resolved before implementation
+If you find this roadmap valuable, consider supporting our work:
 
-Each `Standards Track` ACP must have the following parts:
+AVAX (C-Chain) Address: 0x1D45Db97367EDb4a68B830e9438CEfCdB1C6B856
 
-* `Backwards Compatibility`: List of backwards incompatible changes required to implement the ACP and their impact on the Avalanche Community
-* `Reference Implementation`: Code, documentation, and telemetry (from a local network) of the ACP change
-
-Each `Best Practices Track` ACP can have the following parts:
-
-* `Backwards Compatibility`: List of backwards incompatible changes required to implement the ACP and their impact on the Avalanche Community
-* `Reference Implementation`: Code, documentation, and telemetry (from a local network) of the ACP change
-
-### ACP Formats and Templates
-
-Each ACP is allocated a unique subdirectory in the `ACPs` directory. The name of this subdirectory must be of the form `N-T` where `N` is the ACP number and `T` is the ACP title with any spaces replaced by hyphens. ACPs must be written in [markdown](https://daringfireball.net/projects/markdown/syntax) format and stored at `ACPs/N-T/README.md`. Please see the [ACP template](./ACPs/TEMPLATE.md) for an example of the correct layout.
-
-### Auxiliary Files
-
-ACPs may include auxiliary files such as diagrams or code snippets. Such files should be stored in the ACP's subdirectory (`ACPs/N-T/*`). There is no required naming convention for auxiliary files.
-
-### Waived Copyright
-
-ACP authors must waive any copyright claims before an ACP will be merged into the repository. This can be done by including the following text in an ACP:
-
-```text
-## Copyright
-
-Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
-```
-
-## Proposals
-
-_You can view the status of each ACP on the [ACP Tracker](https://github.com/orgs/avalanche-foundation/projects/1/views/1)._
-
-| Number | Title |  Author(s) | Type |
-|:-------|:------|:-------|:-----|
-|[13](./ACPs/13-subnet-only-validators/README.md)|Subnet-Only Validators (SOVs)|Patrick O'Grady (contact@patrickogrady.xyz)|Standards|
-|[20](./ACPs/20-ed25519-p2p/README.md)|Ed25519 p2p|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[23](./ACPs/23-p-chain-native-transfers/README.md)|P-Chain Native Transfers|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[24](./ACPs/24-shanghai-eips/README.md)|Activate Shanghai EIPs on C-Chain|Darioush Jalali ([@darioush](https://github.com/darioush))|Standards|
-|[25](./ACPs/25-vm-application-errors/README.md)|Virtual Machine Application Errors|Joshua Kim ([@joshua-kim](https://github.com/joshua-kim))|Standards|
-|[30](./ACPs/30-avalanche-warp-x-evm/README.md)|Integrate Avalanche Warp Messaging into the EVM|Aaron Buchwald (aaron.buchwald56@gmail.com)|Standards|
-|[31](./ACPs/31-enable-subnet-ownership-transfer/README.md)|Enable Subnet Ownership Transfer|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[41](./ACPs/41-remove-pending-stakers/README.md)|Remove Pending Stakers|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[62](./ACPs/62-disable-addvalidatortx-and-adddelegatortx/README.md)|Disable `AddValidatorTx` and `AddDelegatorTx`|Jacob Everly (https://twitter.com/JacobEv3rly), Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[75](./ACPs/75-acceptance-proofs/README.md)|Acceptance Proofs|Joshua Kim ([@joshua-kim](https://github.com/joshua-kim))|Standards|
-|[77](./ACPs/77-reinventing-subnets/README.md)|Reinventing Subnets|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu))|Standards|
-|[83](./ACPs/83-dynamic-multidimensional-fees/README.md)|Dynamic Multidimensional Fees for P-Chain and X-Chain|Alberto Benegiamo ([@abi87](https://github.com/abi87))|Standards|
-|[84](./ACPs/84-table-preamble/README.md)|Table Preamble for ACPs|Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon))|Meta|
-|[99](./ACPs/99-validatorsetmanager-contract/README.md)|Validator Manager Solidity Standard|Gauthier Leonard ([@Nuttymoon](https://github.com/Nuttymoon)), Cam Schultz ([@cam-schultz](https://github.com/cam-schultz))|Best Practices|
-|[103](./ACPs/103-dynamic-fees/README.md)|Add Dynamic Fees to the X-Chain and P-Chain|Dhruba Basu ([@dhrubabasu](https://github.com/dhrubabasu)), Alberto Benegiamo ([@abi87](https://github.com/abi87)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
-|[108](./ACPs/108-evm-event-importing/README.md)|EVM Event Importing|Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Best Practices|
-|[113](./ACPs/113-provable-randomness/README.md)|Provable Virtual Machine Randomness|Tsachi Herman ([@tsachiherman](https://github.com/tsachiherman))|Standards|
-|[118](./ACPs/118-warp-signature-request/README.md)|Standardized P2P Warp Signature Request Interface|Cam Schultz ([@cam-schultz](https://github.com/cam-schultz))|Best Practices|
-|[125](./ACPs/125-basefee-reduction/README.md)|Reduce C-Chain minimum base fee from 25 nAVAX to 1 nAVAX|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Darioush Jalali ([@darioush](https://github.com/darioush))|Standards|
-|[131](./ACPs/131-cancun-eips/README.md)|Activate Cancun EIPs on C-Chain and Subnet-EVM chains|Darioush Jalali ([@darioush](https://github.com/darioush)), Ceyhun Onur ([@ceyonur](https://github.com/ceyonur))|Standards|
-|[151](./ACPs/151-use-current-block-pchain-height-as-context/README.md)|Use current block P-Chain height as context for state verification|Ian Suvak ([@iansuvak](https://github.com/iansuvak))|Standards|
-|[176](./ACPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md)|Dynamic EVM Gas Limits and Price Discovery Updates|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[181](./ACPs/181-p-chain-epoched-views/README.md)|P-Chain Epoched Views|Cam Schultz ([@cam-schultz](https://github.com/cam-schultz))|Standards|
-|[191](./ACPs/191-seamless-l1-creation/README.md)|Seamless L1 Creations (CreateL1Tx)|Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)), Meag FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|Standards|
-|[194](./ACPs/194-streaming-asynchronous-execution/README.md)|Streaming Asynchronous Execution|Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
-|[204](ACPs/204-precompile-secp256r1/README.md)|Precompile for secp256r1 Curve Support|Santiago Cammi ([@scammi](https://github.com/scammi)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N))|Standards|
-|[209](ACPs/209-eip7702-style-account-abstraction/README.md)|EIP-7702-style Set Code for EOAs|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Aaron Buchwald ([aaronbuchwald](https://github.com/aaronbuchwald)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[224](ACPs/224-dynamic-gas-limit-in-subnet-evm/README.md)|Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM|Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[226](ACPs/226-dynamic-minimum-block-times/README.md)|Dynamic Minimum Block Times|Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13))|Standards|
-|[236](ACPs/236-auto-renewed-staking/README.md)|Auto-Renewed Staking|Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1))|Standards|
-|[247](ACPs/247-delegation-multiplier-increase-maximum-validator-weight-reduction/README.md)|Delegation Multiplier Increase & Maximum Validator Weight Reduction|Giacomo Barbieri ([@ijaack94](https://x.com/ijaack94)), BENQI ([@benqifinance](https://x.com/benqifinance))|Standards|
-|[256](ACPs/256-hardware-recommendations/README.md)|Update Hardware Requirements for Primary Network Nodes|Aaron Buchwald ([@aaronbuchwald](https://github.com/aaronbuchwald)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|Best Practices|
-|[267](ACPs/267-uptime-requirement-increase/README.md)|Increase Validator Uptime Requirement from 80% to 90%|Martin Eckardt ([@martineckardt](https://github.com/martineckardt))|Best Practices|
-|[273](ACPs/273-reduce-minimum-staking-duration/README.md)| Reduce Minimum Validator Staking Duration|Eric Lu ([ericlu-avax](https://github.com/ericlu-avax)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph))|Standards|
-
-## Contributing
-
-Before contributing to ACPs, please read the [ACP Terms of Contribution](./CONTRIBUTING.md).
+Developed by the Independent Blockchain Research Lab.
+  
