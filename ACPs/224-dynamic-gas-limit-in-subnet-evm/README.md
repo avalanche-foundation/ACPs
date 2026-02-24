@@ -178,7 +178,7 @@ The `FeeConfig` struct fields are shared by both `setFeeConfig` and `initialFeeC
 **Toggling behavior:**
 
 - **Enabling** (setting `validatorTargetGas` to `true` via `setFeeConfig`): `targetGas` must be `0`. Validators begin adjusting `targetExcess` from the parent block's current value. Since ACP-176's bounded update mechanism limits changes to roughly $\frac{1}{1024}$ of the current value per block, the transition is always gradual. The parent block's `targetExcess` (which was set by the precompile) provides an unambiguous starting point.
-- **Disabling** (setting `validatorTargetGas` to `false` via `setFeeConfig`): The `targetGas` value provided in the same `setFeeConfig` call (must be >= 1,000,000) is immediately authoritative for block building. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate `targetGas` value, since validators may have drifted the effective gas target far from the previously stored value and using a stale value could cause a dangerous sudden jump in gas capacity.
+- **Disabling** (setting `validatorTargetGas` to `false` via `setFeeConfig`): The `targetGas` value provided in the same `setFeeConfig` call (must be >= 1,000,000) is immediately authoritative for block building upon settlement. The caller should check the current effective gas target (from block headers or RPC) and provide an appropriate `targetGas` value, since validators may have drifted the effective gas target far from the previously stored value and using a stale value could cause a dangerous sudden jump in gas capacity.
 
 #### Initial Fee Configuration
 
