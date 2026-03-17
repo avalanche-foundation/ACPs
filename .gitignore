@@ -1,2 +1,10 @@
 # vim editor
 *.swp
+
+# direnv local config
+.envrc
+
+# Analysis docs (not part of the ACP)
+ACPs/TBD-validator-set-composition/interface-dependency-analysis.md
+ACPs/TBD-validator-set-composition/open-issues.md
+ACPs/TBD-validator-set-composition/analysis-*.md
