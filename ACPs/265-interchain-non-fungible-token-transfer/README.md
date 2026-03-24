@@ -1,4 +1,4 @@
-| ACP           | 257                                                                                                                   |
+| ACP           | 265                                                                                                                   |
 | :------------ | :-------------------------------------------------------------------------------------------------------------------- |
 | **Title**     | Interchain Non-Fungible Token Transfer (ICNFTT)                                                                       |
 | **Author(s)** | Simon ([midnight-commit](https://github.com/midnight-commit)), YakMan ([snow-farmer](https://github.com/snow-farmer)) |
@@ -345,7 +345,7 @@ contract BasicTransferExample {
     // Remote chain configuration
     bytes32 public constant REMOTE_BLOCKCHAIN_ID = 0x898b8aa8353f2b79ee1de07c36474fcee339003d90fa06ea3a90d9e88b7d7c33;
     address public remoteContractAddress;
-    
+
     constructor(
         address _homeContract,
         address _nftContract,
@@ -371,16 +371,16 @@ contract BasicTransferExample {
     ) external {
         // 1. Transfer NFT to this contract (or approve homeContract directly)
         nftContract.transferFrom(msg.sender, address(this), tokenId);
-        
+
         // 2. Approve the Home contract to transfer the NFT
         nftContract.approve(address(homeContract), tokenId);
-        
+
         // 3. Approve fee tokens if paying a fee
         if (fee > 0) {
             feeToken.transferFrom(msg.sender, address(this), fee);
             feeToken.approve(address(homeContract), fee);
         }
-        
+
         // 4. Prepare the send input
         SendTokenInput memory input = SendTokenInput({
             destinationBlockchainID: REMOTE_BLOCKCHAIN_ID,
@@ -390,11 +390,11 @@ contract BasicTransferExample {
             primaryFee: fee,
             requiredGasLimit: 300_000 // Adjust based on Remote contract complexity
         });
-        
+
         // 5. Create token IDs array and send
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = tokenId;
-        
+
         homeContract.send(input, tokenIds);
     }
 }
@@ -417,10 +417,10 @@ contract BatchTransferExample {
     IERC721TokenHome public homeContract;
     IERC721 public nftContract;
     IERC20 public feeToken;
-    
+
     bytes32 public remoteBlockchainID;
     address public remoteContractAddress;
-    
+
     constructor(
         address _homeContract,
         address _nftContract,
@@ -451,19 +451,19 @@ contract BatchTransferExample {
             nftContract.transferFrom(msg.sender, address(this), tokenIds[i]);
             nftContract.approve(address(homeContract), tokenIds[i]);
         }
-        
+
         // 2. Handle fee token approval
         if (fee > 0) {
             feeToken.transferFrom(msg.sender, address(this), fee);
             feeToken.approve(address(homeContract), fee);
         }
-        
+
         // 3. Prepare and execute the batch send
         // Note: Gas limit should scale with batch size
         uint256 gasLimitPerToken = 150_000;
         uint256 baseGasLimit = 100_000;
         uint256 totalGasLimit = baseGasLimit + (gasLimitPerToken * tokenIds.length);
-        
+
         SendTokenInput memory input = SendTokenInput({
             destinationBlockchainID: remoteBlockchainID,
             destinationTokenTransferrerAddress: remoteContractAddress,
@@ -472,7 +472,7 @@ contract BatchTransferExample {
             primaryFee: fee,
             requiredGasLimit: totalGasLimit
         });
-        
+
         homeContract.send(input, tokenIds);
     }
 }
@@ -494,7 +494,7 @@ import {SendTokenInput} from "@tesseract/icnftt/interfaces/IERC721Transferrer.so
 contract ReturnToHomeExample {
     IERC721TokenRemote public remoteContract;
     IERC20 public feeToken;
-    
+
     constructor(address _remoteContract, address _feeToken) {
         remoteContract = IERC721TokenRemote(_remoteContract);
         feeToken = IERC20(_feeToken);
@@ -524,17 +524,17 @@ contract ReturnToHomeExample {
                 tokenIds[i]
             );
         }
-        
+
         // 2. Handle fee
         if (fee > 0) {
             feeToken.transferFrom(msg.sender, address(this), fee);
             feeToken.approve(address(remoteContract), fee);
         }
-        
+
         // 3. Get Home chain info from the Remote contract
         bytes32 homeBlockchainID = remoteContract.getHomeBlockchainID();
         address homeTokenAddress = remoteContract.getHomeTokenAddress();
-        
+
         // 4. Send back to Home
         SendTokenInput memory input = SendTokenInput({
             destinationBlockchainID: homeBlockchainID,
@@ -544,7 +544,7 @@ contract ReturnToHomeExample {
             primaryFee: fee,
             requiredGasLimit: 300_000
         });
-        
+
         remoteContract.send(input, tokenIds);
         // Note: Tokens are burned on the Remote chain and released from
         // escrow on the Home chain
@@ -570,12 +570,12 @@ ICNFTT is designed to work with existing ERC721 contracts without requiring modi
 
 Before implementing ICNFTT, evaluate your collection's requirements:
 
-| Consideration | Questions to Ask |
-| ------------- | ---------------- |
+| Consideration         | Questions to Ask                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------ |
 | **Metadata Strategy** | Does your collection use on-chain or off-chain metadata? Are token URIs static or dynamic? |
-| **State Complexity** | Does your NFT have additional on-chain state (royalties, game attributes, etc.)? |
-| **Permissions** | Who can mint? Are there admin functions that need to work cross-chain? |
-| **Integrations** | Which marketplaces, games, or protocols integrate with your collection? |
+| **State Complexity**  | Does your NFT have additional on-chain state (royalties, game attributes, etc.)?           |
+| **Permissions**       | Who can mint? Are there admin functions that need to work cross-chain?                     |
+| **Integrations**      | Which marketplaces, games, or protocols integrate with your collection?                    |
 
 #### Step 2: Deploy Home Contract
 
@@ -602,7 +602,7 @@ contract MyCollectionHome is ERC721TokenHome {
         teleporterManager,
         existingNFTContract
     ) {}
-    
+
     /**
      * @notice Override to customize metadata transfer
      * @dev This example transfers the token URI as metadata
@@ -644,7 +644,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract MyCollectionRemote is ERC721TokenRemote {
     // Store token URIs received from Home chain
     mapping(uint256 => string) private _tokenURIs;
-    
+
     constructor(
         address teleporterRegistryAddress,
         address teleporterManager,
@@ -660,7 +660,7 @@ contract MyCollectionRemote is ERC721TokenRemote {
         name,
         symbol
     ) {}
-    
+
     /**
      * @notice Override to process metadata received from Home chain
      */
@@ -673,7 +673,7 @@ contract MyCollectionRemote is ERC721TokenRemote {
             _tokenURIs[tokenId] = uri;
         }
     }
-    
+
     /**
      * @notice Returns the token URI
      */
@@ -681,7 +681,7 @@ contract MyCollectionRemote is ERC721TokenRemote {
         require(_exists(tokenId), "Token does not exist");
         return _tokenURIs[tokenId];
     }
-    
+
     function _exists(uint256 tokenId) internal view returns (bool) {
         return _ownerOf(tokenId) != address(0);
     }
