@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Introduce ACP-176-Based Dynamic Gas Limits and Fee Manager Precompile in Subnet-EVM  |
 | **Author(s)** | Ceyhun Onur ([@ceyonur](https://github.com/ceyonur)), Michael Kaplan ([@michaelkaplan13](https://github.com/michaelkaplan13)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/230)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/230)) |
 | **Track** | Standards |
 
 ## Abstract
@@ -137,10 +137,10 @@ interface IACP224FeeManager is IAllowList {
     ///      reducing the risk of mis-ordering arguments.
     struct FeeConfig {
         bool    validatorTargetGas; // When true, validators control targetGas via node preferences
-        uint256 targetGas;          // Target gas consumption per second (T)
+        uint64 targetGas;           // Target gas consumption per second (T)
         bool    staticPricing;      // When true, gas price is always minGasPrice
-        uint256 minGasPrice;        // Minimum gas price in wei (M)
-        uint256 timeToDouble;       // Seconds for gas price to double at max capacity
+        uint64 minGasPrice;         // Minimum gas price in wei (M)
+        uint64 timeToDouble;        // Seconds for gas price to double at max capacity
     }
 
     /// @notice Emitted when fee configuration is updated
@@ -391,12 +391,11 @@ A reference implementation is not yet available and must be provided for this AC
 
 Generally, this has the same security considerations as ACP-176. However, due to the dynamic nature of parameters exposed in the `ACP224FeeManagerPrecompile` there is an additional risk of misconfiguration.  Misconfiguration of parameters could leave the network vulnerable to a DoS attack or result in higher transaction fees than necessary.
 
-
 ## Acknowledgements
 
-* [Stephen Buttolph](https://github.com/StephenButtolph)
-* [Arran Schlosberg](https://github.com/ARR4N)
-* [Austin Larson](https://github.com/alarso16)
+- [Stephen Buttolph](https://github.com/StephenButtolph)
+- [Arran Schlosberg](https://github.com/ARR4N)
+- [Austin Larson](https://github.com/alarso16)
 
 ## Copyright
 
