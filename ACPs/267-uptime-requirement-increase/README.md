@@ -39,13 +39,20 @@ The same change would be applied to `genesis/genesis_fuji.go` and `genesis/genes
 
 The proposed change only raises the validator uptime requirement to 90%, with the uptime calculation method remaining unchanged. Validators are measured by their observed responsiveness during the staking period. Validators and their delegators will only receive rewards if the validator achieves at least 90% uptime; otherwise, they receive no rewards, maintaining the current all-or-nothing reward model with no partial payouts.
 
+### Effective Date
+
+The 90% uptime requirement only applies to validations that meet **both** of the following conditions:
+
+1. The validation **started on or after April 1, 2026**.
+2. The validation **has not ended before the activation time of the AvalancheGo release implementing this ACP**.
+
+Validations that started before April 1, 2026, or that ended before the activation of this change, continue to be evaluated against the existing 80% uptime threshold.
+
 ## Backwards Compatibility
 
 Each node continuously tracks its perceived uptime of its peers throughout the peer's validator staking period. At the end of the peer's validator staking period, each node sets its preference of whether or not to reward the peer based on its perceived uptime.
 
-If sufficient stake increases their peer uptime requirement in the middle of ongoing staking periods, those active validators would have their total accumulated uptime (from their original start time) compared against the new 90% threshold when their staking period ends.
-
-To give validators time to improve their infrastructure if needed, this ACP should be advertised broadly in the community.
+The effective date ensures that validators who began their staking period without knowledge of the increased requirement are not retroactively penalized. This ACP was announced on February 10, 2026, and notifications were added in relevant places including the Core staking UI, block explorers, and validator uptime statistics dashboards. The April 1, 2026 effective date provides sufficient lead time for validators to adjust their infrastructure.
 
 ## Copyright
 
