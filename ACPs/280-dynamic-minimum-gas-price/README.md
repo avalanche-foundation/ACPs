@@ -1,4 +1,4 @@
-| ACP | XXX |
+| ACP | 280 |
 | :- | :- |
 | **Title** | Dynamic Minimum Gas Price |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)) |
