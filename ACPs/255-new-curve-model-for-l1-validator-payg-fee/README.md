@@ -204,6 +204,55 @@ ACP-255's cost plateau at 10-15 validators **aligns with the natural maturity ta
 
 **Economic equilibrium:** The majority of L1s will naturally converge to 10-15 validators over 12-24 months, driven by cost optimization rather than mandates.
 
+## Canonical Scenario Tables
+
+To make the internal-margin and external-margin effects easier to compare, this section reduces the proposal to three explicit scenario paths under the same assumptions.
+
+### Scenario A: Enterprise L1 Lifecycle (3 -> 5 -> 8 validators)
+
+This scenario models an enterprise-style L1 that values operator control and grows conservatively.
+
+| Stage | Network Validators | L1 Validators | ACP-77 Total Monthly Cost | ACP-255 Total Monthly Cost | ACP-255 Per-Validator Cost | Interpretation |
+|---|---|---|---|---|---|---|
+| Launch | 800 | 3 | 3.98 AVAX | 140.12 AVAX | 46.71 AVAX | Strong centralization premium at launch |
+| Early growth | 2,000 | 5 | 6.64 AVAX | 161.57 AVAX | 32.31 AVAX | Total cost rises modestly, but per-validator cost falls materially |
+| Mature enterprise set | 5,000 | 8 | 10.62 AVAX | 190.76 AVAX | 23.84 AVAX | L1 remains expensive, but growth reduces the centralization penalty |
+
+**Internal-margin takeaway:** Under ACP-77, the enterprise L1 is always incentivized to stay as small as possible. Under ACP-255, it may still rationally remain below the 10-15 validator plateau, but every added validator meaningfully reduces per-validator cost. In other words, ACP-255 does not forbid smaller enterprise sets, it taxes them.
+
+### Scenario B: Community L1 Lifecycle (3 -> 10 -> 15 validators)
+
+This scenario models a community-oriented L1 that grows toward the 10-15 validator plateau.
+
+| Stage | Network Validators | L1 Validators | ACP-77 Total Monthly Cost | ACP-255 Total Monthly Cost | ACP-255 Per-Validator Cost | Interpretation |
+|---|---|---|---|---|---|---|
+| Launch | 800 | 3 | 3.98 AVAX | 140.12 AVAX | 46.71 AVAX | Small validator sets are deliberately expensive |
+| Growth plateau entry | 2,000 | 10 | 13.27 AVAX | 111.49 AVAX | 11.15 AVAX | More validators but lower total cost than the 3-validator launch case |
+| Mature community set | 5,000 | 15 | 19.91 AVAX | 142.36 AVAX | 9.49 AVAX | Plateau behavior appears: per-validator cost keeps falling while total cost stays manageable |
+
+**Internal-margin takeaway:** This is the core behavioral target of ACP-255. A community L1 that expands from 3 to 10 validators becomes much more decentralized while also lowering its total fee burden relative to its own launch state under ACP-255. The proposal therefore changes validator growth from a pure cost center into a path toward fee efficiency.
+
+### Scenario C: New Entrant Launch Decision (1 vs 3 vs 10 validators)
+
+This scenario isolates the external-margin decision for a brand-new L1 entering a network with 800 total validators.
+
+| Launch Configuration | Network Validators | ACP-77 Total Monthly Cost | ACP-255 Total Monthly Cost | ACP-255 Per-Validator Cost | Interpretation |
+|---|---|---|---|---|---|
+| 1 validator | 800 | 1.33 AVAX | 81.54 AVAX | 81.54 AVAX | Single-validator entry becomes economically unattractive |
+| 3 validators | 800 | 3.98 AVAX | 140.12 AVAX | 46.71 AVAX | Small launches are possible, but pay a steep centralization premium |
+| 10 validators | 800 | 13.27 AVAX | 95.18 AVAX | 9.52 AVAX | Launching closer to the plateau is far more cost-efficient on a per-validator basis |
+
+**External-margin takeaway:** ACP-77 makes minimal-validator entry the rational default. ACP-255 changes the entry decision entirely: if a new L1 wants to optimize for cost efficiency, it should launch closer to the 10-validator range rather than starting with 1-3 validators and staying there indefinitely.
+
+### Summary Across the Three Scenarios
+
+| Question | ACP-77 Answer | ACP-255 Answer |
+|---|---|---|
+| What is the cheapest way to launch? | Launch with as few validators as possible | Launching too small creates a strong premium |
+| How does an existing L1 lower fee pressure? | Keep validator count low | Move toward the 10-15 validator plateau |
+| What happens to enterprise-style L1s? | Staying small is always cheapest | Staying small remains possible, but centralization is explicitly taxed |
+| What happens to community-style L1s? | Decentralization is mostly altruistic | Decentralization becomes economically legible and eventually cost-efficient |
+
 ## Marginal Cost Comparison
 
 This section addresses the critical question: **How does ACP-255 change the economics of adding validators to an L1?**
