@@ -2,7 +2,7 @@
 | :- | :- |
 | **Title** | Dynamic Minimum Gas Price |
 | **Author(s)** | Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)) |
-| **Status** | Proposed |
+| **Status** | Proposed [Discussion](https://github.com/avalanche-foundation/ACPs/discussions/284) |
 | **Track** | Standards |
 
 ## Abstract
