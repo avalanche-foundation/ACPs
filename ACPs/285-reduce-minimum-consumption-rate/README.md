@@ -1,7 +1,7 @@
 | ACP | 285 |
 | :--- | :--- |
 | **Title** | Reduce Minimum Consumption Rate |
-| **Author(s)** | Matias Antonio ([@crypto-virgil](https://github.com/crypto-virgil)), Eric Lu ([@ericlu-avax](https://github.com/ericlu-avax)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald))|
+| **Author(s)** | Matias Antonio ([@crypto-virgil](https://github.com/crypto-virgil)), Eric Lu ([@ericlu-avax](https://github.com/ericlu-avax)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)) |
 | **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/288)) |
 | **Track** | Standards |
 
@@ -42,6 +42,8 @@ As noted in a [recent public discussion](https://x.com/frostLedger/status/203968
 
 Once a validator selects a staking duration, `MinConsumptionRate` is a key determinant of the staking rewards received, and therefore of the AVAX issued by the protocol as rewards. In aggregate, it is a key protocol parameter determining the AVAX inflation rate, alongside the aggregate stake durations chosen by validators. Given the current network stake, staking behavior, and protocol parameter configurations, the trailing one-year inflation rate is approximately 5.5%. That figure uses circulating supply (AVAX issued minus burned minus staked) as the monetary base, which is the closest analogue to M1 (cash and cash equivalents) in monetary economics.
 
+![AVAX net inflation rate](<AVAX net inflation rate.jpeg>)
+
 The current 10% `MinConsumptionRate` functions as untargeted issuance at the floor of the reward formula. It is a code-level parameter, not the realized APR. The formula multiplies it by the remaining-supply ratio, so the effective minimum-duration APR today sits near 5.4% and keeps declining as the supply budget is drawn down. Because of that multiplier, lowering the parameter from 10% to 7.5% reduces the realized minimum-duration APR by roughly 1.3 percentage points, not the full 2.5 that the raw numbers suggest. Separately, because `MaxConsumptionRate` is unchanged, the same cut more than doubles the gap between the minimum-duration and maximum-duration rates, widening the duration premium across the curve.
 
 The level effect reduces total annual AVAX issuance for as long as the supply budget remains, and the gradient effect roughly doubles the gap between minimum-duration and 365-day reward rates. Today a validator committing for 14 days receives roughly 84% of the rate given for a 365-day commitment, so duration accounts for only about 16% of that variation. Lowering the floor to 7.5% reduces that flat subsidy without touching the ceiling long-duration stakers already receive.
@@ -61,6 +63,10 @@ A faster issuance schedule also brings more newly minted AVAX into circulating s
 Under the proposed change, the gap between the 14-day and 365-day APR widens from 1.02 to 2.30 percentage points, more than doubling the duration premium. A wider premium should encourage validators to choose longer staking periods.
 
 This matters because the relative incentive for longer staking has been shrinking as AVAX supply grows. ACP-236 will erode it further by largely eliminating the extra operational cost of renewing short-duration stakes. The proposed change compensates for that erosion and strengthens the incentive for long-term staking.
+
+![AVAX Staking APR vs Staking Duration over time](<AVAX Staking APR vs Staking Duration over time.jpeg>)
+
+![APR Spread Between Long (365-day) and Short (14-day) Staking Duration](<APR Spread.png>)
 
 This is an expected secondary effect, not a guaranteed outcome. The same structural model behind Goal 1's inflation estimate also projects that the stake-weighted average staking duration would rise by roughly two months. Empirical evidence is mixed on whether the wider premium will flip large validators' duration choices. Conversations with node operators and large-position stakers suggest that liquidity preference may dominate even a 2.30 percentage point premium for some cohorts.
 
@@ -113,7 +119,7 @@ The parameters at activation are:
 | $P$ - reduction period | 30 days |
 | $t_0$ - activation time | Helicon |
 
-### A note on the linear ramp
+### A Note on the Linear Ramp
 
 The reduction is phased so that the floor rate is continuous in a stake's start time. No single moment should carry a disproportionate incentive to enter just before or just after it.
 
@@ -159,15 +165,15 @@ If ACP-273 activates without this proposal, the combination of 48-hour minimum d
 
 1. Is 7.5% the right value, or should `MinConsumptionRate` be reduced further?
 
-The 7.5% floor was selected to produce a meaningful but not extreme shift in the APR gradient. The expected impact from a wider range of `MinConsumptionRate` changes was analyzed, and 7.5% was found to be a good balance between the goals and potential risks. A lower floor (e.g., 5%) might reduce minimum-duration validator participation to levels that negatively affect decentralization, or lead to staking duration increases that are too large, resulting in higher emissions. It is worth noting that these analyses extrapolate beyond what has been observed historically, so a more conservative change is also a precaution against such model misspecification risks. In addition, the risk to certain ecosystem applications (e.g., LSTs and relevant strategies) that are beyond the scope of the structural model for staking preferences was considered and investigated, and the impact on the key variables was assessed. A moderate change to 7.5% and the phased implementation of the change were both chosen to mitigate the potential unmodeled risk.
+  The 7.5% floor was selected to produce a meaningful but not extreme shift in the APR gradient. The expected impact from a wider range of `MinConsumptionRate` changes was analyzed, and 7.5% was found to be a good balance between the goals and potential risks. A lower floor (e.g., 5%) might reduce minimum-duration validator participation to levels that negatively affect decentralization, or lead to staking duration increases that are too large, resulting in higher emissions. It is worth noting that these analyses extrapolate beyond what has been observed historically, so a more conservative change is also a precaution against such model misspecification risks. In addition, the risk to certain ecosystem applications (e.g., LSTs and relevant strategies) that are beyond the scope of the structural model for staking preferences was considered and investigated, and the impact on the key variables was assessed. A moderate change to 7.5% and the phased implementation of the change were both chosen to mitigate the potential unmodeled risk.
 
 2. Should `MaxConsumptionRate` change simultaneously?
 
-Reducing `MinConsumptionRate` without touching `MaxConsumptionRate` preserves the full reward for 365-day stakers. An alternative framing would reduce `MaxConsumptionRate` as well to slow total issuance, accepting lower returns for long-term stakers in exchange for a slower approach to the supply cap. This proposal does not pursue that direction, but it is worth discussing.
+  Reducing `MinConsumptionRate` without touching `MaxConsumptionRate` preserves the full reward for 365-day stakers. An alternative framing would reduce `MaxConsumptionRate` as well to slow total issuance, accepting lower returns for long-term stakers in exchange for a slower approach to the supply cap. This proposal does not pursue that direction, but it is worth discussing.
 
 3. Should this proposal activate concurrently with ACP-273?
 
-Given the Security Considerations above, simultaneous activation with ACP-273 is strongly preferred. The two proposals address the same underlying tension of short staking duration versus network stability, from complementary angles.
+  Given the Security Considerations above, simultaneous activation with ACP-273 is strongly preferred. The two proposals address the same underlying tension of short staking duration versus network stability, from complementary angles.
 
 ## Copyright
 
