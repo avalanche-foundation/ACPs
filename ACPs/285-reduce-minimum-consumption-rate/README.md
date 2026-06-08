@@ -7,7 +7,7 @@
 
 ## Abstract
 
-This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate for a validator whose stake duration approaches the minimum staking duration period. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve network security and validator economics.
+This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate (ARR) for a validator whose stake duration approaches the minimum staking duration period. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve network security and validator economics.
 
 ## Motivation
 
@@ -15,16 +15,16 @@ The proposed change has two goals: reducing the AVAX inflation rate and incentiv
 
 First, lowering the reward-rate floor cuts the rewards given to short-duration stakes. This is projected to reduce the AVAX inflation rate by 0.5 to 1 percentage point per year, reflecting a lower reward rate partially offset by longer average staking durations. A reduction in inflation would benefit not only stakers but also all holders of AVAX by structurally reducing the rate at which the protocol token is diluted.
 
-Second, lowering the floor steepens the APR gradient between minimum- and maximum-duration staking, widening the gap from approximately 1.02 percentage points to 2.30 percentage points. This directly encourages new and existing validators to commit their stake for longer. Economic modeling estimates that this change would extend the stake-weighted average staking duration by approximately two months.
+Second, lowering the floor steepens the ARR gradient between minimum- and maximum-duration staking, widening the gap from approximately 1.02 percentage points to 2.30 percentage points. This directly encourages new and existing validators to commit their stake for longer. Economic modeling estimates that this change would extend the stake-weighted average staking duration by approximately two months.
 
 This proposal is designed to work alongside two related ACPs: [ACP-236](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/236-auto-renewed-staking/README.md) enables auto-renewal of staking positions, and [ACP-273](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/273-reduce-minimum-staking-duration/README.md) reduces the minimum staking duration to 48 hours. Together, those two proposals make a compounding 48-hour stake operationally identical to a long-tenor stake while still getting near-maximum rewards. By widening the staking duration difference to 2.30 percentage points, this ACP restores and improves the incentive for longer-term staking.
 
 ### Background
 
-Primary Network staking rewards follow a linear interpolation between `MinConsumptionRate` and `MaxConsumptionRate` based on a validator's stake duration relative to the `MintingPeriod` (365 days):
+Primary Network staking rewards follow a linear interpolation between `MinConsumptionRate` and `MaxConsumptionRate` based on a validator's stake duration relative to the `MintingPeriod` (365 days). Annualized reward rate (ARR) denotes the rate produced by this formula:
 
 ```
-APR(d) = (RemainingSupply / CurrentSupply) × (MinRate + (MaxRate − MinRate) × d / MintingPeriod)
+ARR(d) = (RemainingSupply / CurrentSupply) × (MinRate + (MaxRate − MinRate) × d / MintingPeriod)
 ```
 
 Where:
@@ -34,7 +34,7 @@ Where:
 - `MintingPeriod` = 365 days
 - `RemainingSupply` = `SupplyCap − CurrentSupply`
 
-This formula produces an APR that increases linearly with duration. `MinConsumptionRate` sets the floor: the reward a validator receives if it stakes for the shortest possible period. `MaxConsumptionRate` sets the ceiling: the reward for a full 365-day commitment.
+This formula produces an ARR that increases linearly with duration. `MinConsumptionRate` sets the floor: the reward a validator receives if it stakes for the shortest possible period. `MaxConsumptionRate` sets the ceiling: the reward for a full 365-day commitment.
 
 ### Goal 1: Reduce AVAX Inflation
 
@@ -44,7 +44,7 @@ Once a validator selects a staking duration, `MinConsumptionRate` is a key deter
 
 ![AVAX net inflation rate](<AVAX net inflation rate.jpeg>)
 
-The current 10% `MinConsumptionRate` functions as untargeted issuance at the floor of the reward formula. It is a code-level parameter, not the realized APR. The formula multiplies it by the remaining-supply ratio, so the effective minimum-duration APR today sits near 5.4% and keeps declining as the supply budget is drawn down. Because of that multiplier, lowering the parameter from 10% to 7.5% reduces the realized minimum-duration APR by roughly 1.3 percentage points, not the full 2.5 that the raw numbers suggest. Separately, because `MaxConsumptionRate` is unchanged, the same cut more than doubles the gap between the minimum-duration and maximum-duration rates, widening the duration premium across the curve.
+The current 10% `MinConsumptionRate` functions as untargeted issuance at the floor of the reward formula. It is a code-level parameter, not the realized ARR. The formula multiplies it by the remaining-supply ratio, so the effective minimum-duration ARR today sits near 5.4% and keeps declining as the supply budget is drawn down. Because of that multiplier, lowering the parameter from 10% to 7.5% reduces the realized minimum-duration ARR by roughly 1.3 percentage points, not the full 2.5 that the raw numbers suggest. Separately, because `MaxConsumptionRate` is unchanged, the same cut more than doubles the gap between the minimum-duration and maximum-duration rates, widening the duration premium across the curve.
 
 The level effect reduces total annual AVAX issuance for as long as the supply budget remains, and the gradient effect roughly doubles the gap between minimum-duration and 365-day reward rates. Today a validator committing for 14 days receives roughly 84% of the rate given for a 365-day commitment, so duration accounts for only about 16% of that variation. Lowering the floor to 7.5% reduces that flat subsidy without touching the ceiling long-duration stakers already receive.
 
@@ -60,13 +60,13 @@ A faster issuance schedule also brings more newly minted AVAX into circulating s
 
 ### Goal 3: Encourage Validators to Stake Longer
 
-Under the proposed change, the gap between the 14-day and 365-day APR widens from 1.02 to 2.30 percentage points, more than doubling the duration premium. A wider premium should encourage validators to choose longer staking periods.
+Under the proposed change, the gap between the 14-day and 365-day ARR widens from 1.02 to 2.30 percentage points, more than doubling the duration premium. A wider premium should encourage validators to choose longer staking periods.
 
 This matters because the relative incentive for longer staking has been shrinking as AVAX supply grows. ACP-236 will erode it further by largely eliminating the extra operational cost of renewing short-duration stakes. The proposed change compensates for that erosion and strengthens the incentive for long-term staking.
 
-![AVAX Staking APR vs Staking Duration over time](<AVAX Staking APR vs Staking Duration over time.jpeg>)
+![AVAX Staking ARR vs Staking Duration over time](<AVAX Staking ARR vs Staking Duration over time.jpeg>)
 
-![APR Spread Between Long (365-day) and Short (14-day) Staking Duration](<APR Spread.png>)
+![ARR Spread Between Long (365-day) and Short (14-day) Staking Duration](<ARR Spread.png>)
 
 This is an expected secondary effect, not a guaranteed outcome. The same structural model behind Goal 1's inflation estimate also projects that the stake-weighted average staking duration would rise by roughly two months. Empirical evidence is mixed on whether the wider premium will flip large validators' duration choices. Conversations with node operators and large-position stakers suggest that liquidity preference may dominate even a 2.30 percentage point premium for some cohorts.
 
@@ -76,7 +76,7 @@ If validators do shift to longer durations, the network benefits further. Longer
 
 Reducing `MinConsumptionRate` from 10% to 7.5% produces the following reward schedule:
 
-| Duration | Current APR (MinRate = 10%) | APR (MinRate = 7.5%) | Compounding APY (MinRate = 7.5%) |
+| Duration | Current ARR (MinRate = 10%) | ARR (MinRate = 7.5%) | Compounding ARR (MinRate = 7.5%) |
 | -------- | --------------------------- | -------------------- | -------------------------------- |
 | 2 days   | -                           | 4.00%                | 4.08%                            |
 | 14 days  | 5.36%                       | 4.08%                | 4.16%                            |
@@ -84,7 +84,7 @@ Reducing `MinConsumptionRate` from 10% to 7.5% produces the following reward sch
 | 182 days | 5.85%                       | 5.18%                | 5.25%                            |
 | 365 days | 6.38%                       | 6.38%                | 6.38%                            |
 
-> All values calculated using the live reward formula with current circulating supply of 470,134,316 AVAX and supply cap of 720,000,000 AVAX. Compound APY assumes the user utilizes ACP-236 auto-renewal for 365 days, and all rewards received are added to the principal and restaked.
+> All values calculated using the live reward formula with current circulating supply of 470,134,316 AVAX and supply cap of 720,000,000 AVAX. Compounding ARR assumes the user utilizes ACP-236 auto-renewal for 365 days, and all rewards received are added to the principal and restaked.
 
 The maximum reward for a 365-day validator is unchanged. The incentive gradient more than doubles, going from a spread of 1.02 percentage points to 2.30 percentage points, an increase of over 125%.
 
@@ -165,7 +165,7 @@ If ACP-273 activates without this proposal, the combination of 48-hour minimum d
 
 1. Is 7.5% the right value, or should `MinConsumptionRate` be reduced further?
 
-  The 7.5% floor was selected to produce a meaningful but not extreme shift in the APR gradient. The expected impact from a wider range of `MinConsumptionRate` changes was analyzed, and 7.5% was found to be a good balance between the goals and potential risks. A lower floor (e.g., 5%) might reduce minimum-duration validator participation to levels that negatively affect decentralization, or lead to staking duration increases that are too large, resulting in higher emissions. It is worth noting that these analyses extrapolate beyond what has been observed historically, so a more conservative change is also a precaution against such model misspecification risks. In addition, the risk to certain ecosystem applications (e.g., LSTs and relevant strategies) that are beyond the scope of the structural model for staking preferences was considered and investigated, and the impact on the key variables was assessed. A moderate change to 7.5% and the phased implementation of the change were both chosen to mitigate the potential unmodeled risk.
+  The 7.5% floor was selected to produce a meaningful but not extreme shift in the ARR gradient. The expected impact from a wider range of `MinConsumptionRate` changes was analyzed, and 7.5% was found to be a good balance between the goals and potential risks. A lower floor (e.g., 5%) might reduce minimum-duration validator participation to levels that negatively affect decentralization, or lead to staking duration increases that are too large, resulting in higher emissions. It is worth noting that these analyses extrapolate beyond what has been observed historically, so a more conservative change is also a precaution against such model misspecification risks. In addition, the risk to certain ecosystem applications (e.g., LSTs and relevant strategies) that are beyond the scope of the structural model for staking preferences was considered and investigated, and the impact on the key variables was assessed. A moderate change to 7.5% and the phased implementation of the change were both chosen to mitigate the potential unmodeled risk.
 
 2. Should `MaxConsumptionRate` change simultaneously?
 
