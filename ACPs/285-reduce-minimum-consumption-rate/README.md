@@ -7,7 +7,7 @@
 
 ## Abstract
 
-This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate for a validator whose stake duration approaches the minimum staking duration period. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve tokenomics and validator economics.
+This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate for a validator whose stake duration approaches the minimum staking duration period. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve network security and validator economics.
 
 ## Motivation
 
@@ -40,7 +40,7 @@ This formula produces an APR that increases linearly with duration. `MinConsumpt
 
 As noted in a [recent public discussion](https://x.com/frostLedger/status/2039683238285713557) by the Avalanche Foundation: *"Inflation should be used surgically. To reward specific behaviors: uptime, performance, ecosystem contribution. Not as a blanket payment for passively existing on the network."*
 
-Once a validator selects a staking duration, `MinConsumptionRate` is a key determinant of the staking rewards received, and therefore of the AVAX issued by the protocol as rewards. In aggregate, it is a key protocol parameter determining the AVAX inflation rate, alongside the aggregate stake durations chosen by validators. Given the current network stake, staking behavior, and protocol parameter configurations, the trailing one-year inflation rate is approximately 5.5%. That figure uses circulating supply (AVAX issued minus burned minus staked) as the monetary base, which is the closest analogue to M1 (cash and cash equivalents) in monetary economics.
+Once a validator selects a staking duration, `MinConsumptionRate` is a key determinant of the staking rewards received, and therefore of the AVAX created under the protocol as rewards. In aggregate, it is a key protocol parameter determining the AVAX inflation rate, alongside the aggregate stake durations chosen by validators. Given the current network stake, staking behavior, and protocol parameter configurations, the trailing one-year inflation rate is approximately 5.5%. That figure uses circulating supply (AVAX issued minus burned minus staked) as the monetary base, which is the closest analogue to M1 (cash and cash equivalents) in monetary economics.
 
 ![AVAX net inflation rate](<AVAX net inflation rate.jpeg>)
 
@@ -54,7 +54,7 @@ A structural model of staking preferences was estimated from historical staking 
 
 Lower emissions for short-duration stakers slow the rate at which new AVAX enters circulation, even with no change in staking behavior.
 
-If `MinConsumptionRate` were left at 10%, the protocol would continue spending its issuance budget faster than necessary. Primary Network rewards are funded from the finite 720 million AVAX cap, and every reward issued is a permanent draw on that budget. The slower it is spent, the more issuance remains available as a policy tool for future needs, and the longer the network sustains rewards before inflation-funded emissions taper toward zero.
+If `MinConsumptionRate` were left at 10%, the protocol would continue spending its security budget faster than necessary. Primary Network rewards are funded from the finite 720 million AVAX cap, and every reward issued is a permanent draw on that budget. The slower it is spent, the more issuance remains available as a policy tool for future needs, and the longer the network sustains rewards before inflation-funded emissions taper toward zero.
 
 A faster issuance schedule also brings more newly minted AVAX into circulating supply over any given period. To the extent that some portion of new issuance is sold rather than restaked, a higher emission rate adds more AVAX to circulating supply per unit time than a lower one. Reducing the floor to 7.5% slows that pace.
 
