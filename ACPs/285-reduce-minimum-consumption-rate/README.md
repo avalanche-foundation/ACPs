@@ -42,13 +42,15 @@ As noted in a [recent public discussion](https://x.com/frostLedger/status/203968
 
 Once a validator selects a staking duration, `MinConsumptionRate` is a key determinant of the staking rewards received, and therefore of the AVAX created under the protocol as rewards. In aggregate, it is a key protocol parameter determining the AVAX inflation rate, alongside the aggregate stake durations chosen by validators. Given the current network stake, staking behavior, and protocol parameter configurations, the trailing one-year inflation rate is approximately 5.5%. That figure uses circulating supply (AVAX issued minus burned minus staked) as the monetary base, which is the closest analogue to M1 (cash and cash equivalents) in monetary economics.
 
-![AVAX net inflation rate](<AVAX net inflation rate.jpeg>)
-
 The current 10% `MinConsumptionRate` functions as untargeted issuance at the floor of the reward formula. It is a code-level parameter, not the realized ARR. The formula multiplies it by the remaining-supply ratio, so the effective minimum-duration ARR today sits near 5.4% and keeps declining as the supply budget is drawn down. Because of that multiplier, lowering the parameter from 10% to 7.5% reduces the realized minimum-duration ARR by roughly 1.3 percentage points, not the full 2.5 that the raw numbers suggest. Separately, because `MaxConsumptionRate` is unchanged, the same cut more than doubles the gap between the minimum-duration and maximum-duration rates, widening the duration premium across the curve.
+
+The mechanical impact of the change can be isolated by holding staking behavior constant, with the aggregate staked amount, staking durations, and transaction fee levels (which affect net emissions) all held at recently observed values. Under those assumptions, inflation is projected to be approximately 0.5 percentage point lower than under the current `MinConsumptionRate`.
+
+![Projected net inflation](<Projected net inflation.png>)
 
 The level effect reduces total annual AVAX issuance for as long as the supply budget remains, and the gradient effect roughly doubles the gap between minimum-duration and 365-day reward rates. Today a validator committing for 14 days receives roughly 84% of the rate given for a 365-day commitment, so duration accounts for only about 16% of that variation. Lowering the floor to 7.5% reduces that flat subsidy without touching the ceiling long-duration stakers already receive.
 
-A structural model of staking preferences was estimated from historical staking data under the current protocol parameter configurations, then used to run counterfactual simulations at the proposed `MinConsumptionRate`. The simulations suggest that the annual inflation rate would fall by 0.5 to 1 percentage point from its current level. The full model specification and estimation are available [here](https://x.com/eric_lu_sc/status/2049126828527251907?s=20).
+As discussed in more detail in Goal 3, staking behavior, and the choice of staking duration in particular, is also likely to respond to the change. A structural model of staking preferences was estimated from historical staking data under the current protocol parameter configurations, then used to run counterfactual simulations at the proposed `MinConsumptionRate`, accounting for the staking duration changes. The simulations suggest that the annual inflation rate would fall by 0.5 to 1 percentage point from its current level. The full model specification and estimation are available [here](https://x.com/eric_lu_sc/status/2049126828527251907?s=20).
 
 ### Goal 2: Extend the Network's Security Budget
 
@@ -57,6 +59,10 @@ Lower emissions for short-duration stakers slow the rate at which new AVAX enter
 If `MinConsumptionRate` were left at 10%, the protocol would continue spending its security budget faster than necessary. Primary Network rewards are funded from the finite 720 million AVAX cap, and every reward issued is a permanent draw on that budget. The slower it is spent, the more issuance remains available as a policy tool for future needs, and the longer the network sustains rewards before inflation-funded emissions taper toward zero.
 
 A faster issuance schedule also brings more newly minted AVAX into circulating supply over any given period. To the extent that some portion of new issuance is sold rather than restaked, a higher emission rate adds more AVAX to circulating supply per unit time than a lower one. Reducing the floor to 7.5% slows that pace.
+
+Holding staking behavior constant, the mechanical impact on the token supply path can be estimated in the same way. Both total supply and circulating supply grow more slowly under the lower `MinConsumptionRate` than at the current level, leaving more of the security budget available for the future.
+
+![Projected AVAX supply](<Projected AVAX supply.png>)
 
 ### Goal 3: Encourage Validators to Stake Longer
 
