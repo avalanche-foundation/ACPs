@@ -11,11 +11,13 @@ This proposal reduces the `MinConsumptionRate` parameter governing Primary Netwo
 
 ## Motivation
 
-The proposed change has two goals: reducing the AVAX inflation rate and incentivizing longer staking durations.
+The proposed change has three goals: reducing the AVAX inflation rate, extending the network's security budget, and incentivizing longer staking durations.
 
-First, lowering the reward-rate floor cuts the rewards given to short-duration stakes. This is projected to reduce the AVAX inflation rate by 0.5 to 1 percentage point per year, reflecting a lower reward rate partially offset by longer average staking durations. A reduction in inflation would benefit not only stakers but also all holders of AVAX by structurally reducing the rate at which the protocol token is diluted.
+First, lowering the reward-rate floor cuts the rewards given to short-duration stakes. This is projected to reduce the AVAX inflation rate by 0.5 to 1 percentage point per year, reflecting a lower reward rate partially offset by longer average staking durations. A reduction in inflation would benefit stakers and holders alike by structurally reducing the rate at which the protocol token is diluted.
 
-Second, lowering the floor steepens the ARR gradient between minimum- and maximum-duration staking, widening the gap from approximately 1.02 percentage points to 2.30 percentage points. This directly encourages new and existing validators to commit their stake for longer. Economic modeling estimates that this change would extend the stake-weighted average staking duration by approximately two months.
+Second, lowering the floor slows the rate at which the network spends its finite security budget, leaving more issuance available to sustain rewards in the future.
+
+Third, lowering the floor steepens the ARR gradient between minimum- and maximum-duration staking, widening the gap from approximately 1.02 percentage points to 2.30 percentage points. This directly encourages new and existing validators to commit their stake for longer. Economic modeling estimates that this change would extend the stake-weighted average staking duration by approximately two months.
 
 This proposal is designed to work alongside two related ACPs: [ACP-236](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/236-auto-renewed-staking/README.md) enables auto-renewal of staking positions, and [ACP-273](https://github.com/avalanche-foundation/ACPs/blob/main/ACPs/273-reduce-minimum-staking-duration/README.md) reduces the minimum staking duration to 48 hours. Together, those two proposals make a compounding 48-hour stake operationally identical to a long-tenor stake while still getting near-maximum rewards. By widening the staking duration difference to 2.30 percentage points, this ACP restores and improves the incentive for longer-term staking.
 
