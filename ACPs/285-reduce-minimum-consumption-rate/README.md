@@ -7,7 +7,7 @@
 
 ## Abstract
 
-This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate (ARR) for a validator whose stake duration approaches the minimum staking duration period. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve network security and validator economics.
+This proposal reduces the `MinConsumptionRate` parameter governing Primary Network staking rewards from 10% to 7.5%. `MinConsumptionRate` sets the annualized reward rate (ARR) for a validator whose stake duration approaches the minimum staking duration. `MaxConsumptionRate` is not modified, leaving the maximum reward available to long-term validators unchanged. The change is intended to improve the long-term alignment between staking duration and network security and to redistribute rewards toward longer-duration participants. It is one of a series of ACPs intended to improve network security and validator economics.
 
 ## Motivation
 
