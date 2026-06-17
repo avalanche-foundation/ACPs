@@ -98,7 +98,7 @@ The maximum reward for a 365-day validator is unchanged. The incentive gradient 
 
 ## Specification
 
-The Primary Network reward rate increases linearly with stake duration, between a floor $r$ (`MinConsumptionRate`) and a ceiling (`MaxConsumptionRate`). This ACP lowers the floor from $10\%$ to $7.5\%$, applied as a linear ramp over 30 days rather than a single step. The ceiling, minting period, and supply cap are unchanged.
+The Primary Network reward rate increases linearly with stake duration, between a floor $r$ (`MinConsumptionRate`) and a ceiling (`MaxConsumptionRate`). This ACP lowers the floor from $10\%$ to $7.5\%$, applied as a linear ramp over 90 days rather than a single step. The ceiling, minting period, and supply cap are unchanged.
 
 ### Mechanism
 
