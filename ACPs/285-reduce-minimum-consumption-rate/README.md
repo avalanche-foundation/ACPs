@@ -98,7 +98,7 @@ The maximum reward for a 365-day validator is unchanged. The incentive gradient 
 
 ## Specification
 
-The Primary Network reward rate increases linearly with stake duration, between a floor $r$ (`MinConsumptionRate`) and a ceiling (`MaxConsumptionRate`). This ACP lowers the floor from $10\%$ to $7.5\%$, applied as a linear ramp over 30 days rather than a single step. The ceiling, minting period, and supply cap are unchanged.
+The Primary Network reward rate increases linearly with stake duration, between a floor $r$ (`MinConsumptionRate`) and a ceiling (`MaxConsumptionRate`). This ACP lowers the floor from $10\%$ to $7.5\%$, applied as a linear ramp over 90 days rather than a single step. The ceiling, minting period, and supply cap are unchanged.
 
 ### Mechanism
 
@@ -114,9 +114,9 @@ $$r(t) = r_0 - \Delta \cdot \frac{\min(t - t_0,\ P)}{P}$$
 
 This decreases linearly from $r_0$ at $t_0$ to $r_0 - \Delta$ at $t_0 + P$, and holds at $r_0 - \Delta$ thereafter.
 
-$r(t)$ is evaluated once per stake, using the stake's start time, and is fixed for that stake's full duration. A stake beginning during the ramp locks in the rate at its start, so a stake that starts on day 15 uses $8.75\%$ for its entire term. Stakes already active at $t_0$ are unaffected, since their reward is determined at their own start time.
+$r(t)$ is evaluated once per stake, using the stake's start time, and is fixed for that stake's full duration. A stake beginning during the ramp locks in the rate at its start, so a stake that starts on day 45 uses $8.75\%$ for its entire term. Stakes already active at $t_0$ are unaffected, since their reward is determined at their own start time.
 
-Rates are stored in units of `PercentDenominator` $= 10^6$, so $r_0 = 100{,}000$ and $\Delta = 25{,}000$. Because $r(t)$ is an integer, it decreases by one unit, $0.0001$ percentage points, approximately every $1.728$ minutes, which is the $43{,}200$-minute window divided by $25{,}000$ units.
+Rates are stored in units of `PercentDenominator` $= 10^6$, so $r_0 = 100{,}000$ and $\Delta = 25{,}000$. Because $r(t)$ is an integer, it decreases by one unit, $0.0001$ percentage points, approximately every $5.184$ minutes, which is the $129{,}600$-minute window divided by $25{,}000$ units.
 
 The parameters at activation are:
 
@@ -124,7 +124,7 @@ The parameters at activation are:
 | --------- | --------------------- |
 | $r_0$ - initial `MinConsumptionRate` | 10% (100,000) |
 | $\Delta$ - total reduction | 2.5% (25,000) |
-| $P$ - reduction period | 30 days |
+| $P$ - reduction period | 90 days |
 | $t_0$ - activation time | Helicon |
 
 ### A Note on the Linear Ramp
@@ -133,7 +133,7 @@ The reduction is phased so that the floor rate is continuous in a stake's start 
 
 A single-step reduction breaks that property. The floor would drop discontinuously at $t_0$. A stake beginning just before $t_0$ locks in $10\%$ for its full term, and a stake beginning just after locks in $7.5\%$. An arbitrarily small difference in start time produces the entire $2.5$-point change, so the marginal value of staking one moment earlier becomes unbounded at the boundary. That concentrates a one-time incentive to front-run activation, producing a spike of staking immediately before $t_0$ followed by a lull.
 
-The linear ramp removes the discontinuity. Just after $t_0$ the floor is still approximately $10\%$, and it declines by only $0.0001$ percentage points about every $1.728$ minutes. Staking one day earlier during the window changes the locked-in rate by roughly $0.083$ percentage points rather than the full $2.5$. The incentive to enter at a higher rate is spread smoothly across the 30 days instead of concentrated at a single block, and integrators such as liquid staking protocols have the full window to adjust rather than repricing instantaneously.
+The linear ramp removes the discontinuity. Just after $t_0$ the floor is still approximately $10\%$, and it declines by only $0.0001$ percentage points about every $5.184$ minutes. Staking one day earlier during the window changes the locked-in rate by roughly $0.028$ percentage points rather than the full $2.5$. The incentive to enter at a higher rate is spread smoothly across the 90 days instead of concentrated at a single block, and integrators such as liquid staking protocols have the full window to adjust rather than repricing instantaneously.
 
 ### Unchanged Parameters
 
@@ -157,7 +157,7 @@ The change affects only new staking periods initiated after activation. Validato
 
 ## Reference Implementation
 
-The genesis `MinConsumptionRate` stays at 10%. Two new values drive the transition, a total reduction of 2.5% and a reduction period of 30 days. They are applied in the `GetRewardsCalculator` function (`vms/platformvm/txs/executor/state_changes.go`), which reads the current chain timestamp and decides the rate. Before activation it returns the static 10% calculator. For 30 days after the Helicon upgrade, the P-Chain builds the calculator from a copy of the reward config with `MinConsumptionRate` reduced by the interpolated amount. After the 30-day window, it builds the calculator with the full 2.5% reduction applied, landing exactly on 7.5%.
+The genesis `MinConsumptionRate` stays at 10%. Two new values drive the transition, a total reduction of 2.5% and a reduction period of 90 days. They are applied in the `GetRewardsCalculator` function (`vms/platformvm/txs/executor/state_changes.go`), which reads the current chain timestamp and decides the rate. Before activation it returns the static 10% calculator. For 90 days after the Helicon upgrade, the P-Chain builds the calculator from a copy of the reward config with `MinConsumptionRate` reduced by the interpolated amount. After the 90-day window, it builds the calculator with the full 2.5% reduction applied, landing exactly on 7.5%.
 
 The reward formula in `vms/platformvm/reward/calculator.go` is unchanged and simply receives the reduced rate. Activation is gated on the Helicon upgrade timestamp in the upgrade configuration. The implementation does not introduce new state transitions or P-Chain transaction types.
 
