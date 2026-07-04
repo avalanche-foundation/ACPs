@@ -139,7 +139,12 @@ Potential compatibility considerations across both environments include:
 
 ## Reference Implementation
 
-A reference implementation is not yet provided.
+The reference implementation for this ACP is split across two codebases:
+
+- **Coreth (C-Chain):** a network upgrade that activates `maxCodeSize = 49,152` and `maxInitCodeSize = 98,304` on the C-Chain, and threads those activated values through the existing EIP-170/EIP-3860 enforcement points in `core/state_transition.go`, `core/txpool/validation.go`, and `sync/client/client.go`, with matching coverage in `core/state_processor_test.go`, `sync/client/client_test.go`, and `params/protocol_params_test.go`.
+- **Subnet-EVM (Avalanche L1s):** explicit `maxCodeSize` and `maxInitCodeSize` consensus parameters in chain configuration and upgrade parsing, validation at genesis and upgrade time, `maxInitCodeSize = 2 * maxCodeSize` defaulting when omitted, and enforcement through the same contract creation, txpool, and sync code paths. The implementation naturally touches `params/extras/config.go`, `params/config_extra.go`, `core/genesis.go`, `core/state_transition.go`, `core/txpool/validation.go`, and `sync/client/client.go`, with corresponding tests.
+
+Together, these changes provide the full reference implementation: Coreth demonstrates the C-Chain-first activation path, while Subnet-EVM demonstrates the Avalanche L1 customizability surface.
 
 A compliant implementation should:
 
