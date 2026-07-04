@@ -26,6 +26,8 @@ Several application teams want to deploy larger contracts for reasons that are o
 
 Recent market examples, including Robinhood's reported support for materially larger contracts than Ethereum, show that code-size policy is increasingly a competitive chain feature rather than just a low-level implementation detail.
 
+Fresh on-chain sampling also suggests the current EIP-170 ceiling is a binding constraint in active EVM environments rather than a merely theoretical one. In a 2026-07-04 sample of the most recent 2,000 Base blocks, there were 217 successful contract creations. Of those deployments, 12 produced runtime bytecode of at least 22,000 bytes, 11 were at least 23,000 bytes, and 4 were at least 24,000 bytes. The largest observed runtime artifacts were 24,561 bytes, only 15 bytes below Ethereum's 24,576-byte cap. This is strong evidence that builders already ship directly against the existing ceiling when chain activity is high. A contemporaneous recent C-Chain sample showed much lower contract-creation volume, so the cleaner empirical signal comes from broader EVM deployment behavior rather than recent Avalanche-only flow.
+
 Making the C-Chain the first mover does two things:
 
 1. it gives Avalanche's flagship EVM environment a stronger builder proposition immediately; and
