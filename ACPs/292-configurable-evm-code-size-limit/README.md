@@ -1,4 +1,6 @@
-| ACP | TBD |
+# ACP-292: C-Chain-First EVM Contract Code Size Increase with Avalanche L1 Customizability
+
+| ACP | 292 |
 | :--- | :--- |
 | **Title** | C-Chain-First EVM Contract Code Size Increase with Avalanche L1 Customizability |
 | **Author(s)** | Giacomo Barbieri [(@ijaack94)](https://x.com/ijaack94) |
