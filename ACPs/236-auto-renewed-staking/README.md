@@ -18,7 +18,7 @@ The current staking system on the Avalanche P-Chain restricts flexibility for st
 
 Auto-renewed staking introduces a mechanism that allows validators to remain staked indefinitely, without having to manually renew staking transactions at the end of each period.
 
-Instead of committing to a fixed endtime upfront, validators specify a cycle duration (period) and an `AutoCompoundRewardShares` value when they submit an `AddAutoRenewedValidatorTx`. At the end of each cycle, the validator is automatically restaked for a new cycle. The validator (via `Owner`) may update the auto-renew config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
+Instead of committing to a fixed endtime upfront, validators specify a cycle duration (`Period`) and an `AutoCompoundRewardShares` value when they submit an `AddAutoRenewedValidatorTx`. At the end of each cycle, an eligible (that met uptime requirements) validator is automatically restaked for a new cycle. The validator (via `ValidatorAuthority`) may update the auto-renew config at any time during a cycle; such updates take effect only at the end of the current cycle. To stop validating, the validator signals intent to stop validating by updating the next cycle’s period to `0`; this causes the validator to gracefully exit at the end of the current cycle and unlock their staked funds. The minimum and maximum cycle lengths follow the same protocol parameters as before (`MinStakeDuration` and `MaxStakeDuration`).
 
 Note: On mainnet, the current configuration is: `MinStakeDuration = 14 days` and `MaxStakeDuration = 365 days`.
 
@@ -38,7 +38,7 @@ Note: Submitting an `AddAutoRenewedValidatorTx` immediately followed by a `SetAu
 
 ### Auto-Renew Config
 
-The `Owner` field defines who is authorized to modify the validator's auto-renew config.
+The `ValidatorAuthority` field defines who is authorized to modify the validator's auto-renew config.
 
 The auto-renew config defines the validator's end-of-cycle behavior: whether it continues into the next cycle and how rewards are split between restaking and withdrawal.
 
@@ -63,7 +63,7 @@ type AddAutoRenewedValidatorTx struct {
   BaseTx `serialize:"true"`
   
   // Node ID of the validator
-  ValidatorNodeID ids.NodeID `serialize:"true" json:"nodeID"`
+  ValidatorNodeID types.JSONByteSlice `serialize:"true" json:"nodeID"`
   
   // [Signer] is the BLS key for this validator.
   Signer signer.Signer `serialize:"true" json:"signer"`
@@ -77,16 +77,13 @@ type AddAutoRenewedValidatorTx struct {
   // Where to send delegation rewards when done validating
   DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
 
-  // Who is authorized to modify the auto-renew config
-  Owner fx.Owner `serialize:"true" json:"owner"`
+  // Who is authorized to manage this validator
+  ValidatorAuthority fx.Owner `serialize:"true" json:"validatorAuthority"`
   
   // Fee this validator charges delegators as a percentage, times 10,000
   // For example, if this validator has DelegationShares=300,000 then they
   // take 30% of rewards from delegators
-  DelegationShares uint32 `serialize:"true" json:"shares"`
-
-  // Weight of this validator used when sampling
-  Wght uint64 `serialize:"true" json:"weight"`
+  DelegationShares uint32 `serialize:"true" json:"delegationShares"`
 
   // Percentage of rewards to restake at the end of each cycle, expressed in millionths (percentage * 10,000).
   // Range [0..1_000_000]:
