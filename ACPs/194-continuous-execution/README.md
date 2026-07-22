@@ -183,7 +183,7 @@ Any block that attempts to be enqueued while the current size of the queue is la
 
 ### Block executor
 
-During activation of Continuous Execution, the block executor's timestamp $t_e$ is initialised to the timestamp of the last accepted block.
+During the activation of Continuous Execution, the block executor's timestamp $t_e$ is initialised to the timestamp of the last accepted block.
 
 Prior to executing a block with timestamp $t_b$, the executor's timestamp and excess is updated:
 
