@@ -9,11 +9,11 @@
 
 [EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md) was activated on the Ethereum mainnet in May 2025 as part of the Pectra upgrade, and introduced a new "set code transaction" type that allows Externally Owned Accounts (EOAs) to set the code in their account. This enabled several UX improvements, including batching multiple operations into a single atomic transaction, sponsoring transactions on behalf of another account, and privilege de-escalation for EOAs.
 
-This ACP proposes adding a similar transaction type and functionality to Avalanche EVM implementations in order to have them support the same style of UX available on Ethereum. Modifications to the handling of account nonce and balances are required in order for it to be safe when used in conjunction with the streaming asynchronous execution (SAE) mechanism proposed in [ACP-194](https://github.com/avalanche-foundation/ACPs/tree/4a9408346ee408d0ab81050f42b9ac5ccae328bb/ACPs/194-streaming-asynchronous-execution).
+This ACP proposes adding a similar transaction type and functionality to Avalanche EVM implementations in order to have them support the same style of UX available on Ethereum. Modifications to the handling of account nonce and balances are required in order for it to be safe when used in conjunction with the Continuous Execution mechanism proposed in [ACP-194](../194-continuous-execution/README.md).
 
 ## Motivation
 
-The motivation for this ACP is the same as the motivation described in [EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#motivation). However, EIP-7702 as implemented for Ethereum breaks invariants required for EVM chains that use the ACP-194 SAE mechanism.
+The motivation for this ACP is the same as the motivation described in [EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#motivation). However, EIP-7702 as implemented for Ethereum breaks invariants required for EVM chains that use the ACP-194 Continuous Execution mechanism.
 
 There has been strong community feedback in support of ACP-194 for its potential to:
 - Allow for increasing the target gas rate of Avalanche EVM chains, including the C-Chain
@@ -24,12 +24,12 @@ Given the strong support for ACP-194, bringing EIP-7702-style functionality to A
 
 ### Invariants needed for ACP-194
 
-There are [two invariants explicitly broken by EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#backwards-compatibility) that are required for SAE. They are:
+There are [two invariants explicitly broken by EIP-7702](https://github.com/ethereum/EIPs/blob/e17d216b4e8b359703ddfbc84499d592d65281fb/EIPS/eip-7702.md#backwards-compatibility) that are required for Continuous Execution. They are:
 
 1. An account balance can only decrease as a result of a transaction originating from that account.
 1. An EOA nonce may not increase after transaction execution has begun.
 
-These invariants are required for SAE in order to be able to statically analyze (i.e. determine without executing the transaction) that a transaction:
+These invariants are required for Continuous Execution in order to be able to statically analyze (i.e. determine without executing the transaction) that a transaction:
 - Has the proper nonce
 - Will have sufficient balance to pay for its worst case transaction fee plus the balance it sends
 
@@ -68,7 +68,7 @@ The precompile will maintain a mapping of accounts to their current reserved bal
 During transaction verification, the following rules are applied:
 - If the sender EOA account has not set code via an EIP-7702 transaction, no reserved balance is required.
     - The transaction is confirmed to be able to pay for its worst case transaction fee and transferred balance by looking at the sender account's regular balance and accounting for prior transactions it has sent that are still in the pending execution queue, as specified in ACP-194.
-- Otherwise, if the sender EOA account has previously been delegated via an EIP-7702 transaction (even if that transaction is still in the pending execution queue), then the account's current "[settled](https://github.com/avalanche-foundation/ACPs/tree/4a9408346ee408d0ab81050f42b9ac5ccae328bb/ACPs/194-streaming-asynchronous-execution#settling-blocks)" reserved balance must be sufficient to cover the sum of the worst case transaction fees and balances sent for all of the transactions in the pending execution queue after the set code transaction.
+- Otherwise, if the sender EOA account has previously been delegated via an EIP-7702 transaction (even if that transaction is still in the pending execution queue), then the account's current "[settled](../194-continuous-execution/README.md#settling-blocks)" reserved balance must be sufficient to cover the sum of the worst case transaction fees and balances sent for all of the transactions in the pending execution queue after the set code transaction.
 
 During transaction execution, the following rules are applied:
 - When initially deducting balance from the sender EOA account for the maximum transaction fee and balance sent with the transaction, the account's regular balance is used first. The account's reserved balance is only reduced if the regular balance is insufficient.
