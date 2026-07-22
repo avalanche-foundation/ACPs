@@ -1,22 +1,22 @@
 | ACP | 194 |
 | :--- | :--- |
-| **Title** | Streaming Asynchronous Execution |
+| **Title** | Continuous Execution |
 | **Author(s)** | Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/196)) |
+| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/196)) |
 | **Track** | Standards |
 
 
 ## Abstract
 
-Streaming Asynchronous Execution (SAE) decouples consensus and execution by introducing a queue upon which consensus is performed.
-A concurrent execution stream is responsible for clearing the queue and reporting a delayed state root for recording by later rounds of consensus.
+Continuous Execution decouples consensus and execution by introducing a queue upon which consensus is performed.
+A concurrent executor is responsible for clearing the queue and reporting a delayed state root for recording by later rounds of consensus.
 Validation of transactions to be pushed to the queue is lightweight but guarantees eventual execution.
 
 ## Motivation
 
 ### Performance improvements
 
-1. Concurrent consensus and execution streams eliminate node context switching, reducing latency caused by each waiting on the other.
+1. Concurrent consensus and execution eliminate node context switching, reducing latency caused by each waiting on the other.
 In particular, "VM time" (akin to CPU time) more closely aligns with wall time since it is no longer eroded by consensus.
 This increases gas per wall-second even without an increase in gas per VM-second.
 2. Lean, execution-only clients can rapidly execute the queue agreed upon by consensus, providing accelerated receipt issuance and state computation.
@@ -49,7 +49,7 @@ flowchart LR
     I[Proposed] --> E[Executed] --> A[Accepted/Settled]
 ```
 
-Under SAE, a block is considered valid if all of its transactions can be paid for when eventually _executed_, after which the block is _accepted_ by consensus. The act of _acceptance_ enqueues the block to be _executed_ asynchronously. In the future, some as-yet-unknown later block will reference the execution results and _settle_ all transactions from the _executed_ block.
+With Continuous Execution, a block is considered valid if all of its transactions can be paid for when eventually _executed_, after which the block is _accepted_ by consensus. The act of _acceptance_ enqueues the block to be _executed_ asynchronously. In the future, some as-yet-unknown later block will reference the execution results and _settle_ all transactions from the _executed_ block.
 
 ```mermaid
 flowchart LR
@@ -183,7 +183,7 @@ Any block that attempts to be enqueued while the current size of the queue is la
 
 ### Block executor
 
-During the activation of SAE, the block executor's timestamp $t_e$ is initialised to the timestamp of the last accepted block.
+During activation of Continuous Execution, the block executor's timestamp $t_e$ is initialised to the timestamp of the last accepted block.
 
 Prior to executing a block with timestamp $t_b$, the executor's timestamp and excess is updated:
 
@@ -249,7 +249,7 @@ The `baseFeePerGas` field MUST be populated with the gas price based on the wors
 
 ### Configuration Parameters
 
-As noted above, SAE depends on the values of $\tau$ and $\lambda$ to be set as parameters and the values of $\omega_B$ and $\omega_Q$ are derived from $T$.
+As noted above, Continuous Execution depends on the values of $\tau$ and $\lambda$ to be set as parameters and the values of $\omega_B$ and $\omega_Q$ are derived from $T$.
 
 Parameters to specify for the C-Chain are:
 
@@ -275,7 +275,7 @@ Likely fields to change include:
 
 ## Reference Implementation
 
-A reference implementation is still a work-in-progress. This ACP will be updated to include a reference implementation once one is available.
+Continuous Execution is implemented in AvalancheGo [here](https://github.com/ava-labs/avalanchego/tree/a9f00e53e2884107db88d83eb30557070b64e28a/vms/saevm)
 
 ## Security Considerations
 
@@ -384,7 +384,7 @@ D &= \frac{f_W}{f_A} \\
 \end{align}
 $$
 
-When the queue is empty (i.e. the execution stream has caught up with accepted transactions), the worst-case fee estimate $f_W$ is known to be the actual base fee $f_A$; i.e. $Q = \emptyset \implies D=1$. The previous bound on $\Delta x_W - \Delta x_A$ also bounds Mallory's ability such that:
+When the queue is empty (i.e. the executor has caught up with accepted transactions), the worst-case fee estimate $f_W$ is known to be the actual base fee $f_A$; i.e. $Q = \emptyset \implies D=1$. The previous bound on $\Delta x_W - \Delta x_A$ also bounds Mallory's ability such that:
 
 $$
 \begin{align}
@@ -418,7 +418,7 @@ In particular, the API method `eth_getBlockReceipts` MUST return the receipts co
 #### Named blocks
 
 The Ethereum Mainnet APIs allow for retrieving blocks by named parameters that the API server resolves based on their consensus mechanism.
-Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are mapped to SAE in terms of the _execution_ status of blocks and MUST be interpreted as follows:
+Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are mapped in terms of the _execution_ status of blocks and MUST be interpreted as follows:
 
  * _pending_: the most recently _accepted_ block;
  * _latest_: the block that was most recently _executed_;

@@ -13,7 +13,7 @@ Proposes implementing [ACP-176](https://github.com/avalanche-foundation/ACPs/blo
 
 ACP-176 updated the EVM dynamic fee mechanism to more accurately achieve the target gas consumption on-chain. It also added a mechanism for the target gas consumption rate to be dynamically updated. Until now, ACP-176 was only added to Coreth (C-Chain), primarily because most L1s prefer to control their fees and gas targets through the `FeeManagerPrecompile` and `FeeConfig` in genesis chain configuration, and the existing `FeeManagerPrecompile` is not compatible with the ACP-176 fee mechanism.
 
-[ACP-194](https://github.com/avalanche-foundation/ACPs/blob/aa3bea24431b2fdf1c79f35a3fd7cc57eeb33108/ACPs/194-streaming-asynchronous-execution/README.md) (SAE) depends on having a gas target and capacity mechanism aligned with ACP-176. Specifically, there must be a known gas capacity added per second, and maximum gas capacity. The existing windower fee mechanism employed by Subnet-EVM does not provide these properties because it does not have a fixed capacity rate, making it difficult to calculate worst-case bounds for gas prices. As such, adding ACP-176 into Subnet-EVM is a functional requirement for L1s to be able to use SAE in the future. Adding ACP-176 fee dynamics to Subnet-EVM also has the added benefit of aligning with Coreth such that only a single mechanism needs to be maintained on a go-forwards basis.
+[ACP-194](../194-continuous-execution/README.md) (Continuous Execution) depends on having a gas target and capacity mechanism aligned with ACP-176. Specifically, there must be a known gas capacity added per second, and maximum gas capacity. The existing windower fee mechanism employed by Subnet-EVM does not provide these properties because it does not have a fixed capacity rate, making it difficult to calculate worst-case bounds for gas prices. As such, adding ACP-176 into Subnet-EVM is a functional requirement for L1s to be able to use Continuous Execution in the future. Adding ACP-176 fee dynamics to Subnet-EVM also has the added benefit of aligning with Coreth such that only a single mechanism needs to be maintained on a go-forwards basis.
 
 While both ACP-176 and ACP-194 will be required upgrades for L1s, this ACP aims to provide similar controls for chains with a new precompile. A new dynamic fee configuration and fee manager precompile that maps well into the ACP-176 mechanism will be added, optionally allowing admins to adjust fee parameters dynamically.
 
@@ -93,15 +93,15 @@ The gas capacity added per second (`R`) always being equal to `2*T` keeps it suc
 
 #### Max Capacity Factor (C) Design Rationale
 
-The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (SAE)](https://github.com/avalanche-foundation/ACPs/tree/main/ACPs/194-streaming-asynchronous-execution#block-size) defines the max gas capacity (i.e., max block size/block gas limit) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This definition ensures that the transaction queue can always be fully saturated. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
+The maximum gas capacity (`C`) is intentionally not configurable for L1s. [ACP-194 (Continuous Execution)](../194-continuous-execution/README.md#block-size) defines the max gas capacity (i.e., max block size/block gas limit) as $2 \cdot T \cdot \tau \cdot \lambda$, where $\tau$ is the constant delay and $\lambda$ is the inverse of the minimum percentage of the gas limit charged. This definition ensures that the transaction queue can always be fully saturated. This means that the max capacity of the C-Chain will actually double upon ACP-194 activation, since it is currently $2 \cdot T \cdot 5$ and it will become $2 \cdot T \cdot 5 \cdot 2$.
 
-The original motivation to make this configurable was to allow for very high maximum gas usage by a single block, primarily to support large contract deployments. Given that SAE will be activated at the same time as ACP-224, the max capacity of the C-Chain will double upon activation, further reducing the need for configurability. Additionally Ethereum's Fusaka upgrade introduces a maximum transaction gas limit of $2^{24}$ (~16.7M), which makes this concern largely moot.
+The original motivation to make this configurable was to allow for very high maximum gas usage by a single block, primarily to support large contract deployments. Given that Continuous Execution will be activated at the same time as ACP-224, the max capacity of the C-Chain will double upon activation, further reducing the need for configurability. Additionally Ethereum's Fusaka upgrade introduces a maximum transaction gas limit of $2^{24}$ (~16.7M), which makes this concern largely moot.
 
 Given these considerations, `C` was changed to not be parametrizable for L1s because:
 
-1. SAE provides clear rationale for the max capacity value (ensuring the transaction queue can always be fully saturated).
+1. Continuous Execution provides clear rationale for the max capacity value (ensuring the transaction queue can always be fully saturated).
 2. The future maximum transaction gas limit of 16.7M makes large contract deployments less of a concern.
-3. There are very limited benefits to allowing `C` to be higher than the SAE-defined value in the future.
+3. There are very limited benefits to allowing `C` to be higher than the value defined by Continuous Execution in the future.
 4. It's still a function of `T`, so it can be adjusted dynamically via the `ACP224FeeManagerPrecompile` if needed.
 
 ### Dynamic Gas Target Via Validator Preference
@@ -163,7 +163,7 @@ interface IACP224FeeManager is IAllowList {
 }
 ```
 
-For chains with the precompile activated, `setFeeConfig` can be used to dynamically change all fee configuration parameters, including both numeric values and mode flags. Importantly, any updates made via calls to `setFeeConfig` in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](https://github.com/avalanche-foundation/ACPs/tree/61d2a2a/ACPs/194-streaming-asynchronous-execution#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
+For chains with the precompile activated, `setFeeConfig` can be used to dynamically change all fee configuration parameters, including both numeric values and mode flags. Importantly, any updates made via calls to `setFeeConfig` in a transaction will take effect only as of _settlement_ of the transaction, not as of _acceptance_ or _execution_ (for transaction life cycles/status, refer to ACP-194 [here](../194-continuous-execution/README.md#description)). This ensures that all nodes apply the same worst-case bounds validation on transactions being accepted into the queue, since the worst-case bounds are affected by changes to the fee configuration.
 
 #### FeeConfig Fields
 
@@ -369,7 +369,7 @@ ACP-224 will require a network update in order to activate the new fee mechanism
 
 Activation of the ACP-224 mechanism will deactivate the prior fee mechanism and the prior `FeeManagerPrecompile`. This ensures that there is no ambiguity or overlap between legacy and new pricing logic. The `ACP224FeeManagerPrecompile` with `initialFeeConfig` replaces the prior genesis chain configuration for fee parameters. For existing networks, a network upgrade that activates the `ACP224FeeManagerPrecompile` with `initialFeeConfig` should be used to configure the new fee parameters.
 
-ACP-224 will be activated at the same time as ACP-194 (SAE) in the same network upgrade (Helicon). This coordinated activation is required because ACP-194 depends on the gas target and capacity mechanism defined by ACP-176, which this ACP implements for Subnet-EVM. Networks that do not activate ACP-224 will not be able to use ACP-194.
+ACP-224 will be activated at the same time as ACP-194 (Continuous Execution) in the same network upgrade (Helicon). This coordinated activation is required because ACP-194 depends on the gas target and capacity mechanism defined by ACP-176, which this ACP implements for Subnet-EVM. Networks that do not activate ACP-224 will not be able to use ACP-194.
 
 ### Early Activation of `ACP224FeeManagerPrecompile`
 
