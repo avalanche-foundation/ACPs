@@ -418,7 +418,7 @@ In particular, the API method `eth_getBlockReceipts` MUST return the receipts co
 #### Named blocks
 
 The Ethereum Mainnet APIs allow for retrieving blocks by named parameters that the API server resolves based on their consensus mechanism.
-Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are mapped in terms of the _execution_ status of blocks and MUST be interpreted as follows:
+Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are now mapped in terms of the _execution_ status of blocks and MUST be interpreted as follows:
 
  * _pending_: the most recently _accepted_ block;
  * _latest_: the block that was most recently _executed_;
