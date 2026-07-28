@@ -7,7 +7,7 @@
 
 ## Abstract
 
-Defines a standard smart contract interface and abstract implementation for importing EVM events from any blockchain within Avalanche using [Avalanche Warp Messaging](https://docs.avax.network/build/cross-chain/awm/overview).
+Defines a standard smart contract interface and abstract implementation for importing EVM events from any blockchain within Avalanche using [Avalanche Warp Messaging](https://build.avax.network/docs/cross-chain/avalanche-warp-messaging/overview).
 
 ## Motivation
 
