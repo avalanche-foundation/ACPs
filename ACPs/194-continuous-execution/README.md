@@ -420,9 +420,12 @@ In particular, the API method `eth_getBlockReceipts` MUST return the receipts co
 The Ethereum Mainnet APIs allow for retrieving blocks by named parameters that the API server resolves based on their consensus mechanism.
 Other than the _earliest_ (genesis) named block, which MUST be interpreted in the same manner, all other named blocks are now mapped in terms of the _execution_ status of blocks and MUST be interpreted as follows:
 
- * _pending_: the most recently _accepted_ block;
+ * _pending_: the most recently _accepted_ block OR the most recently _executed_ block;
  * _latest_: the block that was most recently _executed_;
  * _safe_ and _finalized_: the block that was most recently _settled_.
+
+Mapping _pending_ to last-accepted provides a mechanism for retrieving said block, while mapping it to last-executed aligns with EVM-ecosystem tooling that expects "pending" blocks to have execution artefacts.
+Implementations SHOULD map to last-executed for broader compatibility and MUST document their selected treatment.
 
 > [!NOTE]
 > The finality guarantees of Snowman consensus remove any distinction between _safe_ and _finalized_. 
