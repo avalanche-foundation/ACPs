@@ -104,7 +104,7 @@ $D$ and $Q$ were chosen such that it takes approximately 3,600 consecutive block
 
 Subnet-EVM chains use the same values of $M$, $D$, $Q$, and initial $q$ as the C-Chain.
 
-A chain that activates this ACP at genesis may override the initial $q$ with the optional `initialMinDelayMS` field in its genesis chain config. The initial $q$ is then the integer for which $M \cdot e^{\frac{q}{D}}$ is closest to `initialMinDelayMS`. The value must not exceed the default initial `minimumBlockDelay` of approximately 2,000 milliseconds. The field has no effect on chains that activate this ACP after genesis.
+A chain that activates this ACP at genesis may override the initial $q$ with the optional `initialMinDelayMS` field in its genesis chain config. The initial $q$ is then the integer for which $M \cdot e^{\frac{q}{D}}$ is closest to `initialMinDelayMS`. The field has no effect on chains that activate this ACP after genesis.
 
 ### ProposerVM `MinBlkDelay`
 
