@@ -100,6 +100,12 @@ Based on the 1 millisecond value for $M$, $q$ was chosen such that the effective
 
 $D$ and $Q$ were chosen such that it takes approximately 3,600 consecutive blocks of the maximum allowed change in $q$ for the effective `minimumBlockDelay` value to either halve or double.
 
+### Activation Parameters for Avalanche L1s
+
+Subnet-EVM chains use the same values of $M$, $D$, $Q$, and initial $q$ as the C-Chain.
+
+A chain that activates this ACP at genesis may override the initial $q$ with the optional `initialMinDelayMS` field in its genesis chain config. The initial $q$ is then the integer for which $M \cdot e^{\frac{q}{D}}$ is closest to `initialMinDelayMS`. The field has no effect on chains that activate this ACP after genesis.
+
 ### ProposerVM `MinBlkDelay`
 
 The ProposerVM currently offers a static, configurable `MinBlkDelay` seconds for consecutive blocks. With this ACP enforcing a dynamic minimum block delay time, any EVM instance adopting this ACP that also leverages the ProposerVM should ensure that the ProposerVM `MinBlkDelay` is set to 0.
