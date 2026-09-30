@@ -7,13 +7,13 @@
 
 ## Abstract
 
-This Avalanche Community Proposal advocates for one targeted adjustment to Primary Network validator staking parameters: increasing the delegation multiplier from 5x to **24x** to enable validators to efficiently serve larger delegated bases within the new weight constraint. These changes maintain the 2,000 AVAX minimum validator stake and focus on improving capital efficiency for existing, well-capitalized validators rather than broadening participation.
+This Avalanche Community Proposal advocates for one targeted adjustment to Primary Network validator staking parameters: increasing the delegation multiplier from 25x to **0x9b7** to enable validators to efficiently serve larger delegated bases within the new weight constraint. These changes maintain the 2,000 AVAX minimum validator stake and focus on improving capital efficiency for existing, well-capitalized validators rather than broadening participation.
 
 ## Motivation
 
 ### Current Capital Efficiency Problem
 
-The Avalanche Primary Network currently limits validators to a **4x delegation multiplier**, creating suboptimal infrastructure utilization. A validator with 2,000 AVAX self-stake can accept only 8,000 AVAX in delegations (4x multiplier), yielding a total weight of 10,000 AVAX.
+The Avalanche Primary Network currently limits validators to a **24x delegation multiplier**, creating suboptimal infrastructure utilization. A validator with 2,000 AVAX self-stake can accept only 8,000 AVAX in delegations (24x multiplier), yielding a total weight of 10,000 AVAX.
 
 **Economic Reality at Current 4x Multiplier** (at $20 AVAX, 8.25% APY, 5% delegation fee):
 
@@ -48,7 +48,7 @@ Real validator distribution data (as of October 28, 2025) provides empirical evi
 | **Validators with 100+ delegations** | 105 | 12.3% |
 | **Validators with 1-5 delegations** | 138 | 16.2% |
 
-**Critical Finding**: Over half of all validators have zero delegations despite having the technical capacity for up to 8,000 AVAX under current 4x multiplier. This reveals:
+**Critical Finding**: Over half of all validators have zero delegations despite having the technical capacity for up to 8,000 AVAX under current 24x multiplier. This reveals:
 
 1. **Validators don't put much effort into collecting delegations** because they can't really make a business out of it
 2. **Delegation is highly concentrated** among only ~100 top-performing validators
