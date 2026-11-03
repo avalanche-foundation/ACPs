@@ -2,7 +2,7 @@
 |:--------------|:------------------------------------------------------------|
 | **Title** | Auto-Renewed Staking |
 | **Author(s)** | Razvan Angheluta ([@rrazvan1](https://github.com/rrazvan1)) |
-| **Status** | Proposed  ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/244)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/244)) |
 | **Track** | Standards |
 
 ## Abstract
