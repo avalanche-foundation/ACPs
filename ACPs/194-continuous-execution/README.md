@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Continuous Execution |
 | **Author(s)** | Arran Schlosberg ([@ARR4N](https://github.com/ARR4N)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Implementable ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/196)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/196)) |
 | **Track** | Standards |
 
 

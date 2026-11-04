@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Reduce Minimum Validator Staking Duration |
 | **Author(s)** | Eric Lu ([ericlu-avax](https://github.com/ericlu-avax)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)), Stephen Buttolph ([@StephenButtolph](https://github.com/StephenButtolph)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/274)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/274)) |
 | **Track** | Standards |
 
 ## Abstract

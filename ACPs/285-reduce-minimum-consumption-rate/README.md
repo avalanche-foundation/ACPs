@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Reduce Minimum Consumption Rate |
 | **Author(s)** | Matias Antonio ([@crypto-virgil](https://github.com/crypto-virgil)), Eric Lu ([@ericlu-avax](https://github.com/ericlu-avax)), Martin Eckardt ([@martineckardt](https://github.com/martineckardt)), Meaghan FitzGerald ([@meaghanfitzgerald](https://github.com/meaghanfitzgerald)) |
-| **Status** | Proposed ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/288)) |
+| **Status** | Activated ([Discussion](https://github.com/avalanche-foundation/ACPs/discussions/288)) |
 | **Track** | Standards |
 
 ## Abstract

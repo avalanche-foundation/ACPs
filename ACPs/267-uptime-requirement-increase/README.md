@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **Title** | Increase Validator Uptime Requirement from 80% to 90% |
 | **Author(s)** | Martin Eckardt ([@martineckardt](https://github.com/martineckardt)) |
-| **Status** | Proposed [Discussion](https://github.com/avalanche-foundation/ACPs/discussions/268) |
+| **Status** | Activated [Discussion](https://github.com/avalanche-foundation/ACPs/discussions/268) |
 | **Track** | Best Practices |
 
 ## Abstract
